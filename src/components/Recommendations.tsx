@@ -2,27 +2,10 @@
 
 import { useState } from 'react';
 import { Wand2 } from 'lucide-react';
-import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommendations';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from './ui/skeleton';
-
-async function fetchRecommendations() {
-  'use server';
-  try {
-    const result = await getPersonalizedRecommendations({
-      userOrderHistory: '["Pizza", "Coke"]',
-      userPreferences: '["Spicy", "Vegetarian"]',
-    });
-    // The AI returns a string that looks like an array. We need to parse it.
-    const recommendationsArray = JSON.parse(result.recommendations);
-    return recommendationsArray as string[];
-  } catch (error) {
-    console.error('Error fetching recommendations:', error);
-    // Fallback recommendations
-    return ["Spicy Veggie Pizza", "Chilli Paneer", "Gobi Manchurian"];
-  }
-}
+import { fetchRecommendations } from '@/app/actions';
 
 export default function Recommendations() {
   const [recommendations, setRecommendations] = useState<string[]>([]);
