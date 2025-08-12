@@ -28,7 +28,7 @@ export default function CartPage() {
   const sendWhatsApp = () => {
     const phone = '1234567890'; // Replace with the restaurant's number
     const message = encodeURIComponent(
-      `Hello, I'd like to place an order:\n\n${items
+      `¡Hola! Quisiera hacer el siguiente pedido:\n\n${items
         .map((i) => {
           const optionsString = i.selectedOptions ? ` (${Object.values(i.selectedOptions).join(', ')})` : '';
           return `* ${i.name}${optionsString} x ${i.quantity} (S/. ${(i.finalPrice * i.quantity).toFixed(2)})`
@@ -43,7 +43,7 @@ export default function CartPage() {
       <Header />
       <main className="flex-grow container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="font-headline text-4xl font-bold">Carrito</h1>
+          <h1 className="text-3xl font-bold">Mi Carrito</h1>
           {items.length > 0 && (
             <Button variant="destructive" onClick={clearCart} size="sm">
               <Trash2 className="mr-2 h-4 w-4" /> Vaciar
@@ -56,7 +56,7 @@ export default function CartPage() {
              <ShoppingCart className="mx-auto h-24 w-24 text-muted-foreground" />
             <h2 className="mt-6 text-2xl font-semibold">Tu carrito está vacío</h2>
             <p className="mt-2 text-muted-foreground">
-              Aún no has añadido nada a tu carrito.
+              Parece que aún no has añadido nada.
             </p>
             <Button asChild className="mt-6 rounded-full">
               <Link href="/">Comenzar a ordenar</Link>
@@ -111,7 +111,7 @@ export default function CartPage() {
 
               <div className="fixed bottom-24 left-0 right-0 p-4">
                  <Button onClick={sendWhatsApp} size="lg" className="w-full rounded-full text-lg py-7 bg-green-500 hover:bg-green-600 text-white">
-                    Enviar pedido por WhatsApp
+                    Enviar por WhatsApp
                   </Button>
               </div>
           </div>

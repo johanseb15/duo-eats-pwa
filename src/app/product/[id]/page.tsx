@@ -57,8 +57,8 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     };
     addToCart(cartItem);
     toast({
-      title: 'Added to cart!',
-      description: `${product.name} is now in your cart.`,
+      title: '¡Añadido al carrito!',
+      description: `${product.name} está ahora en tu carrito.`,
     });
   };
 
@@ -73,29 +73,28 @@ export default function ProductPage({ params }: { params: { id: string } }) {
           <ChevronLeft className="h-6 w-6" />
         </Button>
 
-      <div className="flex flex-col items-center pt-20">
-         <div className="relative w-64 h-64">
-            <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            objectFit="cover"
-            className="rounded-full"
-            data-ai-hint={product.aiHint}
-            />
-         </div>
+      <div className="relative h-72 w-full">
+        <Image
+          src={product.image}
+          alt={product.name}
+          fill
+          objectFit="cover"
+          className="object-cover"
+          data-ai-hint={product.aiHint}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+      </div>
 
-        <div className="w-full text-center mt-8 px-6">
-          <h1 className="font-headline text-4xl font-bold text-foreground">
-            {product.name}
-          </h1>
-          <p className="text-muted-foreground mt-2 text-lg">
-            {product.description}
-          </p>
-        </div>
-        
+      <div className="p-6 -mt-16 relative bg-background rounded-t-3xl">
+        <h1 className="text-3xl font-bold text-foreground">
+          {product.name}
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          {product.description}
+        </p>
+
         {product.options && (
-          <div className="w-full px-6 mt-6">
+          <div className="mt-6">
             {product.options.map((option) => (
               <div key={option.name} className="mb-4">
                 <h3 className="font-semibold text-lg mb-2">{option.name}</h3>
@@ -118,15 +117,15 @@ export default function ProductPage({ params }: { params: { id: string } }) {
           </div>
         )}
 
-        <div className="w-full text-center mt-6">
-           <p className="text-3xl font-bold text-foreground">
+        <div className="mt-6">
+           <p className="text-4xl font-extrabold text-foreground">
               S/. {finalPrice.toFixed(2)}
             </p>
         </div>
       </div>
       
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-background/80 backdrop-blur-xl border-t">
-         <Button onClick={handleAddToCart} size="lg" className="w-full rounded-full text-lg py-6 px-8">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl border-t">
+         <Button onClick={handleAddToCart} size="lg" className="w-full rounded-full text-lg py-7">
             Agregar al carrito
           </Button>
       </div>

@@ -40,7 +40,7 @@ export function BottomNav() {
               )}
             >
               <div className="relative">
-                <Icon className={cn("h-8 w-8 transition-transform duration-300", isActive && "scale-125")} />
+                <Icon className={cn("h-7 w-7 transition-transform duration-300", isActive && "scale-110 -translate-y-1")} />
                 {badge && badge > 0 ? (
                   <span className="absolute -top-2 -right-3 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
                     {badge}

@@ -1,20 +1,13 @@
 import type { Metadata, Viewport } from 'next';
-import { Playfair_Display, PT_Sans } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 
-const fontHeadline = Playfair_Display({
+const fontSans = Inter({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-headline',
-});
-
-const fontBody = PT_Sans({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  display: 'swap',
-  variable: '--font-body',
+  variable: '--font-sans',
 });
 
 export const metadata: Metadata = {
@@ -24,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#FF7F50',
+  themeColor: '#1e88e5',
 };
 
 export default function RootLayout({
@@ -36,9 +29,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          'min-h-screen bg-background font-body antialiased',
-          fontHeadline.variable,
-          fontBody.variable
+          'min-h-screen bg-background font-sans antialiased',
+          fontSans.variable
         )}
       >
         {children}

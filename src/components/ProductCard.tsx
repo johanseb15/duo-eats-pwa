@@ -6,6 +6,7 @@ import type { Product } from '@/lib/types';
 import { useCart } from '@/store/cart';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { Plus } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -62,7 +63,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         </CardHeader>
         <CardContent className="p-4">
-          <CardTitle className="font-headline text-2xl truncate">
+          <CardTitle className="text-xl font-semibold truncate">
             {product.name}
           </CardTitle>
           <CardDescription className="text-muted-foreground mt-1 h-10 overflow-hidden">
@@ -72,8 +73,8 @@ export function ProductCard({ product }: ProductCardProps) {
       </Link>
       <CardFooter className="flex justify-between items-center p-4 pt-0">
         <p className="text-2xl font-bold text-foreground">S/.{product.price.toFixed(2)}</p>
-        <Button onClick={handleAddToCart} size="lg" className="rounded-full text-lg font-bold">
-          Añadir
+        <Button onClick={handleAddToCart} size="icon" className="rounded-full">
+          <Plus />
         </Button>
       </CardFooter>
     </Card>

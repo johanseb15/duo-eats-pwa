@@ -24,7 +24,7 @@ export default function Recommendations() {
     return (
       <section className="mb-12 text-center">
         <Button onClick={handleClick} size="lg" className="rounded-full">
-          <Wand2 className="mr-2 h-5 w-5" /> Get AI Recommendations
+          <Wand2 className="mr-2 h-5 w-5" /> ¿No sabes qué pedir?
         </Button>
       </section>
     );
@@ -34,9 +34,9 @@ export default function Recommendations() {
     <section className="mb-12">
       <Card className="bg-card/60 backdrop-blur-xl border-primary/50 border-dashed">
         <CardHeader>
-          <CardTitle className="font-headline text-3xl font-semibold flex items-center gap-3">
-            <Wand2 className="h-8 w-8 text-primary" />
-            For You
+          <CardTitle className="text-xl font-bold flex items-center gap-3">
+            <Wand2 className="h-6 w-6 text-primary" />
+            Recomendado para ti
           </CardTitle>
         </CardHeader>
         <CardContent>
