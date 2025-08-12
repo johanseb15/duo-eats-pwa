@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { PlusCircle } from 'lucide-react';
 import type { Product } from '@/lib/types';
 import { useCart } from '@/store/cart';
 import { Button } from '@/components/ui/button';
@@ -53,15 +52,12 @@ export function ProductCard({ product }: ProductCardProps) {
           <CardTitle className="font-headline text-2xl truncate">
             {product.name}
           </CardTitle>
-          <CardDescription className="mt-1 h-10 text-muted-foreground">
-            {product.description}
-          </CardDescription>
         </CardContent>
       </Link>
       <CardFooter className="flex justify-between items-center p-4 pt-0">
-        <p className="text-xl font-bold text-primary">${product.price.toFixed(2)}</p>
+        <p className="text-xl font-bold text-foreground">S/. {product.price.toFixed(2)}</p>
         <Button onClick={handleAddToCart} size="lg" className="rounded-full">
-          <PlusCircle className="mr-2 h-5 w-5" /> Add
+          Añadir
         </Button>
       </CardFooter>
     </Card>

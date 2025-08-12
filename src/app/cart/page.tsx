@@ -22,8 +22,8 @@ export default function CartPage() {
     const phone = '1234567890'; // Replace with the restaurant's number
     const message = encodeURIComponent(
       `Hello, I'd like to place an order:\n\n${items
-        .map((i) => `* ${i.name} x ${i.quantity} ($${(i.price * i.quantity).toFixed(2)})`)
-        .join('\n')}\n\n*Total: $${total.toFixed(2)}*`
+        .map((i) => `* ${i.name} x ${i.quantity} (S/. ${(i.price * i.quantity).toFixed(2)})`)
+        .join('\n')}\n\n*Total: S/. ${total.toFixed(2)}*`
     );
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
   };
@@ -67,7 +67,7 @@ export default function CartPage() {
                   />
                   <div className="ml-4 flex-grow">
                     <h3 className="font-semibold text-lg">{item.name}</h3>
-                    <p className="text-primary font-bold">${item.price.toFixed(2)}</p>
+                    <p className="text-primary font-bold">S/. {item.price.toFixed(2)}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button variant="outline" size="icon" className='h-8 w-8' onClick={() => updateQuantity(item.id, item.quantity - 1)}>
@@ -93,15 +93,15 @@ export default function CartPage() {
                 <CardContent className="space-y-4">
                    <div className="flex justify-between text-muted-foreground">
                     <span>Subtotal</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>S/. {total.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-muted-foreground">
                     <span>Taxes & Fees</span>
-                    <span>$0.00</span>
+                    <span>S/. 0.00</span>
                   </div>
                    <div className="flex justify-between font-bold text-xl pt-4 border-t">
                     <span>Total</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>S/. {total.toFixed(2)}</span>
                   </div>
                 </CardContent>
                 <CardFooter className="flex-col gap-2">

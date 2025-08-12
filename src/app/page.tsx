@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 export default function Home() {
   const categories = [
@@ -30,8 +31,8 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-background pb-28">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-6">
-        <div className="text-center md:text-left mb-8">
-          <h1 className="font-headline text-4xl md:text-5xl font-bold text-foreground">
+        <div className="text-left mb-8">
+          <h1 className="font-headline text-4xl font-bold text-foreground">
             Hola, Johan 🍕
           </h1>
           <p className="text-muted-foreground mt-2 text-lg">
@@ -40,48 +41,28 @@ export default function Home() {
         </div>
 
         <section className="mb-12">
-          <h2 className="font-headline text-3xl font-semibold mb-4 text-center md:text-left">
-            Ofertas del Día
-          </h2>
-          <Carousel
-            opts={{
-              align: 'start',
-            }}
-            className="w-full"
-          >
-            <CarouselContent>
-              {products.slice(0, 3).map((product, index) => (
-                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                  <div className="p-1">
-                    <Card className="overflow-hidden border-2 border-primary/50 shadow-lg bg-card/60 backdrop-blur-xl">
-                      <CardContent className="relative flex aspect-video items-center justify-center p-0">
-                        <Image
-                          src={product.image}
-                          alt={product.name}
-                          width={400}
-                          height={225}
-                          className="object-cover w-full h-full"
-                          data-ai-hint={product.aiHint}
-                        />
-                        <Badge
-                          variant="destructive"
-                          className="absolute top-2 right-2 text-lg py-1 px-3 bg-primary text-primary-foreground border-none shadow-xl"
-                        >
-                          25% OFF
-                        </Badge>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="hidden sm:flex" />
-            <CarouselNext className="hidden sm:flex" />
-          </Carousel>
+           <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-r from-pink-300 via-purple-300 to-blue-300">
+            <CardContent className="relative flex items-center justify-between p-6">
+              <div className='text-white'>
+                <h2 className='font-bold text-4xl'>¡25%</h2>
+                <p className='text-2xl'>OFF!</p>
+              </div>
+              <div>
+                <Image 
+                  src="https://placehold.co/150x100.png"
+                  width={150}
+                  height={100}
+                  alt="Special Offer"
+                  data-ai-hint="pizza illustration"
+                  className='transform scale-125'
+                />
+              </div>
+            </CardContent>
+          </Card>
         </section>
 
         <section className="mb-12">
-          <h2 className="font-headline text-3xl font-semibold mb-4 text-center md:text-left">
+          <h2 className="font-headline text-2xl font-bold mb-4 text-left">
             Categorías
           </h2>
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-4 text-center">
@@ -93,7 +74,7 @@ export default function Home() {
                 <div className="w-20 h-20 bg-card/60 backdrop-blur-xl rounded-2xl shadow-md flex items-center justify-center text-4xl">
                   {category.icon}
                 </div>
-                <span className="font-semibold text-foreground">
+                <span className="font-semibold text-foreground text-sm">
                   {category.name}
                 </span>
               </div>
@@ -104,7 +85,7 @@ export default function Home() {
         <Recommendations />
 
         <section>
-          <h2 className="font-headline text-3xl font-semibold mb-4 text-center md:text-left">
+          <h2 className="font-headline text-2xl font-bold mb-4 text-left">
             Populares
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

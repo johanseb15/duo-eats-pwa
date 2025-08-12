@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, ShoppingCart, User } from 'lucide-react';
+import { Home, ShoppingCart, User, ClipboardList } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/store/cart';
 import { useEffect, useState } from 'react';
@@ -20,13 +20,14 @@ export function BottomNav() {
 
   const navItems = [
     { href: '/', icon: Home, label: 'Home' },
+    { href: '#', icon: ClipboardList, label: 'Orders' },
     { href: '/cart', icon: ShoppingCart, label: 'Cart', badge: itemCount },
     { href: '#', icon: User, label: 'Profile' },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-20 bg-background/60 backdrop-blur-xl border-t md:hidden">
-      <div className="flex h-full justify-around items-center">
+    <nav className="fixed bottom-0 left-0 right-0 h-20 bg-background/80 backdrop-blur-xl border-t md:hidden z-50">
+      <div className="flex h-full justify-around items-center max-w-md mx-auto">
         {navItems.map(({ href, icon: Icon, label, badge }) => {
           const isActive = (href === '/' && pathname === href) || (href !== '/' && pathname.startsWith(href));
           return (
@@ -35,7 +36,7 @@ export function BottomNav() {
               href={href}
               className={cn(
                 'flex flex-col items-center justify-center text-muted-foreground w-full h-full transition-colors hover:text-primary',
-                isActive && 'text-primary'
+                isActive ? 'text-primary' : 'text-gray-400'
               )}
             >
               <div className="relative">
@@ -46,7 +47,6 @@ export function BottomNav() {
                   </span>
                 ) : null}
               </div>
-              <span className="text-xs mt-1">{label}</span>
             </Link>
           );
         })}

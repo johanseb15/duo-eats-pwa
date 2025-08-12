@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { notFound, useRouter } from 'next/navigation';
-import { ChevronLeft, PlusCircle } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { products } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/store/cart';
@@ -60,10 +60,10 @@ export default function ProductPage({ params }: { params: { id: string } }) {
 
           <div className="mt-6 flex justify-between items-center">
             <span className="text-3xl font-bold text-primary">
-              ${product.price.toFixed(2)}
+              S/. {product.price.toFixed(2)}
             </span>
             <Button onClick={handleAddToCart} size="lg" className="rounded-full text-lg py-6 px-8">
-              <PlusCircle className="mr-2 h-6 w-6" /> Add to Cart
+              Añadir
             </Button>
           </div>
         </div>
