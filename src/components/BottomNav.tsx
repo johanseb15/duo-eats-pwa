@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -20,9 +21,9 @@ export function BottomNav() {
 
   const navItems = [
     { href: '/', icon: Home, label: 'Home' },
-    { href: '#', icon: ClipboardList, label: 'Orders' },
+    { href: '/orders', icon: ClipboardList, label: 'Orders' },
     { href: '/cart', icon: ShoppingCart, label: 'Cart', badge: itemCount },
-    { href: '#', icon: User, label: 'Profile' },
+    { href: '/profile', icon: User, label: 'Profile' },
   ];
 
   return (

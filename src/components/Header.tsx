@@ -1,7 +1,8 @@
+
 'use client';
 
 import Link from 'next/link';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, User } from 'lucide-react';
 import { useCart } from '@/store/cart';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -22,7 +23,7 @@ export function Header() {
         <Link href="/" className="flex items-center gap-2">
           <Image src="/logo.png" alt="Dúo Previa Logo" width={140} height={40} />
         </Link>
-        <nav>
+        <div className="flex items-center gap-2">
           <Link
             href="/cart"
             className="relative flex items-center justify-center rounded-full h-10 w-10 hover:bg-muted transition-colors"
@@ -35,7 +36,14 @@ export function Header() {
               </span>
             )}
           </Link>
-        </nav>
+           <Link
+            href="/profile"
+            className="relative flex items-center justify-center rounded-full h-10 w-10 hover:bg-muted transition-colors"
+            aria-label="Profile"
+          >
+            <User className="h-6 w-6 text-foreground" />
+          </Link>
+        </div>
       </div>
     </header>
   );
