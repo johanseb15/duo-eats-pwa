@@ -9,7 +9,7 @@ import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const getCartItemId = (item: any) => {
@@ -30,6 +30,12 @@ const deliveryZones = [
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, clearCart } = useCart();
   const [deliveryCost, setDeliveryCost] = useState(0);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
 
   const subtotal = items.reduce(
     (acc, item) => acc + item.finalPrice * item.quantity,
@@ -55,6 +61,10 @@ export default function CartPage() {
     );
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
   };
+
+  if (!isClient) {
+    return null; // or a loading spinner
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-28">
