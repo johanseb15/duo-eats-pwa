@@ -8,6 +8,16 @@ export const products: Product[] = [
     price: 12.99,
     image: 'https://placehold.co/400x225.png',
     aiHint: 'pizza cheese',
+    options: [
+      {
+        name: 'Tamaño',
+        values: [
+          { name: 'Personal', priceModifier: 0 },
+          { name: 'Mediana', priceModifier: 5 },
+          { name: 'Familiar', priceModifier: 10 },
+        ],
+      },
+    ],
   },
   {
     id: '2',

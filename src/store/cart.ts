@@ -3,28 +3,35 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { CartItem, Product } from '@/lib/types';
-import { useToast } from '@/hooks/use-toast';
 
 interface CartState {
   items: CartItem[];
-  addToCart: (product: Product) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addToCart: (product: Omit<CartItem, 'quantity'>) => void;
+  removeFromCart: (cartItemId: string) => void;
+  updateQuantity: (cartItemId: string, quantity: number) => void;
   clearCart: () => void;
 }
+
+const getCartItemId = (product: Omit<CartItem, 'quantity'>) => {
+  const optionsIdentifier = product.selectedOptions
+    ? Object.entries(product.selectedOptions).sort().join('-')
+    : '';
+  return `${product.id}-${optionsIdentifier}`;
+};
 
 export const useCart = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
-      addToCart: (product: Product) => {
+      addToCart: (product) => {
         const currentItems = get().items;
-        const existingItem = currentItems.find((item) => item.id === product.id);
+        const cartItemId = getCartItemId(product);
+        const existingItem = currentItems.find((item) => getCartItemId(item) === cartItemId);
 
         if (existingItem) {
           set({
             items: currentItems.map((item) =>
-              item.id === product.id
+              getCartItemId(item) === cartItemId
                 ? { ...item, quantity: item.quantity + 1 }
                 : item
             ),
@@ -33,18 +40,18 @@ export const useCart = create<CartState>()(
           set({ items: [...currentItems, { ...product, quantity: 1 }] });
         }
       },
-      removeFromCart: (productId: string) => {
+      removeFromCart: (cartItemId: string) => {
         set({
-          items: get().items.filter((item) => item.id !== productId),
+          items: get().items.filter((item) => getCartItemId(item) !== cartItemId),
         });
       },
-      updateQuantity: (productId: string, quantity: number) => {
+      updateQuantity: (cartItemId: string, quantity: number) => {
         if (quantity < 1) {
-          get().removeFromCart(productId);
+          get().removeFromCart(cartItemId);
         } else {
           set({
             items: get().items.map((item) =>
-              item.id === productId ? { ...item, quantity } : item
+              getCartItemId(item) === cartItemId ? { ...item, quantity } : item
             ),
           });
         }

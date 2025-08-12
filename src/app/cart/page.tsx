@@ -9,11 +9,19 @@ import { BottomNav } from '@/components/BottomNav';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
 
+const getCartItemId = (item: any) => {
+  const optionsIdentifier = item.selectedOptions
+    ? Object.entries(item.selectedOptions).sort().join('-')
+    : '';
+  return `${item.id}-${optionsIdentifier}`;
+};
+
+
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, clearCart } = useCart();
 
   const total = items.reduce(
-    (acc, item) => acc + item.price * item.quantity,
+    (acc, item) => acc + item.finalPrice * item.quantity,
     0
   );
 
@@ -21,7 +29,10 @@ export default function CartPage() {
     const phone = '1234567890'; // Replace with the restaurant's number
     const message = encodeURIComponent(
       `Hello, I'd like to place an order:\n\n${items
-        .map((i) => `* ${i.name} x ${i.quantity} (S/. ${(i.price * i.quantity).toFixed(2)})`)
+        .map((i) => {
+          const optionsString = i.selectedOptions ? ` (${Object.values(i.selectedOptions).join(', ')})` : '';
+          return `* ${i.name}${optionsString} x ${i.quantity} (S/. ${(i.finalPrice * i.quantity).toFixed(2)})`
+        })
         .join('\n')}\n\n*Total: S/. ${total.toFixed(2)}*`
     );
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
@@ -53,36 +64,42 @@ export default function CartPage() {
           </div>
         ) : (
           <div className="space-y-4">
-              {items.map((item) => (
-                <Card key={item.id} className="flex items-center p-4 shadow-md rounded-2xl overflow-hidden bg-card/60 backdrop-blur-xl border-white/20">
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    width={64}
-                    height={64}
-                    className="rounded-full object-cover"
-                    data-ai-hint={item.aiHint}
-                  />
-                  <div className="ml-4 flex-grow">
-                    <h3 className="font-semibold text-lg">{item.name}</h3>
-                     <div className="flex items-center gap-2 mt-2">
-                        <Button variant="outline" size="icon" className='h-8 w-8 rounded-full' onClick={() => updateQuantity(item.id, item.quantity - 1)}>
-                        <Minus className="h-4 w-4" />
-                        </Button>
-                        <span className="w-8 text-center font-bold">{item.quantity}</span>
-                        <Button variant="outline" size="icon" className='h-8 w-8 rounded-full' onClick={() => updateQuantity(item.id, item.quantity + 1)}>
-                        <Plus className="h-4 w-4" />
-                        </Button>
+              {items.map((item) => {
+                const cartItemId = getCartItemId(item);
+                return (
+                  <Card key={cartItemId} className="flex items-center p-4 shadow-md rounded-2xl overflow-hidden bg-card/60 backdrop-blur-xl border-white/20">
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      width={64}
+                      height={64}
+                      className="rounded-full object-cover"
+                      data-ai-hint={item.aiHint}
+                    />
+                    <div className="ml-4 flex-grow">
+                      <h3 className="font-semibold text-lg">{item.name}</h3>
+                      {item.selectedOptions && (
+                        <p className="text-sm text-muted-foreground">{Object.values(item.selectedOptions).join(', ')}</p>
+                      )}
+                       <div className="flex items-center gap-2 mt-2">
+                          <Button variant="outline" size="icon" className='h-8 w-8 rounded-full' onClick={() => updateQuantity(cartItemId, item.quantity - 1)}>
+                          <Minus className="h-4 w-4" />
+                          </Button>
+                          <span className="w-8 text-center font-bold">{item.quantity}</span>
+                          <Button variant="outline" size="icon" className='h-8 w-8 rounded-full' onClick={() => updateQuantity(cartItemId, item.quantity + 1)}>
+                          <Plus className="h-4 w-4" />
+                          </Button>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex flex-col items-end">
-                     <p className="text-lg font-bold">S/. {(item.price * item.quantity).toFixed(2)}</p>
-                     <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 h-8 w-8" onClick={() => removeFromCart(item.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </Card>
-              ))}
+                    <div className="flex flex-col items-end">
+                       <p className="text-lg font-bold">S/. {(item.finalPrice * item.quantity).toFixed(2)}</p>
+                       <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 h-8 w-8" onClick={() => removeFromCart(cartItemId)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </Card>
+                )
+              })}
               <Card className="shadow-xl rounded-2xl bg-card/60 backdrop-blur-xl border-white/20">
                 <CardHeader>
                    <div className="flex justify-between font-bold text-2xl">
