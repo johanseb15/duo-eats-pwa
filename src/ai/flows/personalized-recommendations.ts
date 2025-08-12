@@ -31,9 +31,9 @@ export type PersonalizedRecommendationsInput = z.infer<
 
 const PersonalizedRecommendationsOutputSchema = z.object({
   recommendations: z
-    .string()
+    .array(z.string())
     .describe(
-      'A string containing the personalized food recommendations. Example: [\"Pasta Arrabiata\", \"Spicy Burger\", \"Vegetarian Pizza\"]'
+      'An array of personalized food recommendations. Example: [\"Pasta Arrabiata\", \"Spicy Burger\", \"Vegetarian Pizza\"]'
     ),
 });
 export type PersonalizedRecommendationsOutput = z.infer<
@@ -50,12 +50,12 @@ const prompt = ai.definePrompt({
   name: 'personalizedRecommendationsPrompt',
   input: {schema: PersonalizedRecommendationsInputSchema},
   output: {schema: PersonalizedRecommendationsOutputSchema},
-  prompt: `You are a food recommendation expert. Based on the user's order history and food preferences, you will provide personalized food recommendations.
+  prompt: `You are a food recommendation expert for a restaurant. Based on the user's order history and food preferences, you will provide 3 personalized food recommendations.
 
 User Order History: {{{userOrderHistory}}}
 User Preferences: {{{userPreferences}}}
 
-Recommendations:`,
+Return the recommendations in the 'recommendations' array.`,
 });
 
 const personalizedRecommendationsFlow = ai.defineFlow(

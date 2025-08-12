@@ -1,33 +1,49 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Wand2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from './ui/skeleton';
 import { fetchRecommendations } from '@/app/actions';
 
 export default function Recommendations() {
   const [recommendations, setRecommendations] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [isClicked, setIsClicked] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleClick = async () => {
-    setIsClicked(true);
-    setLoading(true);
-    const recs = await fetchRecommendations();
-    setRecommendations(recs);
-    setLoading(false);
-  };
+  useEffect(() => {
+    const getRecs = async () => {
+      setLoading(true);
+      const recs = await fetchRecommendations();
+      setRecommendations(recs);
+      setLoading(false);
+    };
+    getRecs();
+  }, []);
 
-  if (!isClicked) {
+  if (loading) {
     return (
-      <section className="mb-12 text-center">
-        <Button onClick={handleClick} size="lg" className="rounded-full">
-          <Wand2 className="mr-2 h-5 w-5" /> ¿No sabes qué pedir?
-        </Button>
+      <section className="mb-12">
+        <Card className="bg-card/60 backdrop-blur-xl border-primary/50 border-dashed">
+          <CardHeader>
+            <CardTitle className="text-xl font-bold flex items-center gap-3">
+              <Wand2 className="h-6 w-6 text-primary" />
+              Recomendado para ti
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-3">
+              <Skeleton className="h-10 w-40 bg-muted/50 rounded-full" />
+              <Skeleton className="h-10 w-32 bg-muted/50 rounded-full" />
+              <Skeleton className="h-10 w-48 bg-muted/50 rounded-full" />
+            </div>
+          </CardContent>
+        </Card>
       </section>
     );
+  }
+
+  if (recommendations.length === 0) {
+    return null;
   }
 
   return (
@@ -40,24 +56,16 @@ export default function Recommendations() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <Skeleton className="h-12 w-full bg-muted/50" />
-              <Skeleton className="h-12 w-full bg-muted/50" />
-              <Skeleton className="h-12 w-full hidden sm:block bg-muted/50" />
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-3">
-              {recommendations.map((rec, index) => (
-                <div
-                  key={index}
-                  className="bg-primary/20 text-primary-foreground font-semibold px-4 py-2 rounded-full cursor-pointer hover:bg-primary/40 transition-colors"
-                >
-                  {rec}
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="flex flex-wrap gap-3">
+            {recommendations.map((rec, index) => (
+              <div
+                key={index}
+                className="bg-primary/20 text-primary-foreground font-semibold px-4 py-2 rounded-full cursor-pointer hover:bg-primary/40 transition-colors"
+              >
+                {rec}
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
     </section>

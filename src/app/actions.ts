@@ -8,9 +8,7 @@ export async function fetchRecommendations() {
       userOrderHistory: '["Pizza", "Coke"]',
       userPreferences: '["Spicy", "Vegetarian"]',
     });
-    // The AI returns a string that looks like an array. We need to parse it.
-    const recommendationsArray = JSON.parse(result.recommendations);
-    return recommendationsArray as string[];
+    return result.recommendations;
   } catch (error) {
     console.error('Error fetching recommendations:', error);
     // Fallback recommendations
