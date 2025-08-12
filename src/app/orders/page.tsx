@@ -14,6 +14,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
 import { fetchOrders } from '../actions';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCart } from '@/store/cart';
+import { useToast } from '@/hooks/use-toast';
 
 
 // TODO: Replace with a settings store
@@ -39,6 +41,8 @@ export default function OrdersPage() {
   const { user, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const { addToCart } = useCart();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -53,6 +57,25 @@ export default function OrdersPage() {
       getOrders();
     }
   }, [user, authLoading, router]);
+
+  const handleReorder = (order: Order) => {
+    order.items.forEach(item => {
+      // Create a version of the item that has all the necessary fields from Product
+      const productItem = {
+        ...item,
+        // Ensure all Product fields are present, even if undefined
+        price: item.price || { PEN: 0, USD: 0 },
+        options: item.options || [],
+        aiHint: item.aiHint || '',
+      };
+      addToCart(productItem)
+    });
+    toast({
+      title: '¡Pedido añadido al carrito!',
+      description: 'Los artículos del pedido anterior se han añadido a tu carrito.',
+    });
+    router.push('/cart');
+  };
 
   if (authLoading || loading) {
     return (
@@ -131,7 +154,7 @@ export default function OrdersPage() {
                 </CardContent>
                 <CardFooter className="flex justify-between items-center p-4">
                   <p className="text-lg font-bold">Total: {currencySymbol} {order.total.toFixed(2)}</p>
-                  <Button variant="outline" className="rounded-full">
+                  <Button variant="outline" className="rounded-full" onClick={() => handleReorder(order)}>
                     <Repeat className="mr-2 h-4 w-4" /> Volver a pedir
                   </Button>
                 </CardFooter>

@@ -12,6 +12,7 @@ import {
   MapPin,
   User,
   LogOut,
+  Shield,
 } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 
@@ -25,7 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -110,6 +111,15 @@ export default function ProfilePage() {
                   </div>
               </Link>
             ))}
+             {isAdmin && (
+               <Link href="/admin/orders">
+                  <div className="flex items-center p-4 bg-blue-500/20 backdrop-blur-xl rounded-xl shadow-sm hover:bg-blue-500/40 transition-all duration-200 hover:scale-105">
+                      <Shield className="w-6 h-6 mr-4 text-blue-400" />
+                      <span className="flex-grow font-semibold text-blue-300">Panel de Administración</span>
+                      <ChevronRight className="w-5 h-5 text-blue-400" />
+                  </div>
+              </Link>
+            )}
         </div>
 
          <div className="mt-8">
