@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -8,6 +9,8 @@ import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
+import { useState } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const getCartItemId = (item: any) => {
   const optionsIdentifier = item.selectedOptions
@@ -16,14 +19,29 @@ const getCartItemId = (item: any) => {
   return `${item.id}-${optionsIdentifier}`;
 };
 
+const deliveryZones = [
+  { name: 'Zona 1', cost: 5.00 },
+  { name: 'Zona 2', cost: 7.50 },
+  { name: 'Zona 3', cost: 10.00 },
+  { name: 'Retiro en local', cost: 0.00 },
+]
+
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, clearCart } = useCart();
+  const [deliveryCost, setDeliveryCost] = useState(0);
 
-  const total = items.reduce(
+  const subtotal = items.reduce(
     (acc, item) => acc + item.finalPrice * item.quantity,
     0
   );
+  
+  const total = subtotal + deliveryCost;
+
+  const handleZoneChange = (zoneName: string) => {
+    const zone = deliveryZones.find(z => z.name === zoneName);
+    setDeliveryCost(zone ? zone.cost : 0);
+  }
 
   const sendWhatsApp = () => {
     const phone = '1234567890'; // Replace with the restaurant's number
@@ -33,7 +51,7 @@ export default function CartPage() {
           const optionsString = i.selectedOptions ? ` (${Object.values(i.selectedOptions).join(', ')})` : '';
           return `* ${i.name}${optionsString} x ${i.quantity} (S/. ${(i.finalPrice * i.quantity).toFixed(2)})`
         })
-        .join('\n')}\n\n*Total: S/. ${total.toFixed(2)}*`
+        .join('\n')}\n\n*Subtotal: S/. ${subtotal.toFixed(2)}*\n*Envío: S/. ${deliveryCost.toFixed(2)}*\n*Total: S/. ${total.toFixed(2)}*`
     );
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
   };
@@ -100,13 +118,40 @@ export default function CartPage() {
                   </Card>
                 )
               })}
+
+              <Card className="shadow-xl rounded-2xl bg-card/60 backdrop-blur-xl border-white/20 p-4">
+                <CardHeader className="p-2">
+                  <CardTitle>Zona de Entrega</CardTitle>
+                </CardHeader>
+                <CardContent className="p-2">
+                   <Select onValueChange={handleZoneChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecciona tu zona" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {deliveryZones.map(zone => (
+                         <SelectItem key={zone.name} value={zone.name}>{zone.name} (+ S/. {zone.cost.toFixed(2)})</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </CardContent>
+              </Card>
+
               <Card className="shadow-xl rounded-2xl bg-card/60 backdrop-blur-xl border-white/20">
-                <CardHeader>
+                <CardContent className="p-4 space-y-2">
+                   <div className="flex justify-between text-muted-foreground">
+                    <span>Subtotal</span>
+                    <span>S/. {subtotal.toFixed(2)}</span>
+                  </div>
+                   <div className="flex justify-between text-muted-foreground">
+                    <span>Envío</span>
+                    <span>S/. {deliveryCost.toFixed(2)}</span>
+                  </div>
                    <div className="flex justify-between font-bold text-2xl">
                     <span>Total</span>
                     <span>S/. {total.toFixed(2)}</span>
                   </div>
-                </CardHeader>
+                </CardContent>
               </Card>
 
               <div className="fixed bottom-24 left-0 right-0 p-4">
