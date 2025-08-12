@@ -1,14 +1,8 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Playfair_Display, PT_Sans } from 'next/font/google';
+import { Playfair_Display, PT_Sans } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
-
-const fontSans = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-sans',
-});
 
 const fontPlayfair = Playfair_Display({
   subsets: ['latin'],
@@ -24,7 +18,7 @@ const fontPtSans = PT_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Dúo Previa',
+  title: 'Dúo Eats',
   description: 'Sabores intensos.',
   manifest: '/manifest.json',
 };
@@ -43,7 +37,6 @@ export default function RootLayout({
       <body
         className={cn(
           'min-h-screen bg-background font-pt-sans antialiased',
-          fontSans.variable,
           fontPlayfair.variable,
           fontPtSans.variable
         )}

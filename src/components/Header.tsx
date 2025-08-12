@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { ShoppingCart, User } from 'lucide-react';
 import { useCart } from '@/store/cart';
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 
 export function Header() {
@@ -22,8 +21,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/60 backdrop-blur-xl">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.png" alt="Dúo Previa Logo" width={140} height={40} />
+        <Link href="/" className="flex items-center gap-2 font-playfair">
+          <span className="text-2xl font-bold text-foreground">Duo Eats</span>
         </Link>
         <div className="flex items-center gap-2">
           <Link
