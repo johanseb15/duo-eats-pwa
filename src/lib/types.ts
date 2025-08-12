@@ -1,3 +1,4 @@
+
 export type Currency = 'PEN' | 'USD';
 export type Prices = { [key in Currency]: number };
 
@@ -26,4 +27,16 @@ export interface CartItem extends Product {
   quantity: number;
   selectedOptions?: { [key: string]: string };
   finalPrice: number;
+}
+
+export interface Order {
+  id: string;
+  userId: string;
+  userName: string;
+  items: CartItem[];
+  total: number;
+  subtotal: number;
+  deliveryCost: number;
+  status: 'Pendiente' | 'En preparación' | 'En camino' | 'Entregado' | 'Cancelado';
+  createdAt: any; // Firestore Timestamp
 }

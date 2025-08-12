@@ -8,10 +8,14 @@ import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingCart, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Currency } from '@/lib/types';
+import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { createOrder } from '@/app/actions';
 
 
 // TODO: Replace with a settings store
@@ -35,8 +39,14 @@ const deliveryZones = [
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, clearCart } = useCart();
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
+
   const [deliveryCost, setDeliveryCost] = useState(0);
   const [isClient, setIsClient] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
 
   useEffect(() => {
     setIsClient(true);
@@ -55,20 +65,67 @@ export default function CartPage() {
     setDeliveryCost(zone ? zone.cost : 0);
   }
 
-  const sendWhatsApp = () => {
+  const handleCheckout = async () => {
+    if (!user) {
+      toast({
+        title: 'Debes iniciar sesión',
+        description: 'Para poder realizar un pedido, necesitas iniciar sesión.',
+        variant: 'destructive',
+      });
+      router.push('/auth/signin');
+      return;
+    }
+
+    setIsProcessing(true);
+
+    const orderInput = {
+      userId: user.uid,
+      userName: user.displayName || 'N/A',
+      items: items,
+      total: total,
+      subtotal: subtotal,
+      deliveryCost: deliveryCost,
+    };
+
+    const result = await createOrder(orderInput);
+
+    if (result.success) {
+      sendWhatsApp(result.orderId);
+      toast({
+        title: '¡Pedido guardado!',
+        description: 'Tu pedido ha sido guardado y será enviado a WhatsApp.',
+      });
+      clearCart();
+    } else {
+      toast({
+        title: 'Error al crear el pedido',
+        description: 'Hubo un problema al guardar tu pedido. Por favor, intenta de nuevo.',
+        variant: 'destructive',
+      });
+    }
+
+    setIsProcessing(false);
+  };
+
+
+  const sendWhatsApp = (orderId?: string) => {
     const phone = '1234567890'; // Replace with the restaurant's number
-    const message = encodeURIComponent(
-      `¡Hola! Quisiera hacer el siguiente pedido:\n\n${items
+    let message = `¡Hola! Quisiera hacer el siguiente pedido:\n`;
+    if (orderId) {
+      message += `\n*N° de Pedido: ${orderId}*\n`;
+    }
+    message += `\n${items
         .map((i) => {
           const optionsString = i.selectedOptions ? ` (${Object.values(i.selectedOptions).join(', ')})` : '';
           return `* ${i.name}${optionsString} x ${i.quantity} (${currencySymbol}${(i.finalPrice * i.quantity).toFixed(2)})`
         })
         .join('\n')}\n\n*Subtotal: ${currencySymbol}${subtotal.toFixed(2)}*\n*Envío: ${currencySymbol}${deliveryCost.toFixed(2)}*\n*Total: ${currencySymbol}${total.toFixed(2)}*`
-    );
-    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+    
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
   };
 
-  if (!isClient) {
+  if (!isClient || authLoading) {
     // Return a placeholder or skeleton loader
     return (
       <div className="flex flex-col min-h-screen bg-background pb-28">
@@ -181,8 +238,8 @@ export default function CartPage() {
               </Card>
 
               <div className="fixed bottom-24 left-0 right-0 p-4">
-                 <Button onClick={sendWhatsApp} size="lg" className="w-full rounded-full text-lg py-7 bg-green-500 hover:bg-green-600 text-white">
-                    Enviar por WhatsApp
+                 <Button onClick={handleCheckout} size="lg" className="w-full rounded-full text-lg py-7 bg-green-500 hover:bg-green-600 text-white" disabled={isProcessing}>
+                    {isProcessing ? <Loader2 className="animate-spin" /> : 'Enviar por WhatsApp'}
                   </Button>
               </div>
           </div>
