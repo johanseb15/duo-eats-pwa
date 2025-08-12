@@ -4,7 +4,7 @@
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommendations';
 import { db } from '@/lib/firebase';
 import type { CartItem, Order } from '@/lib/types';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc } from 'firebase/firestore';
 
 export async function fetchRecommendations() {
   try {
@@ -64,5 +64,37 @@ export async function fetchOrders(userId: string): Promise<Order[]> {
   } catch (error) {
     console.error("Error fetching orders: ", error);
     return [];
+  }
+}
+
+
+export async function fetchAllOrders(): Promise<Order[]> {
+  try {
+    const ordersCol = collection(db, 'orders');
+    const q = query(ordersCol, orderBy('createdAt', 'desc'));
+    const ordersSnapshot = await getDocs(q);
+    const orderList = ordersSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
+      } as Order;
+    });
+    return orderList;
+  } catch (error) {
+    console.error("Error fetching all orders: ", error);
+    return [];
+  }
+}
+
+export async function updateOrderStatus(orderId: string, status: Order['status']) {
+  try {
+    const orderRef = doc(db, 'orders', orderId);
+    await updateDoc(orderRef, { status });
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    return { success: false, error: 'Failed to update status' };
   }
 }
