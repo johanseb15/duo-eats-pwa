@@ -1,8 +1,11 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Soup, Beef, GlassWater, IceCream } from 'lucide-react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import type { Product } from '@/lib/types';
 
-import { products } from '@/lib/data';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { ProductCard } from '@/components/ProductCard';
@@ -18,7 +21,27 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
-export default function Home() {
+async function getProducts(): Promise<Product[]> {
+  const productsCol = collection(db, 'products');
+  const productsSnapshot = await getDocs(productsCol);
+  const productList = productsSnapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      name: data.name,
+      description: data.description,
+      price: data.price,
+      image: data.image,
+      aiHint: data.aiHint,
+      options: data.options,
+    } as Product;
+  });
+  return productList;
+}
+
+export default async function Home() {
+  const products = await getProducts();
+  
   const categories = [
     { name: 'Entradas', icon: Soup },
     { name: 'Platos Fuertes', icon: Beef },

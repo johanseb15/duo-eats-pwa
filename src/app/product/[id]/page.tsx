@@ -1,16 +1,19 @@
+
 'use client';
 
 import Image from 'next/image';
 import { notFound, useRouter } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
-import { products } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/store/cart';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useMemo, useEffect } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import type { Currency } from '@/lib/types';
+import type { Currency, Product } from '@/lib/types';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 // TODO: Replace with a settings store
@@ -22,20 +25,36 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   const { addToCart } = useCart();
   const { toast } = useToast();
 
-  const product = products.find((p) => p.id === params.id);
-
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
   const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: string }>({});
 
-  // Set default options on mount
   useEffect(() => {
-    if (product?.options) {
-      const defaults: { [key: string]: string } = {};
-      product.options.forEach(option => {
-        defaults[option.name] = option.values[0].name;
-      });
-      setSelectedOptions(defaults);
-    }
-  }, [product]);
+    const fetchProduct = async () => {
+      setLoading(true);
+      const docRef = doc(db, 'products', params.id);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const productData = { id: docSnap.id, ...docSnap.data() } as Product;
+        setProduct(productData);
+        // Set default options
+        if (productData.options) {
+          const defaults: { [key: string]: string } = {};
+          productData.options.forEach(option => {
+            defaults[option.name] = option.values[0].name;
+          });
+          setSelectedOptions(defaults);
+        }
+      } else {
+        notFound();
+      }
+      setLoading(false);
+    };
+
+    fetchProduct();
+  }, [params.id]);
+
 
   const finalPrice = useMemo(() => {
     if (!product) return 0;
@@ -50,6 +69,24 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     return product.price[currentCurrency] + optionsPrice;
   }, [product, selectedOptions]);
   
+  if (loading) {
+    return (
+       <div className="min-h-screen bg-background relative pb-24">
+         <Skeleton className="absolute top-4 left-4 h-10 w-10 rounded-full" />
+         <Skeleton className="h-72 w-full" />
+         <div className="p-6 -mt-16 relative bg-background rounded-t-3xl space-y-4">
+            <Skeleton className="h-9 w-3/4" />
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-12 w-1/2 mt-6" />
+         </div>
+         <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl border-t">
+            <Skeleton className="h-[52px] w-full rounded-full" />
+         </div>
+       </div>
+    );
+  }
+
   if (!product) {
     notFound();
   }
@@ -141,3 +178,4 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
+
