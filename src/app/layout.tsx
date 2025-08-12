@@ -16,8 +16,8 @@ const fontBody = PT_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Duo Eats',
-  description: 'Order food and get it delivered via WhatsApp.',
+  title: 'Dúo Previa',
+  description: 'Sabores intensos.',
   manifest: '/manifest.json',
 };
 

@@ -1,7 +1,7 @@
 {
-  "name": "Duo Eats",
-  "short_name": "Duo Eats",
-  "description": "Order food and get it delivered via WhatsApp.",
+  "name": "Dúo Previa",
+  "short_name": "Dúo Previa",
+  "description": "Sabores intensos.",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
@@ -16,7 +16,7 @@
   ],
   "theme_color": "#ffffff",
   "background_color": "#ffffff",
-  "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait"
+  "scope": "/",
+  "start_url": "/"
 }
