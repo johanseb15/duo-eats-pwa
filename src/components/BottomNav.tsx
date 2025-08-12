@@ -32,7 +32,7 @@ export function BottomNav() {
           const isActive = (href === '/' && pathname === href) || (href !== '/' && pathname.startsWith(href));
           return (
             <Link
-              key={href}
+              key={label}
               href={href}
               className={cn(
                 'flex flex-col items-center justify-center text-muted-foreground w-full h-full transition-colors hover:text-primary',
