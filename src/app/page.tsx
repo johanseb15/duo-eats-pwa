@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { PlusCircle } from 'lucide-react';
+import { Soup, Beef, Receipt, ShoppingBag } from 'lucide-react';
 
 import { products } from '@/lib/data';
 import { Header } from '@/components/Header';
@@ -20,11 +20,10 @@ import { Button } from '@/components/ui/button';
 
 export default function Home() {
   const categories = [
-    { name: 'Pizza', icon: '🍕' },
-    { name: 'Burgers', icon: '🍔' },
-    { name: 'Salads', icon: '🥗' },
-    { name: 'Desserts', icon: '🍰' },
-    { name: 'Drinks', icon: '🥤' },
+    { name: 'Sopas', icon: Soup },
+    { name: 'Carnes', icon: Beef },
+    { name: 'Bebidas', icon: Receipt },
+    { name: 'Postres', icon: ShoppingBag },
   ];
 
   return (
@@ -41,21 +40,11 @@ export default function Home() {
         </div>
 
         <section className="mb-12">
-           <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-r from-pink-300 via-purple-300 to-blue-300">
-            <CardContent className="relative flex items-center justify-between p-6">
-              <div className='text-white'>
-                <h2 className='font-bold text-4xl'>¡25%</h2>
-                <p className='text-2xl'>OFF!</p>
-              </div>
-              <div>
-                <Image 
-                  src="https://placehold.co/150x100.png"
-                  width={150}
-                  height={100}
-                  alt="Special Offer"
-                  data-ai-hint="pizza illustration"
-                  className='transform scale-125'
-                />
+          <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-r from-blue-400 to-purple-400">
+            <CardContent className="relative flex items-center justify-between p-8">
+              <div className="text-white">
+                <p className="text-xl">Oferta del día</p>
+                <h2 className="font-bold text-5xl">25% OFF!</h2>
               </div>
             </CardContent>
           </Card>
@@ -65,14 +54,14 @@ export default function Home() {
           <h2 className="font-headline text-2xl font-bold mb-4 text-left">
             Categorías
           </h2>
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-4 text-center">
+          <div className="grid grid-cols-4 gap-4 text-center">
             {categories.map((category) => (
               <div
                 key={category.name}
                 className="flex flex-col items-center gap-2"
               >
-                <div className="w-20 h-20 bg-card/60 backdrop-blur-xl rounded-2xl shadow-md flex items-center justify-center text-4xl">
-                  {category.icon}
+                <div className="w-20 h-20 bg-card/60 backdrop-blur-xl rounded-2xl shadow-md flex items-center justify-center">
+                  <category.icon className="h-10 w-10 text-primary" />
                 </div>
                 <span className="font-semibold text-foreground text-sm">
                   {category.name}
@@ -81,7 +70,7 @@ export default function Home() {
             ))}
           </div>
         </section>
-        
+
         <Recommendations />
 
         <section>

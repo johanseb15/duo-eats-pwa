@@ -7,8 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Minus, Plus, Trash2, ShoppingCart, Info } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, clearCart } = useCart();
@@ -33,10 +32,10 @@ export default function CartPage() {
       <Header />
       <main className="flex-grow container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="font-headline text-4xl font-bold">Your Cart</h1>
+          <h1 className="font-headline text-4xl font-bold">Carrito</h1>
           {items.length > 0 && (
             <Button variant="destructive" onClick={clearCart} size="sm">
-              <Trash2 className="mr-2 h-4 w-4" /> Clear Cart
+              <Trash2 className="mr-2 h-4 w-4" /> Vaciar
             </Button>
           )}
         </div>
@@ -44,80 +43,60 @@ export default function CartPage() {
         {items.length === 0 ? (
           <div className="text-center py-20">
              <ShoppingCart className="mx-auto h-24 w-24 text-muted-foreground" />
-            <h2 className="mt-6 text-2xl font-semibold">Your cart is empty</h2>
+            <h2 className="mt-6 text-2xl font-semibold">Tu carrito está vacío</h2>
             <p className="mt-2 text-muted-foreground">
-              Looks like you haven't added anything to your cart yet.
+              Aún no has añadido nada a tu carrito.
             </p>
             <Button asChild className="mt-6 rounded-full">
-              <Link href="/">Start Ordering</Link>
+              <Link href="/">Comenzar a ordenar</Link>
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-4">
+          <div className="space-y-4">
               {items.map((item) => (
                 <Card key={item.id} className="flex items-center p-4 shadow-md rounded-2xl overflow-hidden bg-card/60 backdrop-blur-xl border-white/20">
                   <Image
                     src={item.image}
                     alt={item.name}
-                    width={80}
-                    height={80}
-                    className="rounded-lg object-cover"
+                    width={64}
+                    height={64}
+                    className="rounded-full object-cover"
                     data-ai-hint={item.aiHint}
                   />
                   <div className="ml-4 flex-grow">
                     <h3 className="font-semibold text-lg">{item.name}</h3>
-                    <p className="text-primary font-bold">S/. {item.price.toFixed(2)}</p>
+                     <div className="flex items-center gap-2 mt-2">
+                        <Button variant="outline" size="icon" className='h-8 w-8 rounded-full' onClick={() => updateQuantity(item.id, item.quantity - 1)}>
+                        <Minus className="h-4 w-4" />
+                        </Button>
+                        <span className="w-8 text-center font-bold">{item.quantity}</span>
+                        <Button variant="outline" size="icon" className='h-8 w-8 rounded-full' onClick={() => updateQuantity(item.id, item.quantity + 1)}>
+                        <Plus className="h-4 w-4" />
+                        </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" className='h-8 w-8' onClick={() => updateQuantity(item.id, item.quantity - 1)}>
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <span className="w-8 text-center font-bold">{item.quantity}</span>
-                    <Button variant="outline" size="icon" className='h-8 w-8' onClick={() => updateQuantity(item.id, item.quantity + 1)}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 h-8 w-8" onClick={() => removeFromCart(item.id)}>
+                  <div className="flex flex-col items-end">
+                     <p className="text-lg font-bold">S/. {(item.price * item.quantity).toFixed(2)}</p>
+                     <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 h-8 w-8" onClick={() => removeFromCart(item.id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </Card>
               ))}
-            </div>
-
-            <div className="lg:col-span-1">
-              <Card className="shadow-xl rounded-2xl sticky top-24 bg-card/60 backdrop-blur-xl border-white/20">
+              <Card className="shadow-xl rounded-2xl bg-card/60 backdrop-blur-xl border-white/20">
                 <CardHeader>
-                  <CardTitle className="font-headline text-2xl">Order Summary</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                   <div className="flex justify-between text-muted-foreground">
-                    <span>Subtotal</span>
-                    <span>S/. {total.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>Taxes & Fees</span>
-                    <span>S/. 0.00</span>
-                  </div>
-                   <div className="flex justify-between font-bold text-xl pt-4 border-t">
+                   <div className="flex justify-between font-bold text-2xl">
                     <span>Total</span>
                     <span>S/. {total.toFixed(2)}</span>
                   </div>
-                </CardContent>
-                <CardFooter className="flex-col gap-2">
-                  <Button onClick={sendWhatsApp} size="lg" className="w-full rounded-full text-lg py-6">
-                    Send Order via WhatsApp 📲
-                  </Button>
-                  <Alert className="mt-2 text-sm bg-transparent border-primary/30">
-                    <Info className="h-4 w-4 text-primary" />
-                    <AlertTitle>Guest Checkout</AlertTitle>
-                    <AlertDescription>
-                      You'll confirm details and payment directly in WhatsApp.
-                    </AlertDescription>
-                  </Alert>
-                </CardFooter>
+                </CardHeader>
               </Card>
-            </div>
+
+              <div className="fixed bottom-24 left-0 right-0 p-4">
+                 <Button onClick={sendWhatsApp} size="lg" className="w-full rounded-full text-lg py-7 bg-green-500 hover:bg-green-600 text-white">
+                    Enviar pedido por WhatsApp
+                  </Button>
+              </div>
           </div>
         )}
       </main>

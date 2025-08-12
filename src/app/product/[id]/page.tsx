@@ -28,29 +28,29 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="relative h-[50vh]">
-        <Image
-          src={product.image}
-          alt={product.name}
-          layout="fill"
-          objectFit="cover"
-          className="w-full h-full"
-          data-ai-hint={product.aiHint}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-        <Button
+    <div className="min-h-screen bg-background relative">
+       <Button
           variant="ghost"
           size="icon"
-          className="absolute top-4 left-4 rounded-full bg-background/50 text-foreground hover:bg-background"
+          className="absolute top-4 left-4 rounded-full bg-background/50 text-foreground hover:bg-background z-10"
           onClick={() => router.back()}
         >
           <ChevronLeft className="h-6 w-6" />
         </Button>
-      </div>
 
-      <div className="relative -mt-16 p-6">
-        <div className="bg-background/70 backdrop-blur-xl p-6 rounded-3xl shadow-2xl border border-white/20">
+      <div className="flex flex-col items-center pt-20">
+         <div className="relative w-64 h-64">
+            <Image
+            src={product.image}
+            alt={product.name}
+            layout="fill"
+            objectFit="cover"
+            className="rounded-full"
+            data-ai-hint={product.aiHint}
+            />
+         </div>
+
+        <div className="w-full text-center mt-8 px-6">
           <h1 className="font-headline text-4xl font-bold text-foreground">
             {product.name}
           </h1>
@@ -58,15 +58,16 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             {product.description}
           </p>
 
-          <div className="mt-6 flex justify-between items-center">
-            <span className="text-3xl font-bold text-primary">
+           <p className="text-3xl font-bold text-foreground mt-6">
               S/. {product.price.toFixed(2)}
-            </span>
-            <Button onClick={handleAddToCart} size="lg" className="rounded-full text-lg py-6 px-8">
-              Añadir
-            </Button>
-          </div>
+            </p>
         </div>
+      </div>
+      
+      <div className="fixed bottom-0 left-0 right-0 p-6 bg-background/80 backdrop-blur-xl border-t">
+         <Button onClick={handleAddToCart} size="lg" className="w-full rounded-full text-lg py-6 px-8">
+            Agregar al carrito
+          </Button>
       </div>
     </div>
   );
