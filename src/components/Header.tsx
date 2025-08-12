@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -17,7 +16,7 @@ export function Header() {
   const itemCount = isClient ? items.reduce((sum, item) => sum + item.quantity, 0) : 0;
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-md">
+    <header className="sticky top-0 z-40 w-full border-b bg-background/60 backdrop-blur-xl">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
           <span className="font-headline text-2xl font-bold text-primary">

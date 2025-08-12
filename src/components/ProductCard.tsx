@@ -35,7 +35,7 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <Card className="w-full overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 rounded-2xl group">
+    <Card className="w-full overflow-hidden transition-shadow duration-300 rounded-2xl group bg-card/60 backdrop-blur-xl border-white/20 shadow-lg hover:shadow-2xl">
       <Link href={`/product/${product.id}`} className="block">
         <CardHeader className="p-0">
           <div className="aspect-video overflow-hidden">
@@ -53,7 +53,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <CardTitle className="font-headline text-2xl truncate">
             {product.name}
           </CardTitle>
-          <CardDescription className="mt-1 h-10">
+          <CardDescription className="mt-1 h-10 text-muted-foreground">
             {product.description}
           </CardDescription>
         </CardContent>

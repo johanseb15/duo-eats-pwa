@@ -53,7 +53,7 @@ export default function Home() {
               {products.slice(0, 3).map((product, index) => (
                 <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                   <div className="p-1">
-                    <Card className="overflow-hidden border-2 border-primary shadow-lg">
+                    <Card className="overflow-hidden border-2 border-primary/50 shadow-lg bg-card/60 backdrop-blur-xl">
                       <CardContent className="relative flex aspect-video items-center justify-center p-0">
                         <Image
                           src={product.image}
@@ -90,7 +90,7 @@ export default function Home() {
                 key={category.name}
                 className="flex flex-col items-center gap-2"
               >
-                <div className="w-20 h-20 bg-card rounded-2xl shadow-md flex items-center justify-center text-4xl">
+                <div className="w-20 h-20 bg-card/60 backdrop-blur-xl rounded-2xl shadow-md flex items-center justify-center text-4xl">
                   {category.icon}
                 </div>
                 <span className="font-semibold text-foreground">

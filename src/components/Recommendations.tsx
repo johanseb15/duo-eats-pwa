@@ -32,7 +32,7 @@ export default function Recommendations() {
 
   return (
     <section className="mb-12">
-      <Card className="bg-card/80 backdrop-blur-sm border-primary border-dashed">
+      <Card className="bg-card/60 backdrop-blur-xl border-primary/50 border-dashed">
         <CardHeader>
           <CardTitle className="font-headline text-3xl font-semibold flex items-center gap-3">
             <Wand2 className="h-8 w-8 text-primary" />
@@ -42,9 +42,9 @@ export default function Recommendations() {
         <CardContent>
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full hidden sm:block" />
+              <Skeleton className="h-12 w-full bg-muted/50" />
+              <Skeleton className="h-12 w-full bg-muted/50" />
+              <Skeleton className="h-12 w-full hidden sm:block bg-muted/50" />
             </div>
           ) : (
             <div className="flex flex-wrap gap-3">

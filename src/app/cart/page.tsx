@@ -56,7 +56,7 @@ export default function CartPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-4">
               {items.map((item) => (
-                <Card key={item.id} className="flex items-center p-4 shadow-md rounded-2xl overflow-hidden">
+                <Card key={item.id} className="flex items-center p-4 shadow-md rounded-2xl overflow-hidden bg-card/60 backdrop-blur-xl border-white/20">
                   <Image
                     src={item.image}
                     alt={item.name}
@@ -86,7 +86,7 @@ export default function CartPage() {
             </div>
 
             <div className="lg:col-span-1">
-              <Card className="shadow-xl rounded-2xl sticky top-24">
+              <Card className="shadow-xl rounded-2xl sticky top-24 bg-card/60 backdrop-blur-xl border-white/20">
                 <CardHeader>
                   <CardTitle className="font-headline text-2xl">Order Summary</CardTitle>
                 </CardHeader>
@@ -108,8 +108,8 @@ export default function CartPage() {
                   <Button onClick={sendWhatsApp} size="lg" className="w-full rounded-full text-lg py-6">
                     Send Order via WhatsApp 📲
                   </Button>
-                  <Alert className="mt-2 text-sm">
-                    <Info className="h-4 w-4" />
+                  <Alert className="mt-2 text-sm bg-transparent border-primary/30">
+                    <Info className="h-4 w-4 text-primary" />
                     <AlertTitle>Guest Checkout</AlertTitle>
                     <AlertDescription>
                       You'll confirm details and payment directly in WhatsApp.
