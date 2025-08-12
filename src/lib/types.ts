@@ -1,6 +1,10 @@
+export type Currency = 'PEN' | 'USD';
+export type Prices = { [key in Currency]: number };
+
+
 export interface ProductOptionValue {
   name: string;
-  priceModifier: number;
+  priceModifier: Prices;
 }
 
 export interface ProductOption {
@@ -12,7 +16,7 @@ export interface Product {
   id: string;
   name: string;
   description: string;
-  price: number;
+  price: Prices;
   image: string;
   aiHint: string;
   options?: ProductOption[];

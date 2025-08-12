@@ -9,6 +9,11 @@ import { BottomNav } from '@/components/BottomNav';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+import type { Currency } from '@/lib/types';
+
+
+// TODO: Replace with a settings store
+const currencySymbol = 'S/.';
 
 const orders = [
   {
@@ -104,7 +109,7 @@ export default function OrdersPage() {
                    </ul>
                 </CardContent>
                 <CardFooter className="flex justify-between items-center p-4">
-                  <p className="text-lg font-bold">Total: S/. {order.total.toFixed(2)}</p>
+                  <p className="text-lg font-bold">Total: {currencySymbol} {order.total.toFixed(2)}</p>
                   <Button variant="outline" className="rounded-full">
                     <Repeat className="mr-2 h-4 w-4" /> Volver a pedir
                   </Button>

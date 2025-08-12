@@ -11,6 +11,12 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { Currency } from '@/lib/types';
+
+
+// TODO: Replace with a settings store
+const currentCurrency: Currency = 'PEN';
+const currencySymbol = 'S/.';
 
 const getCartItemId = (item: any) => {
   const optionsIdentifier = item.selectedOptions
@@ -55,15 +61,25 @@ export default function CartPage() {
       `¡Hola! Quisiera hacer el siguiente pedido:\n\n${items
         .map((i) => {
           const optionsString = i.selectedOptions ? ` (${Object.values(i.selectedOptions).join(', ')})` : '';
-          return `* ${i.name}${optionsString} x ${i.quantity} (S/. ${(i.finalPrice * i.quantity).toFixed(2)})`
+          return `* ${i.name}${optionsString} x ${i.quantity} (${currencySymbol}${(i.finalPrice * i.quantity).toFixed(2)})`
         })
-        .join('\n')}\n\n*Subtotal: S/. ${subtotal.toFixed(2)}*\n*Envío: S/. ${deliveryCost.toFixed(2)}*\n*Total: S/. ${total.toFixed(2)}*`
+        .join('\n')}\n\n*Subtotal: ${currencySymbol}${subtotal.toFixed(2)}*\n*Envío: ${currencySymbol}${deliveryCost.toFixed(2)}*\n*Total: ${currencySymbol}${total.toFixed(2)}*`
     );
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
   };
 
   if (!isClient) {
-    return null; // or a loading spinner
+    // Return a placeholder or skeleton loader
+    return (
+      <div className="flex flex-col min-h-screen bg-background pb-28">
+        <Header />
+        <main className="flex-grow container mx-auto px-4 py-6">
+          <h1 className="text-3xl font-bold mb-6">Mi Carrito</h1>
+          {/* Skeleton loader for cart items */}
+        </main>
+        <BottomNav />
+      </div>
+    );
   }
 
   return (
@@ -120,7 +136,7 @@ export default function CartPage() {
                       </div>
                     </div>
                     <div className="flex flex-col items-end">
-                       <p className="text-lg font-bold">S/. {(item.finalPrice * item.quantity).toFixed(2)}</p>
+                       <p className="text-lg font-bold">{currencySymbol} {(item.finalPrice * item.quantity).toFixed(2)}</p>
                        <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 h-8 w-8" onClick={() => removeFromCart(cartItemId)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -140,7 +156,7 @@ export default function CartPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {deliveryZones.map(zone => (
-                         <SelectItem key={zone.name} value={zone.name}>{zone.name} (+ S/. {zone.cost.toFixed(2)})</SelectItem>
+                         <SelectItem key={zone.name} value={zone.name}>{zone.name} (+ {currencySymbol} {zone.cost.toFixed(2)})</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -151,15 +167,15 @@ export default function CartPage() {
                 <CardContent className="p-4 space-y-2">
                    <div className="flex justify-between text-muted-foreground">
                     <span>Subtotal</span>
-                    <span>S/. {subtotal.toFixed(2)}</span>
+                    <span>{currencySymbol} {subtotal.toFixed(2)}</span>
                   </div>
                    <div className="flex justify-between text-muted-foreground">
                     <span>Envío</span>
-                    <span>S/. {deliveryCost.toFixed(2)}</span>
+                    <span>{currencySymbol} {deliveryCost.toFixed(2)}</span>
                   </div>
                    <div className="flex justify-between font-bold text-2xl">
                     <span>Total</span>
-                    <span>S/. {total.toFixed(2)}</span>
+                    <span>{currencySymbol} {total.toFixed(2)}</span>
                   </div>
                 </CardContent>
               </Card>

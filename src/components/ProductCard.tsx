@@ -21,6 +21,10 @@ interface ProductCardProps {
   product: Product;
 }
 
+// TODO: Replace with a settings store
+const currentCurrency = 'PEN';
+const currencySymbol = 'S/.';
+
 export function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
   const { toast } = useToast();
@@ -29,17 +33,16 @@ export function ProductCard({ product }: ProductCardProps) {
     e.preventDefault();
     e.stopPropagation();
 
-    const productToAdd = {
-      ...product,
-      finalPrice: product.price,
-    };
-    
     // If product has options, redirect to product page
     if (product.options && product.options.length > 0) {
-      // Find a way to navigate without useRouter
        window.location.href = `/product/${product.id}`;
       return;
     }
+    
+    const productToAdd = {
+      ...product,
+      finalPrice: product.price[currentCurrency],
+    };
 
     addToCart(productToAdd);
     toast({
@@ -73,7 +76,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </CardContent>
       </Link>
       <CardFooter className="flex justify-between items-center p-4 pt-0">
-        <p className="text-2xl font-bold text-foreground">S/.{product.price.toFixed(2)}</p>
+        <p className="text-2xl font-bold text-foreground">{currencySymbol}{product.price[currentCurrency].toFixed(2)}</p>
         <Button onClick={handleAddToCart} size="icon" className="rounded-full">
           <Plus />
         </Button>

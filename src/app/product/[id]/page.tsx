@@ -7,10 +7,15 @@ import { products } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/store/cart';
 import { useToast } from '@/hooks/use-toast';
-import { useState, useMemo } from 'react';
-import type { ProductOption, ProductOptionValue } from '@/lib/types';
+import { useState, useMemo, useEffect } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import type { Currency } from '@/lib/types';
+
+
+// TODO: Replace with a settings store
+const currentCurrency: Currency = 'PEN';
+const currencySymbol = 'S/.';
 
 export default function ProductPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -21,6 +26,30 @@ export default function ProductPage({ params }: { params: { id: string } }) {
 
   const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: string }>({});
 
+  // Set default options on mount
+  useEffect(() => {
+    if (product?.options) {
+      const defaults: { [key: string]: string } = {};
+      product.options.forEach(option => {
+        defaults[option.name] = option.values[0].name;
+      });
+      setSelectedOptions(defaults);
+    }
+  }, [product]);
+
+  const finalPrice = useMemo(() => {
+    if (!product) return 0;
+    if (!product.options) return product.price[currentCurrency];
+
+    const optionsPrice = Object.entries(selectedOptions).reduce((total, [optionName, valueName]) => {
+      const option = product.options?.find(opt => opt.name === optionName);
+      const value = option?.values.find(val => val.name === valueName);
+      return total + (value?.priceModifier[currentCurrency] || 0);
+    }, 0);
+
+    return product.price[currentCurrency] + optionsPrice;
+  }, [product, selectedOptions]);
+  
   if (!product) {
     notFound();
   }
@@ -28,31 +57,11 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   const handleOptionChange = (optionName: string, valueName: string) => {
     setSelectedOptions(prev => ({ ...prev, [optionName]: valueName }));
   };
-
-  const finalPrice = useMemo(() => {
-    if (!product?.options) return product.price;
-
-    const optionsPrice = Object.entries(selectedOptions).reduce((total, [optionName, valueName]) => {
-      const option = product.options?.find(opt => opt.name === optionName);
-      const value = option?.values.find(val => val.name === valueName);
-      return total + (value?.priceModifier || 0);
-    }, 0);
-
-    return product.price + optionsPrice;
-  }, [product, selectedOptions]);
   
   const handleAddToCart = () => {
-    // Ensure default options are selected if none are chosen
-    const finalSelectedOptions = { ...selectedOptions };
-    product.options?.forEach(option => {
-      if (!finalSelectedOptions[option.name]) {
-        finalSelectedOptions[option.name] = option.values[0].name;
-      }
-    });
-
     const cartItem = {
       ...product,
-      selectedOptions: finalSelectedOptions,
+      selectedOptions: selectedOptions,
       finalPrice: finalPrice,
     };
     addToCart(cartItem);
@@ -99,7 +108,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
               <div key={option.name} className="mb-4">
                 <h3 className="font-semibold text-lg mb-2">{option.name}</h3>
                 <RadioGroup 
-                  defaultValue={option.values[0].name}
+                  value={selectedOptions[option.name]}
                   onValueChange={(value) => handleOptionChange(option.name, value)}
                 >
                   {option.values.map((value) => (
@@ -107,7 +116,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                       <RadioGroupItem value={value.name} id={`${option.name}-${value.name}`} />
                       <Label htmlFor={`${option.name}-${value.name}`} className="flex justify-between w-full">
                         <span>{value.name}</span>
-                        {value.priceModifier > 0 && <span>+ S/. {value.priceModifier.toFixed(2)}</span>}
+                        {value.priceModifier[currentCurrency] > 0 && <span>+ {currencySymbol} {value.priceModifier[currentCurrency].toFixed(2)}</span>}
                       </Label>
                     </div>
                   ))}
@@ -119,7 +128,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
 
         <div className="mt-6">
            <p className="text-4xl font-extrabold text-foreground">
-              S/. {finalPrice.toFixed(2)}
+              {currencySymbol} {finalPrice.toFixed(2)}
             </p>
         </div>
       </div>
