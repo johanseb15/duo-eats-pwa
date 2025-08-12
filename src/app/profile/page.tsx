@@ -32,6 +32,10 @@ export default function ProfilePage() {
     if (!loading && !user) {
       router.push('/auth/signin');
     }
+    // Temporary log to help user find their UID
+    if (user) {
+      console.log('Tu UID de administrador es:', user.uid);
+    }
   }, [user, loading, router]);
 
   const handleSignOut = async () => {
