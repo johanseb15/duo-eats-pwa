@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Playfair_Display, PT_Sans } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
@@ -10,6 +10,19 @@ const fontSans = Inter({
   variable: '--font-sans',
 });
 
+const fontPlayfair = Playfair_Display({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-playfair',
+});
+
+const fontPtSans = PT_Sans({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  display: 'swap',
+  variable: '--font-pt-sans',
+});
+
 export const metadata: Metadata = {
   title: 'Dúo Previa',
   description: 'Sabores intensos.',
@@ -17,7 +30,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#1e88e5',
+  themeColor: '#FF7F50',
 };
 
 export default function RootLayout({
@@ -29,9 +42,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          'min-h-screen bg-background font-sans antialiased',
-          fontSans.variable
+          'min-h-screen bg-background font-pt-sans antialiased',
+          fontSans.variable,
+          fontPlayfair.variable,
+          fontPtSans.variable
         )}
+        suppressHydrationWarning={true}
       >
         {children}
         <Toaster />
