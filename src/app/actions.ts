@@ -3,8 +3,8 @@
 
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommendations';
 import { db } from '@/lib/firebase';
-import type { CartItem } from '@/lib/types';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import type { CartItem, Order } from '@/lib/types';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy } from 'firebase/firestore';
 
 export async function fetchRecommendations() {
   try {
@@ -41,5 +41,28 @@ export async function createOrder(input: CreateOrderInput) {
   } catch (error) {
     console.error('Error creating order:', error);
     return { success: false, error: 'Failed to create order' };
+  }
+}
+
+export async function fetchOrders(userId: string): Promise<Order[]> {
+  if (!userId) {
+    return [];
+  }
+  try {
+    const ordersCol = collection(db, 'orders');
+    const q = query(ordersCol, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+    const ordersSnapshot = await getDocs(q);
+    const orderList = ordersSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
+      } as Order;
+    });
+    return orderList;
+  } catch (error) {
+    console.error("Error fetching orders: ", error);
+    return [];
   }
 }

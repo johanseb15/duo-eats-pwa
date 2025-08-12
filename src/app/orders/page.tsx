@@ -2,48 +2,22 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, FileText, Repeat } from 'lucide-react';
+import { ChevronLeft, FileText, Repeat, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import type { Currency } from '@/lib/types';
+import type { Currency, Order } from '@/lib/types';
+import { useAuth } from '@/hooks/useAuth';
+import { useEffect, useState } from 'react';
+import { fetchOrders } from '../actions';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 // TODO: Replace with a settings store
 const currencySymbol = 'S/.';
-
-const orders = [
-  {
-    id: '#3456',
-    date: '12 de agosto, 2024',
-    total: 54.98,
-    status: 'Entregado',
-    items: [
-      { name: 'Pizza Margherita (Mediana)', quantity: 1 },
-      { name: 'Hamburguesa Clásica', quantity: 1 },
-    ],
-  },
-  {
-    id: '#3455',
-    date: '10 de agosto, 2024',
-    total: 25.99,
-    status: 'Cancelado',
-    items: [{ name: 'Pizza Margherita (Personal)', quantity: 1 }],
-  },
-   {
-    id: '#3454',
-    date: '5 de agosto, 2024',
-    total: 30.50,
-    status: 'Entregado',
-    items: [
-        { name: 'Ensalada César', quantity: 1 },
-        { name: 'Pastel de Chocolate', quantity: 1}
-    ],
-  },
-];
 
 const getStatusVariant = (status: string) => {
   switch (status) {
@@ -51,6 +25,10 @@ const getStatusVariant = (status: string) => {
       return 'bg-green-500';
     case 'Cancelado':
       return 'bg-red-500';
+    case 'En preparación':
+      return 'bg-blue-500';
+    case 'En camino':
+      return 'bg-orange-500';
     default:
       return 'bg-yellow-500';
   }
@@ -58,6 +36,43 @@ const getStatusVariant = (status: string) => {
 
 export default function OrdersPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/auth/signin');
+    } else if (user) {
+      const getOrders = async () => {
+        setLoading(true);
+        const userOrders = await fetchOrders(user.uid);
+        setOrders(userOrders);
+        setLoading(false);
+      };
+      getOrders();
+    }
+  }, [user, authLoading, router]);
+
+  if (authLoading || loading) {
+    return (
+       <div className="flex flex-col min-h-screen bg-background pb-28">
+        <Header />
+        <main className="flex-grow container mx-auto px-4 py-6">
+          <div className="relative flex items-center mb-6">
+            <Skeleton className="h-10 w-10 rounded-full" />
+            <Skeleton className="h-7 w-32 mx-auto" />
+          </div>
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <Skeleton key={i} className="h-48 w-full rounded-2xl" />
+            ))}
+          </div>
+        </main>
+        <BottomNav />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-28">
@@ -93,16 +108,22 @@ export default function OrdersPage() {
               <Card key={order.id} className="shadow-md rounded-2xl bg-card/60 backdrop-blur-xl border-white/20 overflow-hidden">
                 <CardHeader className="flex flex-row justify-between items-center p-4">
                   <div>
-                    <CardTitle className="text-lg font-bold">Pedido {order.id}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{order.date}</p>
+                    <CardTitle className="text-lg font-bold">Pedido #{order.id.slice(0, 6)}</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(order.createdAt).toLocaleDateString('es-ES', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </p>
                   </div>
                   <Badge className={`${getStatusVariant(order.status)} text-white`}>{order.status}</Badge>
                 </CardHeader>
                 <CardContent className="p-4 border-t border-b">
                    <ul className="space-y-1 text-sm text-foreground">
                     {order.items.map(item => (
-                        <li key={item.name} className="flex justify-between">
-                            <span>{item.name}</span>
+                        <li key={item.id} className="flex justify-between">
+                            <span>{item.name} {item.selectedOptions && `(${Object.values(item.selectedOptions).join(', ')})`}</span>
                             <span>x{item.quantity}</span>
                         </li>
                     ))}

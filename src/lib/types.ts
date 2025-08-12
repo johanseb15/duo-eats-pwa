@@ -38,5 +38,5 @@ export interface Order {
   subtotal: number;
   deliveryCost: number;
   status: 'Pendiente' | 'En preparación' | 'En camino' | 'Entregado' | 'Cancelado';
-  createdAt: any; // Firestore Timestamp
+  createdAt: string; // ISO 8601 date string
 }
