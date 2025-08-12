@@ -16,7 +16,23 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MoreHorizontal, PlusCircle } from 'lucide-react';
+import { MoreHorizontal, PlusCircle, Trash2, Edit } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   Dialog,
   DialogContent,
@@ -27,6 +43,7 @@ import {
 } from '@/components/ui/dialog';
 import { ProductForm } from '@/components/ProductForm';
 import { useToast } from '@/hooks/use-toast';
+import { deleteProduct } from '@/app/actions';
 
 async function getProducts(): Promise<Product[]> {
   const productsCol = collection(db, 'products');
@@ -53,7 +70,9 @@ const currentCurrency = 'PEN';
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { toast } = useToast();
 
   const loadProducts = async () => {
@@ -67,13 +86,51 @@ export default function AdminProductsPage() {
     loadProducts();
   }, []);
 
-  const handleProductAdded = () => {
-    setIsDialogOpen(false);
+  const handleFormSubmit = () => {
+    setIsFormOpen(false);
     toast({
-      title: "Producto añadido",
-      description: "El nuevo producto se ha guardado correctamente.",
+      title: selectedProduct ? "Producto actualizado" : "Producto añadido",
+      description: `El producto se ha ${selectedProduct ? 'actualizado' : 'guardado'} correctamente.`,
     });
+    setSelectedProduct(null);
     loadProducts(); // Refresh the list
+  }
+  
+  const handleEditClick = (product: Product) => {
+    setSelectedProduct(product);
+    setIsFormOpen(true);
+  };
+  
+  const handleDeleteClick = (product: Product) => {
+    setSelectedProduct(product);
+    setIsAlertOpen(true);
+  };
+  
+  const handleDeleteConfirm = async () => {
+    if (!selectedProduct) return;
+    const result = await deleteProduct(selectedProduct.id);
+    if (result.success) {
+      toast({
+        title: "Producto eliminado",
+        description: "El producto ha sido eliminado del catálogo.",
+      });
+      loadProducts();
+    } else {
+       toast({
+        title: "Error",
+        description: "No se pudo eliminar el producto.",
+        variant: "destructive",
+      });
+    }
+    setIsAlertOpen(false);
+    setSelectedProduct(null);
+  }
+
+  const handleDialogClose = (open: boolean) => {
+    if (!open) {
+      setSelectedProduct(null);
+    }
+    setIsFormOpen(open);
   }
 
   if (loading) {
@@ -90,18 +147,21 @@ export default function AdminProductsPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Productos</h2>
-         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+         <Dialog open={isFormOpen} onOpenChange={handleDialogClose}>
           <DialogTrigger asChild>
             <Button><PlusCircle className="mr-2 h-4 w-4" /> Añadir Producto</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Añadir Nuevo Producto</DialogTitle>
+              <DialogTitle>{selectedProduct ? 'Editar Producto' : 'Añadir Nuevo Producto'}</DialogTitle>
               <DialogDescription>
-                Rellena los detalles del nuevo producto que se añadirá al menú.
+                {selectedProduct ? 'Modifica los detalles del producto.' : 'Rellena los detalles del nuevo producto que se añadirá al menú.'}
               </DialogDescription>
             </DialogHeader>
-            <ProductForm onProductAdded={handleProductAdded} />
+            <ProductForm 
+              onProductSubmit={handleFormSubmit}
+              product={selectedProduct}
+            />
           </DialogContent>
         </Dialog>
       </div>
@@ -112,7 +172,7 @@ export default function AdminProductsPage() {
               <TableHead className="w-[80px]">Imagen</TableHead>
               <TableHead>Nombre</TableHead>
               <TableHead>Precio Base</TableHead>
-              <TableHead className="w-[100px]">Acciones</TableHead>
+              <TableHead className="text-right w-[100px]">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -129,16 +189,49 @@ export default function AdminProductsPage() {
                 </TableCell>
                 <TableCell className="font-medium">{product.name}</TableCell>
                 <TableCell>{currencySymbol}{product.price[currentCurrency].toFixed(2)}</TableCell>
-                <TableCell>
-                  <Button variant="ghost" size="icon">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
+                <TableCell className="text-right">
+                   <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleEditClick(product)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Editar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDeleteClick(product)} className="text-destructive focus:text-destructive">
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Eliminar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
+      
+       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Esto eliminará permanentemente
+              el producto "{selectedProduct?.name}" de tu catálogo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive hover:bg-destructive/90">
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
+

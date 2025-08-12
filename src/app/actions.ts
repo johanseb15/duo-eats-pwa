@@ -3,8 +3,9 @@
 
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommendations';
 import { db } from '@/lib/firebase';
-import type { CartItem, Order, Product } from '@/lib/types';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc } from 'firebase/firestore';
+import type { Order, Product } from '@/lib/types';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { revalidatePath } from 'next/cache';
 
 export async function fetchRecommendations() {
   try {
@@ -92,6 +93,7 @@ export async function updateOrderStatus(orderId: string, status: Order['status']
   try {
     const orderRef = doc(db, 'orders', orderId);
     await updateDoc(orderRef, { status });
+    revalidatePath('/admin/orders');
     return { success: true };
   } catch (error) {
     console.error('Error updating order status:', error);
@@ -99,15 +101,44 @@ export async function updateOrderStatus(orderId: string, status: Order['status']
   }
 }
 
-// Omit 'id' and other read-only fields for creation
-type AddProductInput = Omit<Product, 'id' | 'options'>; 
+// Omit 'id' and other read-only fields for creation/updates
+export type ProductInput = Omit<Product, 'id' | 'options'>; 
 
-export async function addProduct(productData: AddProductInput) {
+export async function addProduct(productData: ProductInput) {
   try {
     const docRef = await addDoc(collection(db, 'products'), productData);
+    revalidatePath('/admin/products');
+    revalidatePath('/');
     return { success: true, productId: docRef.id };
   } catch (error) {
     console.error('Error adding product:', error);
     return { success: false, error: 'Failed to add product' };
+  }
+}
+
+export async function updateProduct(productId: string, productData: ProductInput) {
+  try {
+    const productRef = doc(db, 'products', productId);
+    await updateDoc(productRef, productData);
+    revalidatePath('/admin/products');
+    revalidatePath(`/product/${productId}`);
+     revalidatePath('/');
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating product:', error);
+    return { success: false, error: 'Failed to update product' };
+  }
+}
+
+export async function deleteProduct(productId: string) {
+  try {
+    const productRef = doc(db, 'products', productId);
+    await deleteDoc(productRef);
+    revalidatePath('/admin/products');
+     revalidatePath('/');
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    return { success: false, error: 'Failed to delete product' };
   }
 }

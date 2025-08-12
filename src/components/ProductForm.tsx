@@ -16,10 +16,10 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { addProduct } from '@/app/actions';
-import { useState } from 'react';
+import { addProduct, updateProduct, type ProductInput } from '@/app/actions';
+import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import type { Currency, Prices } from '@/lib/types';
+import type { Currency, Prices, Product } from '@/lib/types';
 
 
 const currentCurrency: Currency = 'PEN';
@@ -43,10 +43,11 @@ const formSchema = z.object({
 });
 
 interface ProductFormProps {
-  onProductAdded: () => void;
+  onProductSubmit: () => void;
+  product?: Product | null;
 }
 
-export function ProductForm({ onProductAdded }: ProductFormProps) {
+export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -59,6 +60,26 @@ export function ProductForm({ onProductAdded }: ProductFormProps) {
       aiHint: '',
     },
   });
+
+  useEffect(() => {
+    if (product) {
+      form.reset({
+        name: product.name,
+        description: product.description,
+        price: product.price[currentCurrency],
+        image: product.image,
+        aiHint: product.aiHint,
+      })
+    } else {
+       form.reset({
+        name: '',
+        description: '',
+        price: 0,
+        image: '',
+        aiHint: '',
+       });
+    }
+  }, [product, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
@@ -74,7 +95,7 @@ export function ProductForm({ onProductAdded }: ProductFormProps) {
       prices['PEN'] = values.price * 3.7; // Example conversion
     }
 
-    const productData = {
+    const productData: ProductInput = {
       name: values.name,
       description: values.description,
       price: prices as Prices,
@@ -82,13 +103,18 @@ export function ProductForm({ onProductAdded }: ProductFormProps) {
       aiHint: values.aiHint || values.name.toLowerCase().split(' ').slice(0, 2).join(' '),
     };
 
-    const result = await addProduct(productData);
+    let result;
+    if (product) {
+       result = await updateProduct(product.id, productData);
+    } else {
+       result = await addProduct(productData);
+    }
 
     if (result.success) {
-      onProductAdded();
+      onProductSubmit();
     } else {
       // Handle error, maybe show a toast
-      console.error('Failed to add product');
+      console.error('Failed to submit product');
     }
     setIsSubmitting(false);
   }
@@ -172,7 +198,7 @@ export function ProductForm({ onProductAdded }: ProductFormProps) {
         />
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isSubmitting ? 'Guardando...' : 'Añadir Producto'}
+          {isSubmitting ? 'Guardando...' : (product ? 'Guardar Cambios' : 'Añadir Producto')}
         </Button>
       </form>
     </Form>
