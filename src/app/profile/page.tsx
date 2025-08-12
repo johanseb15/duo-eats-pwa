@@ -23,7 +23,7 @@ export default function ProfilePage() {
   const router = useRouter();
 
   const menuItems = [
-    { icon: ClipboardList, text: 'Historial de pedidos', href: '#' },
+    { icon: ClipboardList, text: 'Historial de pedidos', href: '/orders' },
     { icon: MapPin, text: 'Direcciones', href: '#' },
     { icon: CreditCard, text: 'Metodos de pago', href: '#' },
     { icon: User, text: 'Mi perfil', href: '#' },
@@ -58,7 +58,7 @@ export default function ProfilePage() {
         <div className="mt-8 space-y-3">
             {menuItems.map((item) => (
               <Link href={item.href} key={item.text}>
-                  <div className="flex items-center p-4 bg-card/60 backdrop-blur-xl rounded-xl shadow-sm hover:bg-card/90 transition-colors">
+                  <div className="flex items-center p-4 bg-card/60 backdrop-blur-xl rounded-xl shadow-sm hover:bg-card/90 transition-all duration-200 hover:scale-105">
                       <item.icon className="w-6 h-6 mr-4 text-primary" />
                       <span className="flex-grow font-semibold">{item.text}</span>
                       <ChevronRight className="w-5 h-5 text-muted-foreground" />

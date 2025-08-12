@@ -8,6 +8,7 @@ import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 const orders = [
   {
@@ -78,7 +79,7 @@ export default function OrdersPage() {
               Empieza a ordenar para ver tu historial aquí.
             </p>
             <Button asChild className="mt-6 rounded-full">
-              <a href="/">Comenzar a ordenar</a>
+              <Link href="/">Comenzar a ordenar</Link>
             </Button>
           </div>
         ) : (
