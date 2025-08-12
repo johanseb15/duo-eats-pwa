@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Playfair_Display, PT_Sans } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
@@ -18,6 +18,11 @@ const fontBody = PT_Sans({
 export const metadata: Metadata = {
   title: 'Duo Eats',
   description: 'Order food and get it delivered via WhatsApp.',
+  manifest: '/manifest.json',
+};
+
+export const viewport: Viewport = {
+  themeColor: '#ffffff',
 };
 
 export default function RootLayout({
