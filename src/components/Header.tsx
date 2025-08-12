@@ -6,9 +6,11 @@ import { ShoppingCart, User } from 'lucide-react';
 import { useCart } from '@/store/cart';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useAuth } from '@/hooks/useAuth';
 
 export function Header() {
   const { items } = useCart();
+  const { user } = useAuth();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -37,7 +39,7 @@ export function Header() {
             )}
           </Link>
            <Link
-            href="/profile"
+            href={user ? "/profile" : "/auth/signin"}
             className="relative flex items-center justify-center rounded-full h-10 w-10 hover:bg-muted transition-colors"
             aria-label="Profile"
           >

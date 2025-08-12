@@ -7,10 +7,12 @@ import { Home, ShoppingCart, User, ClipboardList } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/store/cart';
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 export function BottomNav() {
   const pathname = usePathname();
   const { items } = useCart();
+  const { user } = useAuth();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -23,7 +25,7 @@ export function BottomNav() {
     { href: '/', icon: Home, label: 'Home' },
     { href: '/orders', icon: ClipboardList, label: 'Orders' },
     { href: '/cart', icon: ShoppingCart, label: 'Cart', badge: itemCount },
-    { href: '/profile', icon: User, label: 'Profile' },
+    { href: user ? '/profile' : '/auth/signin', icon: User, label: 'Profile' },
   ];
 
   return (

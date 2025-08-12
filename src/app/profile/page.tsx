@@ -1,7 +1,7 @@
 
 'use client';
 
-import Image from 'next/image';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -13,14 +13,34 @@ import {
   User,
   LogOut,
 } from 'lucide-react';
+import { signOut } from 'firebase/auth';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
+import { useAuth } from '@/hooks/useAuth';
+import { auth } from '@/lib/firebase';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/auth/signin');
+    }
+  }, [user, loading, router]);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      router.push('/');
+    } catch (error) {
+      console.error('Error signing out', error);
+    }
+  };
 
   const menuItems = [
     { icon: ClipboardList, text: 'Historial de pedidos', href: '/orders' },
@@ -28,6 +48,30 @@ export default function ProfilePage() {
     { icon: CreditCard, text: 'Metodos de pago', href: '#' },
     { icon: User, text: 'Mi perfil', href: '#' },
   ];
+  
+  if (loading || !user) {
+    return (
+       <div className="flex flex-col min-h-screen bg-background pb-28">
+        <Header />
+        <main className="flex-grow container mx-auto px-4 py-6">
+          <Skeleton className="h-8 w-24 mb-6" />
+          <div className="flex flex-col items-center text-center">
+            <Skeleton className="w-24 h-24 rounded-full mb-4" />
+            <Skeleton className="h-8 w-48" />
+          </div>
+          <div className="mt-8 space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full rounded-xl" />
+            ))}
+          </div>
+          <div className="mt-8">
+            <Skeleton className="h-14 w-full rounded-full" />
+          </div>
+        </main>
+        <BottomNav />
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-28">
@@ -49,10 +93,11 @@ export default function ProfilePage() {
 
         <div className="flex flex-col items-center text-center">
           <Avatar className="w-24 h-24 mb-4">
-            <AvatarImage src="https://placehold.co/100x100.png" alt="Johan González" data-ai-hint="profile picture" />
-            <AvatarFallback>JG</AvatarFallback>
+            <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'User'} />
+            <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
           </Avatar>
-          <h2 className="text-2xl font-bold">Johan González</h2>
+          <h2 className="text-2xl font-bold">{user.displayName}</h2>
+          <p className="text-sm text-muted-foreground">{user.email}</p>
         </div>
 
         <div className="mt-8 space-y-3">
@@ -68,7 +113,7 @@ export default function ProfilePage() {
         </div>
 
          <div className="mt-8">
-            <Button variant="destructive" className="w-full rounded-full py-6 text-lg" onClick={() => console.log('Cerrar sesión')}>
+            <Button variant="destructive" className="w-full rounded-full py-6 text-lg" onClick={handleSignOut}>
                 <LogOut className="mr-2 h-5 w-5" />
                 Cerrar sesión
             </Button>
