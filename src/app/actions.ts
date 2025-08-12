@@ -3,7 +3,7 @@
 
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommendations';
 import { db } from '@/lib/firebase';
-import type { CartItem, Order } from '@/lib/types';
+import type { CartItem, Order, Product } from '@/lib/types';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc } from 'firebase/firestore';
 
 export async function fetchRecommendations() {
@@ -96,5 +96,18 @@ export async function updateOrderStatus(orderId: string, status: Order['status']
   } catch (error) {
     console.error('Error updating order status:', error);
     return { success: false, error: 'Failed to update status' };
+  }
+}
+
+// Omit 'id' and other read-only fields for creation
+type AddProductInput = Omit<Product, 'id' | 'options'>; 
+
+export async function addProduct(productData: AddProductInput) {
+  try {
+    const docRef = await addDoc(collection(db, 'products'), productData);
+    return { success: true, productId: docRef.id };
+  } catch (error) {
+    console.error('Error adding product:', error);
+    return { success: false, error: 'Failed to add product' };
   }
 }

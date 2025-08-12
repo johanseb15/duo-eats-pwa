@@ -16,7 +16,17 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, PlusCircle } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { ProductForm } from '@/components/ProductForm';
+import { useToast } from '@/hooks/use-toast';
 
 async function getProducts(): Promise<Product[]> {
   const productsCol = collection(db, 'products');
@@ -43,6 +53,8 @@ const currentCurrency = 'PEN';
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   const loadProducts = async () => {
     setLoading(true);
@@ -54,6 +66,15 @@ export default function AdminProductsPage() {
   useEffect(() => {
     loadProducts();
   }, []);
+
+  const handleProductAdded = () => {
+    setIsDialogOpen(false);
+    toast({
+      title: "Producto añadido",
+      description: "El nuevo producto se ha guardado correctamente.",
+    });
+    loadProducts(); // Refresh the list
+  }
 
   if (loading) {
     return (
@@ -69,7 +90,20 @@ export default function AdminProductsPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Productos</h2>
-        <Button>Añadir Producto</Button>
+         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button><PlusCircle className="mr-2 h-4 w-4" /> Añadir Producto</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Añadir Nuevo Producto</DialogTitle>
+              <DialogDescription>
+                Rellena los detalles del nuevo producto que se añadirá al menú.
+              </DialogDescription>
+            </DialogHeader>
+            <ProductForm onProductAdded={handleProductAdded} />
+          </DialogContent>
+        </Dialog>
       </div>
       <div className="rounded-2xl border bg-card/60 backdrop-blur-xl overflow-hidden">
         <Table>
