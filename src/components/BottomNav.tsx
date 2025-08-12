@@ -26,7 +26,7 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-20 bg-background/80 backdrop-blur-xl border-t md:hidden z-50">
+    <nav className="fixed bottom-0 left-0 right-0 h-20 bg-background/80 backdrop-blur-xl border-t-2 border-white/20 md:hidden z-50 rounded-t-3xl">
       <div className="flex h-full justify-around items-center max-w-md mx-auto">
         {navItems.map(({ href, icon: Icon, label, badge }) => {
           const isActive = (href === '/' && pathname === href) || (href !== '/' && pathname.startsWith(href));
@@ -35,14 +35,14 @@ export function BottomNav() {
               key={label}
               href={href}
               className={cn(
-                'flex flex-col items-center justify-center text-muted-foreground w-full h-full transition-colors hover:text-primary',
-                isActive ? 'text-primary' : 'text-gray-400'
+                'flex flex-col items-center justify-center w-full h-full transition-colors',
+                isActive ? 'text-primary' : 'text-muted-foreground hover:text-primary'
               )}
             >
               <div className="relative">
-                <Icon className="h-7 w-7" />
+                <Icon className={cn("h-8 w-8 transition-transform duration-300", isActive && "scale-125")} />
                 {badge && badge > 0 ? (
-                  <span className="absolute -top-2 -right-3 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                  <span className="absolute -top-2 -right-3 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
                     {badge}
                   </span>
                 ) : null}

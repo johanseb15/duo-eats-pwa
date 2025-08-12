@@ -6,12 +6,14 @@ import { Toaster } from '@/components/ui/toaster';
 
 const fontHeadline = Playfair_Display({
   subsets: ['latin'],
+  display: 'swap',
   variable: '--font-headline',
 });
 
 const fontBody = PT_Sans({
   subsets: ['latin'],
   weight: ['400', '700'],
+  display: 'swap',
   variable: '--font-body',
 });
 
@@ -22,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#ffffff',
+  themeColor: '#FF7F50',
 };
 
 export default function RootLayout({

@@ -26,15 +26,28 @@ export function ProductCard({ product }: ProductCardProps) {
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart(product);
+
+    const productToAdd = {
+      ...product,
+      finalPrice: product.price,
+    };
+    
+    // If product has options, redirect to product page
+    if (product.options && product.options.length > 0) {
+      // Find a way to navigate without useRouter
+       window.location.href = `/product/${product.id}`;
+      return;
+    }
+
+    addToCart(productToAdd);
     toast({
-      title: 'Added to cart!',
-      description: `${product.name} is now in your cart.`,
+      title: '¡Añadido al carrito!',
+      description: `${product.name} está ahora en tu carrito.`,
     });
   };
 
   return (
-    <Card className="w-full overflow-hidden transition-shadow duration-300 rounded-3xl group bg-card/60 backdrop-blur-xl border-white/20 shadow-lg hover:shadow-2xl">
+    <Card className="w-full overflow-hidden transition-shadow duration-300 rounded-3xl group bg-card/80 backdrop-blur-xl border-white/20 shadow-lg hover:shadow-2xl">
       <Link href={`/product/${product.id}`} className="block">
         <CardHeader className="p-0">
           <div className="aspect-video overflow-hidden">
@@ -52,11 +65,14 @@ export function ProductCard({ product }: ProductCardProps) {
           <CardTitle className="font-headline text-2xl truncate">
             {product.name}
           </CardTitle>
+          <CardDescription className="text-muted-foreground mt-1 h-10 overflow-hidden">
+            {product.description}
+          </CardDescription>
         </CardContent>
       </Link>
       <CardFooter className="flex justify-between items-center p-4 pt-0">
-        <p className="text-xl font-bold text-foreground">S/. {product.price.toFixed(2)}</p>
-        <Button onClick={handleAddToCart} size="lg" className="rounded-full">
+        <p className="text-2xl font-bold text-foreground">S/.{product.price.toFixed(2)}</p>
+        <Button onClick={handleAddToCart} size="lg" className="rounded-full text-lg font-bold">
           Añadir
         </Button>
       </CardFooter>

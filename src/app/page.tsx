@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Soup, Beef, Receipt, ShoppingBag } from 'lucide-react';
+import { Soup, Beef, GlassWater, IceCream2 } from 'lucide-react';
 
 import { products } from '@/lib/data';
 import { Header } from '@/components/Header';
@@ -22,8 +22,8 @@ export default function Home() {
   const categories = [
     { name: 'Sopas', icon: Soup },
     { name: 'Carnes', icon: Beef },
-    { name: 'Bebidas', icon: Receipt },
-    { name: 'Postres', icon: ShoppingBag },
+    { name: 'Bebidas', icon: GlassWater },
+    { name: 'Postres', icon: IceCream2 },
   ];
 
   return (
@@ -40,11 +40,11 @@ export default function Home() {
         </div>
 
         <section className="mb-12">
-          <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-r from-blue-400 to-purple-400">
+          <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-r from-primary to-accent">
             <CardContent className="relative flex items-center justify-between p-8">
               <div className="text-white">
-                <p className="text-xl">Oferta del día</p>
-                <h2 className="font-bold text-5xl">25% OFF!</h2>
+                <p className="text-xl font-bold">Oferta del día</p>
+                <h2 className="font-headline text-5xl font-extrabold">25% OFF!</h2>
               </div>
             </CardContent>
           </Card>
@@ -60,10 +60,10 @@ export default function Home() {
                 key={category.name}
                 className="flex flex-col items-center gap-2"
               >
-                <div className="w-20 h-20 bg-card/60 backdrop-blur-xl rounded-2xl shadow-md flex items-center justify-center">
+                <div className="w-20 h-20 bg-card/80 backdrop-blur-xl rounded-2xl shadow-md flex items-center justify-center transition-transform duration-300 hover:scale-110">
                   <category.icon className="h-10 w-10 text-primary" />
                 </div>
-                <span className="font-semibold text-foreground text-sm">
+                <span className="font-semibold text-foreground text-sm mt-1">
                   {category.name}
                 </span>
               </div>
