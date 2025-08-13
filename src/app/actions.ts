@@ -8,6 +8,7 @@ import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, do
 import { revalidatePath } from 'next/cache';
 import { getAuth } from 'firebase-admin/auth';
 import { adminApp } from '@/lib/firebase-admin';
+import { auth } from '@/lib/firebase';
 
 
 export async function fetchAllUsers() {
@@ -35,9 +36,25 @@ export async function fetchAllUsers() {
 
 export async function fetchRecommendations() {
   try {
+    const currentUser = auth.currentUser;
+    let userOrderHistory: string[] = [];
+    
+    if (currentUser) {
+      const userOrders = await fetchOrders(currentUser.uid);
+      if (userOrders.length > 0) {
+        const productNames = userOrders.flatMap(order => order.items.map(item => item.name));
+        userOrderHistory = [...new Set(productNames)]; // Get unique product names
+      }
+    }
+
+    // If no history, provide a generic one to get some recommendations
+    if (userOrderHistory.length === 0) {
+      return ['Pizza de Muzzarella', 'Empanadas de Carne', 'Flan con Dulce de Leche'];
+    }
+
     const result = await getPersonalizedRecommendations({
-      userOrderHistory: '["Pizza", "Coke"]',
-      userPreferences: '["Spicy", "Vegetarian"]',
+      userOrderHistory: JSON.stringify(userOrderHistory),
+      userPreferences: '[]', // Preferences not implemented yet
     });
     return result.recommendations;
   } catch (error) {
