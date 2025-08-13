@@ -89,7 +89,7 @@ export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormPro
         aiHint: '',
        });
     }
-  }, [promotion, form]);
+  }, [promotion, form.reset]);
 
   const handleProductSelect = (productId: string) => {
     const selectedProduct = products.find(p => p.id === productId);

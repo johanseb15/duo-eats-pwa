@@ -83,6 +83,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
     },
   });
 
+  // This effect should only run when the `product` prop changes, or on initial load.
   useEffect(() => {
     if (product) {
       form.reset({
@@ -100,10 +101,10 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
         price: 0,
         image: '',
         aiHint: '',
-        category: categories.length > 0 ? categories[0].name : '',
+        category: '',
        });
     }
-  }, [product, form, categories]);
+  }, [product, form.reset]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
@@ -113,6 +114,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
     };
     
     if (currentCurrency === 'ARS') {
+      // Simulate a conversion for USD, replace with real logic if needed
       prices['USD'] = values.price / 1000;
     } else {
       prices['ARS'] = values.price * 1000;
