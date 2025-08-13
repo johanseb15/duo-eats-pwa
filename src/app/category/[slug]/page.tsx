@@ -77,53 +77,54 @@ async function getProductsByCategory(categoryName: string): Promise<Product[]> {
     const q = query(productsCol, where('category', '==', categoryName));
     const productsSnapshot = await getDocs(q);
     
-    if (!productsSnapshot.empty) {
-        const productList = productsSnapshot.docs.map(doc => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            name: data.name,
-            description: data.description,
-            price: data.price,
-            image: data.image,
-            aiHint: data.aiHint,
-            category: data.category,
-            options: data.options,
-          } as Product;
-        });
-        return productList;
+    if (productsSnapshot.empty) {
+        console.log(`Firestore is empty for category ${categoryName}. Returning test data.`);
+        return testProducts.filter(p => p.category === categoryName);
     }
+    
+    const productList = productsSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        image: data.image,
+        aiHint: data.aiHint,
+        category: data.category,
+        options: data.options,
+      } as Product;
+    });
+    return productList;
   } catch (error) {
-    console.error(`Error fetching products for category ${categoryName}:`, error);
-    // Fallback to test data if Firestore errors out
+    console.error(`Error fetching products for category ${categoryName}, falling back to test data:`, error);
+    return testProducts.filter(p => p.category === categoryName);
   }
-  
-  console.log(`Firestore is empty for category ${categoryName} or an error occurred. Returning test data.`);
-  return testProducts.filter(p => p.category === categoryName);
 }
 
 async function getCategoryBySlug(slug: string): Promise<ProductCategoryData | null> {
+    const testCategories: ProductCategoryData[] = [
+      { id: '1', name: 'Pizzas', slug: 'pizzas', icon: 'Pizza' },
+      { id: '2', name: 'Empanadas', slug: 'empanadas', icon: 'Wind' },
+      { id: '3', name: 'Bebidas', slug: 'bebidas', icon: 'CupSoda' },
+      { id: '4', name: 'Postres', slug: 'postres', icon: 'CakeSlice' },
+    ];
+    
     try {
         const categoriesCol = collection(db, 'categories');
         const q = query(categoriesCol, where('slug', '==', slug));
         const categorySnapshot = await getDocs(q);
 
         if (categorySnapshot.empty) {
-            // Fallback for example data
-            const testCategories: ProductCategoryData[] = [
-              { id: '1', name: 'Pizzas', slug: 'pizzas', icon: 'Pizza' },
-              { id: '2', name: 'Empanadas', slug: 'empanadas', icon: 'Wind' },
-              { id: '3', name: 'Bebidas', slug: 'bebidas', icon: 'CupSoda' },
-              { id: '4', name: 'Postres', slug: 'postres', icon: 'CakeSlice' },
-            ];
+            console.log(`Category with slug '${slug}' not found in Firestore. Searching in test data.`);
             return testCategories.find(c => c.slug === slug) || null;
         }
 
         const doc = categorySnapshot.docs[0];
         return { id: doc.id, ...doc.data() } as ProductCategoryData;
     } catch (error) {
-        console.error(`Error fetching category for slug ${slug}:`, error);
-        return null;
+        console.error(`Error fetching category for slug '${slug}', falling back to test data:`, error);
+        return testCategories.find(c => c.slug === slug) || null;
     }
 }
 
