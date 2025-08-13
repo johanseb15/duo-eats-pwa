@@ -46,16 +46,26 @@ export default function OrdersPage() {
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/auth/signin');
-    } else if (user) {
+      return;
+    } 
+    
+    if (user) {
       const getOrders = async () => {
-        setLoading(true);
+        // No set loading to true on subsequent fetches to avoid skeleton flicker
         const userOrders = await fetchOrders(user.uid);
         setOrders(userOrders);
-        setLoading(false);
+        if (loading) {
+          setLoading(false);
+        }
       };
-      getOrders();
+      
+      getOrders(); // Initial fetch
+      
+      const interval = setInterval(getOrders, 30000); // Refresh every 30 seconds
+      
+      return () => clearInterval(interval); // Cleanup on component unmount
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, loading]);
 
   const handleReorder = (order: Order) => {
     order.items.forEach(item => {
