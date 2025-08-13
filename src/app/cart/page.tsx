@@ -30,9 +30,9 @@ const getCartItemId = (item: CartItem) => {
 };
 
 const deliveryZones = [
-  { name: 'Zona 1', cost: 5.00 },
-  { name: 'Zona 2', cost: 7.50 },
-  { name: 'Zona 3', cost: 10.00 },
+  { name: 'Zona 1', cost: 500.00 },
+  { name: 'Zona 2', cost: 750.00 },
+  { name: 'Zona 3', cost: 1000.00 },
   { name: 'Retiro en local', cost: 0.00 },
 ]
 
@@ -75,6 +75,16 @@ export default function CartPage() {
       router.push('/auth/signin');
       return;
     }
+
+    if (deliveryCost === 0 && !deliveryZones.find(z => z.cost === 0)) {
+        toast({
+            title: 'Selecciona una zona',
+            description: 'Por favor, elige una zona de entrega para continuar.',
+            variant: 'destructive',
+        });
+        return;
+    }
+
 
     setIsProcessing(true);
 
