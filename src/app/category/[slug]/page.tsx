@@ -1,4 +1,3 @@
-
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Product, ProductCategoryData } from '@/lib/types';
@@ -78,7 +77,7 @@ async function getProductsByCategory(categoryName: string): Promise<Product[]> {
     const productsSnapshot = await getDocs(q);
     
     if (productsSnapshot.empty) {
-        console.log(`Firestore is empty for category ${categoryName}. Returning test data.`);
+        // This case is for when the DB is reachable but the collection for this category is empty
         return testProducts.filter(p => p.category === categoryName);
     }
     
@@ -97,6 +96,7 @@ async function getProductsByCategory(categoryName: string): Promise<Product[]> {
     });
     return productList;
   } catch (error) {
+    // This case is for when the DB is NOT reachable (permissions, config, etc)
     console.error(`Error fetching products for category ${categoryName}, falling back to test data:`, error);
     return testProducts.filter(p => p.category === categoryName);
   }
@@ -115,14 +115,16 @@ async function getCategoryBySlug(slug: string): Promise<ProductCategoryData | nu
         const q = query(categoriesCol, where('slug', '==', slug));
         const categorySnapshot = await getDocs(q);
 
-        if (categorySnapshot.empty) {
-            console.log(`Category with slug '${slug}' not found in Firestore. Searching in test data.`);
-            return testCategories.find(c => c.slug === slug) || null;
+        if (!categorySnapshot.empty) {
+           const doc = categorySnapshot.docs[0];
+           return { id: doc.id, ...doc.data() } as ProductCategoryData;
         }
 
-        const doc = categorySnapshot.docs[0];
-        return { id: doc.id, ...doc.data() } as ProductCategoryData;
+        // If not found in Firestore, fallback to test data
+        return testCategories.find(c => c.slug === slug) || null;
+
     } catch (error) {
+        // If Firestore call fails, fallback to test data
         console.error(`Error fetching category for slug '${slug}', falling back to test data:`, error);
         return testCategories.find(c => c.slug === slug) || null;
     }
