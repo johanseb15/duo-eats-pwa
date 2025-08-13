@@ -11,7 +11,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Minus, Plus, Trash2, ShoppingCart, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { Currency } from '@/lib/types';
+import type { Currency, CartItem } from '@/lib/types';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -22,11 +22,11 @@ import { createOrder } from '@/app/actions';
 const currentCurrency: Currency = 'ARS';
 const currencySymbol = '$';
 
-const getCartItemId = (item: any) => {
-  const optionsIdentifier = item.selectedOptions
-    ? Object.entries(item.selectedOptions).sort().join('-')
-    : '';
-  return `${item.id}-${optionsIdentifier}`;
+const getCartItemId = (item: CartItem) => {
+    const optionsIdentifier = item.selectedOptions
+      ? Object.entries(item.selectedOptions).sort().map(([key, value]) => `${key}:${value}`).join('-')
+      : '';
+    return `${item.id}-${optionsIdentifier}`;
 };
 
 const deliveryZones = [
@@ -96,6 +96,7 @@ export default function CartPage() {
         description: 'Tu pedido ha sido guardado y será enviado a WhatsApp.',
       });
       clearCart();
+      router.push(`/orders?orderId=${result.orderId}`);
     } else {
       toast({
         title: 'Error al crear el pedido',
@@ -112,11 +113,11 @@ export default function CartPage() {
     const phone = '5493511234567'; // Replace with the restaurant's number
     let message = `¡Hola! Quisiera hacer el siguiente pedido:\n`;
     if (orderId) {
-      message += `\n*N° de Pedido: ${orderId}*\n`;
+      message += `\n*N° de Pedido: ${orderId.slice(0, 6)}*\n`;
     }
     message += `\n${items
         .map((i) => {
-          const optionsString = i.selectedOptions ? ` (${Object.values(i.selectedOptions).join(', ')})` : '';
+          const optionsString = i.selectedOptions && Object.values(i.selectedOptions).length > 0 ? ` (${Object.values(i.selectedOptions).join(', ')})` : '';
           return `* ${i.name}${optionsString} x ${i.quantity} (${currencySymbol}${(i.finalPrice * i.quantity).toFixed(2)})`
         })
         .join('\n')}\n\n*Subtotal: ${currencySymbol}${subtotal.toFixed(2)}*\n*Envío: ${currencySymbol}${deliveryCost.toFixed(2)}*\n*Total: ${currencySymbol}${total.toFixed(2)}*`
@@ -179,7 +180,7 @@ export default function CartPage() {
                     />
                     <div className="ml-4 flex-grow">
                       <h3 className="font-semibold text-lg">{item.name}</h3>
-                      {item.selectedOptions && (
+                      {item.selectedOptions && Object.values(item.selectedOptions).length > 0 && (
                         <p className="text-sm text-muted-foreground">{Object.values(item.selectedOptions).join(', ')}</p>
                       )}
                        <div className="flex items-center gap-2 mt-2">

@@ -16,18 +16,19 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { useRouter } from 'next/navigation';
 
 interface ProductCardProps {
   product: Product;
 }
 
-// TODO: Replace with a settings store
 const currentCurrency = 'ARS';
 const currencySymbol = '$';
 
 export function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
   const { toast } = useToast();
+  const router = useRouter();
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -35,12 +36,14 @@ export function ProductCard({ product }: ProductCardProps) {
 
     // If product has options, redirect to product page
     if (product.options && product.options.length > 0) {
-       window.location.href = `/product/${product.id}`;
+      router.push(`/product/${product.id}`);
       return;
     }
     
+    // Set default options and final price for products without options
     const productToAdd = {
       ...product,
+      selectedOptions: {},
       finalPrice: product.price[currentCurrency],
     };
 

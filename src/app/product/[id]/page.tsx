@@ -58,15 +58,19 @@ export default function ProductPage({ params }: { params: { id: string } }) {
 
   const finalPrice = useMemo(() => {
     if (!product) return 0;
-    if (!product.options) return product.price[currentCurrency];
+    let basePrice = product.price[currentCurrency];
+
+    if (!product.options || Object.keys(selectedOptions).length === 0) {
+        return basePrice;
+    }
 
     const optionsPrice = Object.entries(selectedOptions).reduce((total, [optionName, valueName]) => {
       const option = product.options?.find(opt => opt.name === optionName);
       const value = option?.values.find(val => val.name === valueName);
-      return total + (value?.priceModifier[currentCurrency] || 0);
+      return total + (value?.priceModifier?.[currentCurrency] || 0);
     }, 0);
 
-    return product.price[currentCurrency] + optionsPrice;
+    return basePrice + optionsPrice;
   }, [product, selectedOptions]);
   
   if (loading) {
@@ -96,6 +100,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   };
   
   const handleAddToCart = () => {
+    if (!product) return;
     const cartItem = {
       ...product,
       selectedOptions: selectedOptions,
@@ -124,7 +129,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
           src={product.image}
           alt={product.name}
           fill
-          objectFit="cover"
+          style={{objectFit:"cover"}}
           className="object-cover"
           data-ai-hint={product.aiHint}
         />
@@ -139,7 +144,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
           {product.description}
         </p>
 
-        {product.options && (
+        {product.options && product.options.length > 0 && (
           <div className="mt-6">
             {product.options.map((option) => (
               <div key={option.name} className="mb-4">
@@ -153,7 +158,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                       <RadioGroupItem value={value.name} id={`${option.name}-${value.name}`} />
                       <Label htmlFor={`${option.name}-${value.name}`} className="flex justify-between w-full">
                         <span>{value.name}</span>
-                        {value.priceModifier[currentCurrency] > 0 && <span>+ {currencySymbol} {value.priceModifier[currentCurrency].toFixed(2)}</span>}
+                        {value.priceModifier?.[currentCurrency] > 0 && <span>+ {currencySymbol} {value.priceModifier[currentCurrency].toFixed(2)}</span>}
                       </Label>
                     </div>
                   ))}
@@ -178,4 +183,3 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
-

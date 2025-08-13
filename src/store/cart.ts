@@ -1,8 +1,9 @@
+
 'use client';
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { CartItem, Product } from '@/lib/types';
+import type { CartItem } from '@/lib/types';
 
 interface CartState {
   items: CartItem[];
@@ -12,9 +13,9 @@ interface CartState {
   clearCart: () => void;
 }
 
-const getCartItemId = (product: Omit<CartItem, 'quantity'>) => {
+const getCartItemId = (product: Omit<CartItem, 'quantity' | 'id'> & { id: string }) => {
   const optionsIdentifier = product.selectedOptions
-    ? Object.entries(product.selectedOptions).sort().join('-')
+    ? Object.entries(product.selectedOptions).sort().map(([key, value]) => `${key}:${value}`).join('-')
     : '';
   return `${product.id}-${optionsIdentifier}`;
 };

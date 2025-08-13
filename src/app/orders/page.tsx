@@ -9,7 +9,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import type { Currency, Order } from '@/lib/types';
+import type { Order } from '@/lib/types';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
 import { fetchOrders } from '../actions';
@@ -18,7 +18,6 @@ import { useCart } from '@/store/cart';
 import { useToast } from '@/hooks/use-toast';
 
 
-// TODO: Replace with a settings store
 const currencySymbol = '$';
 
 const getStatusVariant = (status: string) => {
@@ -60,15 +59,7 @@ export default function OrdersPage() {
 
   const handleReorder = (order: Order) => {
     order.items.forEach(item => {
-      // Create a version of the item that has all the necessary fields from Product
-      const productItem = {
-        ...item,
-        // Ensure all Product fields are present, even if undefined
-        price: item.price || { ARS: 0, USD: 0 },
-        options: item.options || [],
-        aiHint: item.aiHint || '',
-      };
-      addToCart(productItem)
+      addToCart(item)
     });
     toast({
       title: '¡Pedido añadido al carrito!',
@@ -144,9 +135,9 @@ export default function OrdersPage() {
                 </CardHeader>
                 <CardContent className="p-4 border-t border-b">
                    <ul className="space-y-1 text-sm text-foreground">
-                    {order.items.map(item => (
-                        <li key={item.id} className="flex justify-between">
-                            <span>{item.name} {item.selectedOptions && `(${Object.values(item.selectedOptions).join(', ')})`}</span>
+                    {order.items.map((item, index) => (
+                        <li key={`${item.id}-${index}`} className="flex justify-between">
+                            <span>{item.name} {item.selectedOptions && Object.values(item.selectedOptions).length > 0 && `(${Object.values(item.selectedOptions).join(', ')})`}</span>
                             <span>x{item.quantity}</span>
                         </li>
                     ))}
