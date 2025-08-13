@@ -15,6 +15,70 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Added for example data
+const testProducts: Product[] = [
+    {
+        id: '1',
+        name: 'Pizza de Muzzarella',
+        description: 'Clásica pizza con salsa de tomate, muzzarella y aceitunas.',
+        price: { ARS: 10000, USD: 10 },
+        image: 'https://placehold.co/400x225.png',
+        aiHint: 'mozzarella pizza',
+        category: 'Pizzas',
+        options: [
+            {
+                name: 'Tamaño',
+                values: [
+                    { name: 'Individual', priceModifier: { ARS: 0, USD: 0 } },
+                    { name: 'Grande', priceModifier: { ARS: 2000, USD: 2 } },
+                ],
+            },
+             {
+                name: 'Borde',
+                values: [
+                    { name: 'Normal', priceModifier: { ARS: 0, USD: 0 } },
+                    { name: 'Relleno de Queso', priceModifier: { ARS: 1500, USD: 1.5 } },
+                ],
+            }
+        ]
+    },
+    {
+        id: '2',
+        name: 'Empanadas de Carne',
+        description: 'Empanadas jugosas de carne cortada a cuchillo.',
+        price: { ARS: 1000, USD: 1 },
+        image: 'https://placehold.co/400x225.png',
+        aiHint: 'meat empanada',
+        category: 'Empanadas',
+    },
+    {
+        id: '3',
+        name: 'Flan con Dulce de Leche',
+        description: 'Flan casero tradicional con una generosa porción de dulce de leche.',
+        price: { ARS: 3000, USD: 3 },
+        image: 'https://placehold.co/400x225.png',
+        aiHint: 'flan caramel',
+        category: 'Postres',
+    },
+     {
+        id: '4',
+        name: 'Pizza Napolitana',
+        description: 'Pizza con salsa de tomate, muzzarella, rodajas de tomate fresco y ajo.',
+        price: { ARS: 11000, USD: 11 },
+        image: 'https://placehold.co/400x225.png',
+        aiHint: 'neapolitan pizza',
+        category: 'Pizzas',
+         options: [
+            {
+                name: 'Tamaño',
+                values: [
+                    { name: 'Individual', priceModifier: { ARS: 0, USD: 0 } },
+                    { name: 'Grande', priceModifier: { ARS: 2200, USD: 2.2 } },
+                ],
+            }
+        ]
+    },
+];
 
 // TODO: Replace with a settings store
 const currentCurrency: Currency = 'ARS';
@@ -37,24 +101,48 @@ export default function ProductPage() {
 
     const fetchProduct = async () => {
       setLoading(true);
-      const docRef = doc(db, 'products', productId);
-      const docSnap = await getDoc(docRef);
+      try {
+        const docRef = doc(db, 'products', productId);
+        const docSnap = await getDoc(docRef);
 
-      if (docSnap.exists()) {
-        const productData = { id: docSnap.id, ...docSnap.data() } as Product;
-        setProduct(productData);
-        // Set default options
-        if (productData.options) {
-          const defaults: { [key: string]: string } = {};
-          productData.options.forEach(option => {
-            defaults[option.name] = option.values[0].name;
-          });
-          setSelectedOptions(defaults);
+        let productData: Product | null = null;
+
+        if (docSnap.exists()) {
+          productData = { id: docSnap.id, ...docSnap.data() } as Product;
+        } else {
+          // Fallback to test data if not found in Firestore
+          console.log(`Product with id ${productId} not found in Firestore. Searching in test data.`);
+          const testProduct = testProducts.find(p => p.id === productId);
+          if (testProduct) {
+            productData = testProduct;
+          }
         }
-      } else {
-        notFound();
+        
+        if (productData) {
+          setProduct(productData);
+          // Set default options
+          if (productData.options) {
+            const defaults: { [key: string]: string } = {};
+            productData.options.forEach(option => {
+              defaults[option.name] = option.values[0].name;
+            });
+            setSelectedOptions(defaults);
+          }
+        } else {
+            notFound();
+        }
+
+      } catch (error) {
+        console.error("Error fetching product, falling back to test data:", error);
+        const testProduct = testProducts.find(p => p.id === productId);
+        if (testProduct) {
+          setProduct(testProduct);
+        } else {
+          notFound();
+        }
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchProduct();
@@ -192,3 +280,5 @@ export default function ProductPage() {
     </div>
   );
 }
+
+    
