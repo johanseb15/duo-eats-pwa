@@ -2,7 +2,7 @@
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Product, ProductCategoryData } from '@/lib/types';
-import { notFound } from 'next/navigation';
+import { notFound, useRouter } from 'next/navigation';
 
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
@@ -10,6 +10,7 @@ import { ProductCard } from '@/components/ProductCard';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Frown } from 'lucide-react';
 import Link from 'next/link';
+import CategoryClientPage from './page.client';
 
 // Added for example data
 const testProducts: Product[] = [
@@ -100,9 +101,9 @@ async function getProductsByCategory(categoryName: string): Promise<Product[]> {
     }
   } catch (error) {
     console.error(`Error fetching products for category ${categoryName}:`, error);
+    // Fallback to test data if Firestore errors out
   }
   
-  // Fallback to test data if Firestore is empty or on error
   console.log(`Firestore is empty for category ${categoryName} or an error occurred. Returning test data.`);
   return testProducts.filter(p => p.category === categoryName);
 }
@@ -144,43 +145,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
   const products = await getProductsByCategory(category.name);
 
   return (
-    <div className="flex flex-col min-h-screen bg-background pb-28">
-      <Header />
-      <main className="flex-grow container mx-auto px-4 py-6">
-        <div className="relative flex items-center mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute left-0 rounded-full"
-            asChild
-          >
-            <Link href="/">
-              <ChevronLeft className="h-6 w-6" />
-            </Link>
-          </Button>
-          <h1 className="text-2xl font-bold text-center flex-grow">
-            {category.name}
-          </h1>
-        </div>
-
-        {products.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-20">
-            <Frown className="mx-auto h-24 w-24 text-muted-foreground" />
-            <h2 className="mt-6 text-2xl font-semibold">No hay productos aquí</h2>
-            <p className="mt-2 text-muted-foreground">
-              Parece que aún no hay productos en la categoría "{category.name}".
-            </p>
-          </div>
-        )}
-      </main>
-      <BottomNav />
-    </div>
+    <CategoryClientPage products={products} category={category} />
   );
 }
 

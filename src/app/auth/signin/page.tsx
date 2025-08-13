@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -14,7 +15,7 @@ export default function SignInPage() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      router.push('/profile');
+      router.push('/');
     } catch (error) {
       console.error('Error signing in with Google', error);
     }

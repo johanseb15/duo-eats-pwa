@@ -5,7 +5,6 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  ChevronLeft,
   ChevronRight,
   ClipboardList,
   CreditCard,
@@ -86,18 +85,8 @@ export default function ProfilePage() {
       <Header />
       <main className="flex-grow container mx-auto px-4 py-6">
         <div className="relative flex items-center mb-6">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full"
-              onClick={() => router.back()}
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </Button>
             <h1 className="text-xl font-bold text-center flex-grow">Perfil</h1>
-            <div className="w-10"></div> {/* Spacer */}
         </div>
-
 
         <div className="flex flex-col items-center text-center">
           <Avatar className="w-24 h-24 mb-4">
