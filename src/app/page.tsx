@@ -1,4 +1,6 @@
 
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Soup, Beef, GlassWater, IceCream } from 'lucide-react';
@@ -20,6 +22,10 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import { useEffect, useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
+
 
 async function getProducts(): Promise<Product[]> {
   const productsCol = collection(db, 'products');
@@ -39,24 +45,43 @@ async function getProducts(): Promise<Product[]> {
   return productList;
 }
 
-export default async function Home() {
-  const products = await getProducts();
+export default function Home() {
+  const { user, loading: authLoading } = useAuth();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      const fetchedProducts = await getProducts();
+      setProducts(fetchedProducts);
+      setLoading(false);
+    }
+    fetchProducts();
+  }, []);
+
   const categories = [
     { name: 'Entradas', icon: Soup },
     { name: 'Platos Fuertes', icon: Beef },
     { name: 'Bebidas', icon: GlassWater },
     { name: 'Postres', icon: IceCream },
   ];
+  
+  const welcomeName = user ? user.displayName?.split(' ')[0] : 'invitado';
+
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-28">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-6">
         <div className="text-left mb-8">
-          <h1 className="text-3xl font-bold text-foreground">
-            Hola, Johan 👋
-          </h1>
+           {authLoading ? (
+            <Skeleton className="h-9 w-48" />
+          ) : (
+            <h1 className="text-3xl font-bold text-foreground">
+              Hola, {welcomeName} 👋
+            </h1>
+          )}
           <p className="text-muted-foreground mt-1">
             ¿Qué se te antoja hoy?
           </p>
@@ -103,11 +128,19 @@ export default async function Home() {
           <h2 className="text-xl font-bold mb-4 text-left">
             Más Populares
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+           {loading ? (
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Skeleton className="h-72 w-full rounded-3xl" />
+                <Skeleton className="h-72 w-full rounded-3xl" />
+                <Skeleton className="h-72 w-full rounded-3xl" />
+             </div>
+           ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+           )}
         </section>
       </main>
       <BottomNav />
