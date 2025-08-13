@@ -1,3 +1,4 @@
+
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Product, ProductCategoryData } from '@/lib/types';
@@ -38,6 +39,24 @@ const testProducts: Product[] = [
         ]
     },
     {
+        id: '2',
+        name: 'Empanadas de Carne',
+        description: 'Empanadas jugosas de carne cortada a cuchillo.',
+        price: { ARS: 1000, USD: 1 },
+        image: 'https://placehold.co/400x225.png',
+        aiHint: 'meat empanada',
+        category: 'Empanadas',
+    },
+    {
+        id: '3',
+        name: 'Flan con Dulce de Leche',
+        description: 'Flan casero tradicional con una generosa porción de dulce de leche.',
+        price: { ARS: 3000, USD: 3 },
+        image: 'https://placehold.co/400x225.png',
+        aiHint: 'flan caramel',
+        category: 'Postres',
+    },
+    {
         id: '4',
         name: 'Pizza Napolitana',
         description: 'Pizza con salsa de tomate, muzzarella, rodajas de tomate fresco y ajo.',
@@ -63,35 +82,29 @@ async function getProductsByCategory(categoryName: string): Promise<Product[]> {
     const q = query(productsCol, where('category', '==', categoryName));
     const productsSnapshot = await getDocs(q);
     
-    if (productsSnapshot.empty) {
-        // Return example data if firestore is empty and category matches
-        const exampleProducts = testProducts.filter(p => p.category === categoryName);
-        if (exampleProducts.length > 0) {
-            console.log(`Firestore is empty for category ${categoryName}. Returning test data.`);
-            return exampleProducts;
-        }
-        return [];
+    if (!productsSnapshot.empty) {
+        const productList = productsSnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            name: data.name,
+            description: data.description,
+            price: data.price,
+            image: data.image,
+            aiHint: data.aiHint,
+            category: data.category,
+            options: data.options,
+          } as Product;
+        });
+        return productList;
     }
-    
-    const productList = productsSnapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        name: data.name,
-        description: data.description,
-        price: data.price,
-        image: data.image,
-        aiHint: data.aiHint,
-        category: data.category,
-        options: data.options,
-      } as Product;
-    });
-    return productList;
   } catch (error) {
     console.error(`Error fetching products for category ${categoryName}:`, error);
-    // Fallback to test data on error
-    return testProducts.filter(p => p.category === categoryName);
   }
+  
+  // Fallback to test data if Firestore is empty or on error
+  console.log(`Firestore is empty for category ${categoryName} or an error occurred. Returning test data.`);
+  return testProducts.filter(p => p.category === categoryName);
 }
 
 async function getCategoryBySlug(slug: string): Promise<ProductCategoryData | null> {
