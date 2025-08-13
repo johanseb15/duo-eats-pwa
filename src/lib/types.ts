@@ -57,3 +57,9 @@ export interface Promotion {
   image: string;
   aiHint: string;
 }
+
+export interface DeliveryZone {
+    id: string;
+    name: string;
+    cost: number;
+}

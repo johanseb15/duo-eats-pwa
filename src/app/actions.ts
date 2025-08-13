@@ -3,7 +3,7 @@
 
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommendations';
 import { db } from '@/lib/firebase';
-import type { Order, Product, Promotion, ProductCategoryData } from '@/lib/types';
+import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone } from '@/lib/types';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { getAuth } from 'firebase-admin/auth';
@@ -273,4 +273,44 @@ export async function deleteCategory(categoryId: string) {
     console.error('Error deleting category:', error);
     return { success: false, error: 'Failed to delete category' };
   }
+}
+
+export type DeliveryZoneInput = Omit<DeliveryZone, 'id'>;
+
+export async function addDeliveryZone(zoneData: DeliveryZoneInput) {
+    try {
+        const docRef = await addDoc(collection(db, 'deliveryZones'), zoneData);
+        revalidatePath('/admin/delivery-zones');
+        revalidatePath('/cart');
+        return { success: true, zoneId: docRef.id };
+    } catch (error) {
+        console.error('Error adding delivery zone:', error);
+        return { success: false, error: 'Failed to add delivery zone' };
+    }
+}
+
+export async function updateDeliveryZone(zoneId: string, zoneData: DeliveryZoneInput) {
+    try {
+        const zoneRef = doc(db, 'deliveryZones', zoneId);
+        await updateDoc(zoneRef, zoneData);
+        revalidatePath('/admin/delivery-zones');
+        revalidatePath('/cart');
+        return { success: true };
+    } catch (error) {
+        console.error('Error updating delivery zone:', error);
+        return { success: false, error: 'Failed to update delivery zone' };
+    }
+}
+
+export async function deleteDeliveryZone(zoneId: string) {
+    try {
+        const zoneRef = doc(db, 'deliveryZones', zoneId);
+        await deleteDoc(zoneRef);
+        revalidatePath('/admin/delivery-zones');
+        revalidatePath('/cart');
+        return { success: true };
+    } catch (error) {
+        console.error('Error deleting delivery zone:', error);
+        return { success: false, error: 'Failed to delete delivery zone' };
+    }
 }

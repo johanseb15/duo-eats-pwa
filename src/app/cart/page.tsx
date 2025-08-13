@@ -13,11 +13,14 @@ import { Label } from '@/components/ui/label';
 import { Minus, Plus, Trash2, ShoppingCart, Loader2 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { Currency, CartItem } from '@/lib/types';
+import type { Currency, CartItem, DeliveryZone } from '@/lib/types';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { createOrder } from '@/app/actions';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 // TODO: Replace with a settings store
@@ -31,12 +34,10 @@ const getCartItemId = (item: CartItem) => {
     return `${item.id}-${optionsIdentifier}`;
 };
 
-const deliveryZones = [
-  { name: 'Zona 1', cost: 500.00 },
-  { name: 'Zona 2', cost: 750.00 },
-  { name: 'Zona 3', cost: 1000.00 },
-  { name: 'Retiro en local', cost: 0.00 },
-]
+const defaultDeliveryZones: DeliveryZone[] = [
+  { id: '1', name: 'Retiro en local', cost: 0.00 },
+  { id: '2', name: 'Zona 1 (Ejemplo)', cost: 500.00 },
+];
 
 
 export default function CartPage() {
@@ -45,10 +46,12 @@ export default function CartPage() {
   const router = useRouter();
   const { toast } = useToast();
 
+  const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
   const [deliveryCost, setDeliveryCost] = useState(0);
   const [selectedZone, setSelectedZone] = useState('');
   const [isClient, setIsClient] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [loadingZones, setLoadingZones] = useState(true);
   
   // Guest info
   const [guestName, setGuestName] = useState('');
@@ -57,6 +60,27 @@ export default function CartPage() {
 
   useEffect(() => {
     setIsClient(true);
+    const fetchZones = async () => {
+        setLoadingZones(true);
+        try {
+            const zonesCol = collection(db, 'deliveryZones');
+            const q = query(zonesCol, orderBy('cost'));
+            const snapshot = await getDocs(q);
+
+            if (snapshot.empty) {
+                setDeliveryZones(defaultDeliveryZones);
+            } else {
+                const zoneList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DeliveryZone));
+                setDeliveryZones(zoneList);
+            }
+        } catch (error) {
+            console.error("Error fetching delivery zones, using defaults:", error);
+            setDeliveryZones(defaultDeliveryZones);
+        } finally {
+            setLoadingZones(false);
+        }
+    };
+    fetchZones();
   }, []);
 
 
@@ -96,10 +120,12 @@ export default function CartPage() {
   
   const total = finalSubtotal + deliveryCost;
 
-  const handleZoneChange = (zoneName: string) => {
-    const zone = deliveryZones.find(z => z.name === zoneName);
-    setDeliveryCost(zone ? zone.cost : 0);
-    setSelectedZone(zoneName);
+  const handleZoneChange = (zoneId: string) => {
+    const zone = deliveryZones.find(z => z.id === zoneId);
+    if (zone) {
+        setDeliveryCost(zone.cost);
+        setSelectedZone(zone.id);
+    }
   }
 
   const handleCheckout = async () => {
@@ -178,7 +204,7 @@ export default function CartPage() {
       message += `*Dirección: ${address}*\n`;
     }
     
-    const deliveryZoneInfo = deliveryZones.find(z => z.name === selectedZone)?.name || 'No especificada';
+    const deliveryZoneInfo = deliveryZones.find(z => z.id === selectedZone)?.name || 'No especificada';
 
     message += `*Zona de Entrega: ${deliveryZoneInfo}*\n`
 
@@ -300,16 +326,20 @@ export default function CartPage() {
                   <CardTitle>Zona de Entrega</CardTitle>
                 </CardHeader>
                 <CardContent className="p-2">
-                   <Select onValueChange={handleZoneChange} value={selectedZone}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecciona tu zona" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {deliveryZones.map(zone => (
-                         <SelectItem key={zone.name} value={zone.name}>{zone.name} (+ {currencySymbol} {zone.cost.toFixed(2)})</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                   {loadingZones ? (
+                        <Skeleton className="h-10 w-full" />
+                   ) : (
+                    <Select onValueChange={handleZoneChange} value={selectedZone}>
+                        <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecciona tu zona" />
+                        </SelectTrigger>
+                        <SelectContent>
+                        {deliveryZones.map(zone => (
+                            <SelectItem key={zone.id} value={zone.id}>{zone.name} (+ {currencySymbol} {zone.cost.toFixed(2)})</SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+                   )}
                 </CardContent>
               </Card>
 

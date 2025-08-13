@@ -19,7 +19,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { addPromotion, updatePromotion, type PromotionInput } from '@/app/actions';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import type { Promotion } from '@/lib/types';
+import type { Product, Promotion } from '@/lib/types';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -43,6 +46,18 @@ interface PromotionFormProps {
 
 export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const productsCol = collection(db, 'products');
+      const q = query(productsCol, orderBy('name'));
+      const snapshot = await getDocs(q);
+      const productList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+      setProducts(productList);
+    };
+    fetchProducts();
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -71,6 +86,14 @@ export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormPro
        });
     }
   }, [promotion, form]);
+
+  const handleProductSelect = (productId: string) => {
+    const selectedProduct = products.find(p => p.id === productId);
+    if (selectedProduct) {
+        form.setValue('image', selectedProduct.image);
+        form.setValue('aiHint', selectedProduct.aiHint);
+    }
+  }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
@@ -129,6 +152,25 @@ export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormPro
             </FormItem>
           )}
         />
+         <FormItem>
+            <FormLabel>Imagen del Producto</FormLabel>
+             <Select onValueChange={handleProductSelect} disabled={products.length === 0}>
+                <FormControl>
+                <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar un producto para usar su imagen" />
+                </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                {products.map(p => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                ))}
+                </SelectContent>
+            </Select>
+            <FormDescription>
+                O introduce una URL manualmente a continuación.
+            </FormDescription>
+        </FormItem>
+
         <FormField
           control={form.control}
           name="image"
@@ -138,9 +180,6 @@ export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormPro
               <FormControl>
                 <Input placeholder="https://ejemplo.com/imagen.png" {...field} />
               </FormControl>
-              <FormDescription>
-                Si se deja en blanco, se usará una imagen de marcador de posición.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -155,7 +194,7 @@ export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormPro
                 <Input placeholder="Ej: pizza promo" {...field} />
               </FormControl>
                <FormDescription>
-                Una o dos palabras para buscar imágenes de stock (opcional).
+                Se rellenará automáticamente si seleccionas un producto.
               </FormDescription>
               <FormMessage />
             </FormItem>
