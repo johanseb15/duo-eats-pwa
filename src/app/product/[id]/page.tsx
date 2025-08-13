@@ -30,7 +30,7 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true);
   const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: string }>({});
   
-  const productId = Array.isArray(params.id) ? params.id[0] : params.id;
+  const productId = useMemo(() => (Array.isArray(params.id) ? params.id[0] : params.id), [params.id]);
 
   useEffect(() => {
     if (!productId) return;
