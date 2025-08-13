@@ -114,7 +114,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   };
 
   return (
-    <div className="min-h-screen bg-background relative pb-24">
+    <div className="min-h-screen bg-background">
        <Button
           variant="ghost"
           size="icon"
@@ -136,7 +136,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
         <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
       </div>
 
-      <div className="p-6 -mt-16 relative bg-background rounded-t-3xl">
+      <div className="p-6 -mt-16 relative bg-background rounded-t-3xl md:pb-24 pb-32">
         <h1 className="text-3xl font-bold text-foreground">
           {product.name}
         </h1>
@@ -175,10 +175,12 @@ export default function ProductPage({ params }: { params: { id: string } }) {
         </div>
       </div>
       
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl border-t">
-         <Button onClick={handleAddToCart} size="lg" className="w-full rounded-full text-lg py-7">
-            Agregar al carrito
-          </Button>
+       <div className="md:p-0 p-4 md:static md:border-0 fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-xl border-t">
+          <div className='container mx-auto px-4 md:px-0'>
+             <Button onClick={handleAddToCart} size="lg" className="w-full rounded-full text-lg py-7">
+                Agregar al carrito
+              </Button>
+          </div>
       </div>
     </div>
   );
