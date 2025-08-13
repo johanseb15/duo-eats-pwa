@@ -3,7 +3,7 @@
 
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommendations';
 import { db } from '@/lib/firebase';
-import type { Order, Product } from '@/lib/types';
+import type { Order, Product, Promotion } from '@/lib/types';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { getAuth } from 'firebase-admin/auth';
@@ -183,5 +183,47 @@ export async function deleteProduct(productId: string) {
   } catch (error) {
     console.error('Error deleting product:', error);
     return { success: false, error: 'Failed to delete product' };
+  }
+}
+
+
+// Omit 'id' and other read-only fields for creation/updates
+export type PromotionInput = Omit<Promotion, 'id'>;
+
+export async function addPromotion(promotionData: PromotionInput) {
+  try {
+    const docRef = await addDoc(collection(db, 'promotions'), promotionData);
+    revalidatePath('/admin/promotions');
+    revalidatePath('/');
+    return { success: true, promotionId: docRef.id };
+  } catch (error) {
+    console.error('Error adding promotion:', error);
+    return { success: false, error: 'Failed to add promotion' };
+  }
+}
+
+export async function updatePromotion(promotionId: string, promotionData: PromotionInput) {
+  try {
+    const promotionRef = doc(db, 'promotions', promotionId);
+    await updateDoc(promotionRef, promotionData);
+    revalidatePath('/admin/promotions');
+    revalidatePath('/');
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating promotion:', error);
+    return { success: false, error: 'Failed to update promotion' };
+  }
+}
+
+export async function deletePromotion(promotionId: string) {
+  try {
+    const promotionRef = doc(db, 'promotions', promotionId);
+    await deleteDoc(promotionRef);
+    revalidatePath('/admin/promotions');
+    revalidatePath('/');
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting promotion:', error);
+    return { success: false, error: 'Failed to delete promotion' };
   }
 }
