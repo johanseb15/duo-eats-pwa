@@ -1,7 +1,37 @@
 {
   "name": "Duo Eats",
-  "short_name": "Duo Eats",
+  "short_name": "DuoEats",
   "description": "Sabores intensos.",
+  "start_url": "/",
+  "display_override": [
+    "window-controls-overlay"
+  ],
+  "display": "standalone",
+  "background_color": "#F5F5DC",
+  "theme_color": "#FF7F50",
+  "scope": "/",
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 480
+  },
+  "handle_links": "auto",
+  "file_handlers": [
+    {
+      "action": "/handle-file",
+      "accept": {
+        "text/plain": [
+          ".menu"
+        ]
+      }
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+duoeats",
+      "url": "/?protocol=%s"
+    }
+  ],
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
@@ -13,14 +43,5 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ],
-  "theme_color": "#FF7F50",
-  "background_color": "#F5F5DC",
-  "start_url": "/",
-  "display": "standalone",
-  "orientation": "portrait",
-  "scope": "/",
-  "related_applications": [],
-  "prefer_related_applications": false,
-  "iarc_rating_id": ""
+  ]
 }
