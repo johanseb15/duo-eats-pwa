@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -5,10 +6,18 @@ import { Wand2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from './ui/skeleton';
 import { fetchRecommendations } from '@/app/actions';
+import type { Product } from '@/lib/types';
+import { useRouter } from 'next/navigation';
 
-export default function Recommendations() {
+interface RecommendationsProps {
+    products: Product[];
+}
+
+
+export default function Recommendations({ products }: RecommendationsProps) {
   const [recommendations, setRecommendations] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const getRecs = async () => {
@@ -19,6 +28,13 @@ export default function Recommendations() {
     };
     getRecs();
   }, []);
+
+  const handleRecommendationClick = (rec: string) => {
+    const product = products.find(p => p.name.toLowerCase() === rec.toLowerCase());
+    if (product) {
+      router.push(`/product/${product.id}`);
+    }
+  };
 
   if (loading) {
     return (
@@ -60,6 +76,7 @@ export default function Recommendations() {
             {recommendations.map((rec, index) => (
               <div
                 key={index}
+                onClick={() => handleRecommendationClick(rec)}
                 className="bg-primary/20 text-primary-foreground font-semibold px-4 py-2 rounded-full cursor-pointer hover:bg-primary/40 transition-colors"
               >
                 {rec}

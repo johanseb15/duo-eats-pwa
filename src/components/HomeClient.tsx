@@ -49,11 +49,11 @@ export default function HomeClient({ products }: HomeClientProps) {
         </div>
 
         <section className="mb-12">
-           <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-r from-primary to-blue-400">
+           <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-r from-primary to-accent">
              <CardContent className="relative flex items-center justify-between p-6">
                <div className="text-white">
                  <h2 className="text-2xl font-bold">¡Dúo Dinámico!</h2>
-                 <p className="text-sm">2 Pizzas Medianas por $ 8000</p>
+                 <p className="text-sm">2 Pizzas Medianas por $8000</p>
                </div>
                 <Image
                   src="https://placehold.co/100x100.png"
@@ -83,7 +83,7 @@ export default function HomeClient({ products }: HomeClientProps) {
           </div>
         </section>
 
-        <Recommendations />
+        <Recommendations products={products} />
 
         <section>
           <h2 className="text-xl font-bold mb-4 text-left">

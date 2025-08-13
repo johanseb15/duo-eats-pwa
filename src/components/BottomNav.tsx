@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, ShoppingCart, User, ClipboardList } from 'lucide-react';
+import { Home, ShoppingCart, User, ClipboardList, Utensils } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/store/cart';
 import { useEffect, useState } from 'react';
@@ -22,7 +22,7 @@ export function BottomNav() {
   const itemCount = isClient ? items.reduce((sum, item) => sum + item.quantity, 0) : 0;
 
   const navItems = [
-    { href: '/', icon: Home, label: 'Home' },
+    { href: '/', icon: Utensils, label: 'Home' },
     { href: '/orders', icon: ClipboardList, label: 'Orders' },
     { href: '/cart', icon: ShoppingCart, label: 'Cart', badge: itemCount },
     { href: user ? '/profile' : '/auth/signin', icon: User, label: 'Profile' },
@@ -44,7 +44,7 @@ export function BottomNav() {
             >
               <div className="relative">
                 <Icon className={cn("h-7 w-7 transition-transform duration-300", isActive && "scale-110 -translate-y-1")} />
-                {badge && badge > 0 ? (
+                {badge !== undefined && badge > 0 ? (
                   <span className="absolute -top-2 -right-3 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
                     {badge}
                   </span>
