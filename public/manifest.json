@@ -1,15 +1,14 @@
+
 {
   "name": "Dúo Eats",
   "short_name": "Dúo Eats",
-  "description": "Sabores intensos.",
+  "description": "Sabores intensos para compartir. El mejor delivery de Córdoba.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F5F5DC",
   "theme_color": "#FF7F50",
   "orientation": "portrait-primary",
-  "id": "/?source=pwa",
-  "scope": "/",
-  "lang": "es-PE",
+  "id": "/?utm_source=pwa",
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
@@ -53,22 +52,21 @@
       "type": "image/png"
     }
   ],
+  "categories": ["food", "delivery", "restaurant"],
   "screenshots": [
     {
-      "src": "/screenshots/screenshot1.png",
-      "type": "image/png",
+      "src": "https://placehold.co/1080x1920.png",
       "sizes": "1080x1920",
-      "form_factor": "narrow"
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Home Screen"
     },
     {
-      "src": "/screenshots/screenshot2.png",
+      "src": "https://placehold.co/1920x1080.png",
+      "sizes": "1920x1080",
       "type": "image/png",
-      "sizes": "1080x1920",
-      "form_factor": "narrow"
+      "form_factor": "wide",
+      "label": "Product Page"
     }
-  ],
-  "categories": [
-    "food",
-    "restaurant"
   ]
 }
