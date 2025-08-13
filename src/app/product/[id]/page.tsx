@@ -206,7 +206,7 @@ export default function ProductPage() {
       title: '¡Añadido al carrito!',
       description: `${product.name} está ahora en tu carrito.`,
     });
-    router.back();
+    router.push('/');
   };
 
   return (
