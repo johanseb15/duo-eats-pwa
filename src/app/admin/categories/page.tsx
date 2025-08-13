@@ -78,9 +78,15 @@ export default function AdminCategoriesPage() {
 
   const loadCategories = async () => {
     setLoading(true);
-    const allCategories = await getCategories();
-    setCategories(allCategories);
-    setLoading(false);
+    try {
+        const allCategories = await getCategories();
+        setCategories(allCategories);
+    } catch (error) {
+        console.error("Failed to load categories:", error);
+        toast({ title: "Error", description: "No se pudieron cargar las categorías.", variant: "destructive" });
+    } finally {
+        setLoading(false);
+    }
   };
 
   useEffect(() => {

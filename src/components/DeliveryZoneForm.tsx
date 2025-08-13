@@ -29,7 +29,7 @@ const formSchema = z.object({
 });
 
 interface DeliveryZoneFormProps {
-  onFormSubmit: () => void;
+  onFormSubmit: () => Promise<void>;
   zone?: DeliveryZone | null;
 }
 
@@ -58,7 +58,7 @@ export function DeliveryZoneForm({ onFormSubmit, zone }: DeliveryZoneFormProps) 
         cost: 0,
        });
     }
-  }, [zone, form]);
+  }, [zone, form.reset]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
@@ -68,19 +68,18 @@ export function DeliveryZoneForm({ onFormSubmit, zone }: DeliveryZoneFormProps) 
       cost: values.cost,
     };
 
-    let result;
-    if (zone) {
-       result = await updateDeliveryZone(zone.id, zoneData);
-    } else {
-       result = await addDeliveryZone(zoneData);
+    try {
+        if (zone) {
+           await updateDeliveryZone(zone.id, zoneData);
+        } else {
+           await addDeliveryZone(zoneData);
+        }
+        await onFormSubmit();
+    } catch (error) {
+        console.error('Failed to submit delivery zone', error);
+    } finally {
+        setIsSubmitting(false);
     }
-
-    if (result.success) {
-      onFormSubmit();
-    } else {
-      console.error('Failed to submit delivery zone');
-    }
-    setIsSubmitting(false);
   }
 
   return (

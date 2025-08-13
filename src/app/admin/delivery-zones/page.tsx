@@ -68,23 +68,29 @@ export default function AdminDeliveryZonesPage() {
 
   const loadZones = async () => {
     setLoading(true);
-    const allZones = await getDeliveryZones();
-    setZones(allZones);
-    setLoading(false);
+    try {
+        const allZones = await getDeliveryZones();
+        setZones(allZones);
+    } catch (error) {
+        console.error("Failed to load delivery zones:", error);
+        toast({ title: "Error", description: "No se pudieron cargar las zonas de entrega.", variant: "destructive" });
+    } finally {
+        setLoading(false);
+    }
   };
 
   useEffect(() => {
     loadZones();
   }, []);
 
-  const handleFormSubmit = () => {
+  const handleFormSubmit = async () => {
     setIsFormOpen(false);
     toast({
       title: selectedZone ? "Zona de entrega actualizada" : "Zona de entrega añadida",
       description: `La zona se ha ${selectedZone ? 'actualizado' : 'guardado'} correctamente.`,
     });
     setSelectedZone(null);
-    loadZones();
+    await loadZones();
   }
   
   const handleEditClick = (zone: DeliveryZone) => {
@@ -105,7 +111,7 @@ export default function AdminDeliveryZonesPage() {
         title: "Zona eliminada",
         description: "La zona de entrega ha sido eliminada.",
       });
-      loadZones();
+      await loadZones();
     } else {
        toast({
         title: "Error",

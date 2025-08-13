@@ -40,7 +40,7 @@ const formSchema = z.object({
 });
 
 interface PromotionFormProps {
-  onPromotionSubmit: () => void;
+  onPromotionSubmit: () => Promise<void>;
   promotion?: Promotion | null;
 }
 
@@ -109,19 +109,18 @@ export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormPro
       aiHint: values.aiHint || values.title.toLowerCase().split(' ').slice(0, 2).join(' '),
     };
 
-    let result;
-    if (promotion) {
-       result = await updatePromotion(promotion.id, promotionData);
-    } else {
-       result = await addPromotion(promotionData);
+    try {
+        if (promotion) {
+           await updatePromotion(promotion.id, promotionData);
+        } else {
+           await addPromotion(promotionData);
+        }
+        await onPromotionSubmit();
+    } catch (error) {
+        console.error('Failed to submit promotion', error);
+    } finally {
+        setIsSubmitting(false);
     }
-
-    if (result.success) {
-      onPromotionSubmit();
-    } else {
-      console.error('Failed to submit promotion');
-    }
-    setIsSubmitting(false);
   }
 
   return (

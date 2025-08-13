@@ -34,7 +34,7 @@ const formSchema = z.object({
 });
 
 interface CategoryFormProps {
-  onSubmitSuccess: () => void;
+  onSubmitSuccess: () => Promise<void>;
   category?: ProductCategoryData | null;
 }
 
@@ -65,7 +65,7 @@ export function CategoryForm({ onSubmitSuccess, category }: CategoryFormProps) {
         icon: 'Package',
        });
     }
-  }, [category, form]);
+  }, [category, form.reset]);
 
   const handleSuggestIcon = () => {
     const categoryName = form.getValues('name');
@@ -94,7 +94,7 @@ export function CategoryForm({ onSubmitSuccess, category }: CategoryFormProps) {
         } else {
             await addCategory(categoryData);
         }
-        onSubmitSuccess();
+        await onSubmitSuccess();
     } catch (error) {
       console.error('Failed to submit category', error);
       // Optionally, show an error toast to the user

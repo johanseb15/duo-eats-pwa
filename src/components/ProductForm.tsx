@@ -48,7 +48,7 @@ const formSchema = z.object({
 });
 
 interface ProductFormProps {
-  onProductSubmit: () => void;
+  onProductSubmit: () => Promise<void>;
   product?: Product | null;
 }
 
@@ -83,7 +83,6 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
     },
   });
 
-  // This effect should only run when the `product` prop changes, or on initial load.
   useEffect(() => {
     if (product) {
       form.reset({
@@ -93,7 +92,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
         image: product.image,
         aiHint: product.aiHint,
         category: product.category,
-      })
+      });
     } else {
        form.reset({
         name: '',
@@ -129,19 +128,18 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
       aiHint: values.aiHint || values.name.toLowerCase().split(' ').slice(0, 2).join(' '),
     };
 
-    let result;
-    if (product) {
-       result = await updateProduct(product.id, productData);
-    } else {
-       result = await addProduct(productData);
+    try {
+        if (product) {
+           await updateProduct(product.id, productData);
+        } else {
+           await addProduct(productData);
+        }
+        await onProductSubmit();
+    } catch (error) {
+        console.error('Failed to submit product', error);
+    } finally {
+        setIsSubmitting(false);
     }
-
-    if (result.success) {
-      onProductSubmit();
-    } else {
-      console.error('Failed to submit product');
-    }
-    setIsSubmitting(false);
   }
 
   return (

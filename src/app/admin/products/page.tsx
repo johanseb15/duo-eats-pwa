@@ -81,9 +81,15 @@ export default function AdminProductsPage() {
 
   const loadProducts = async () => {
     setLoading(true);
-    const allProducts = await getProducts();
-    setProducts(allProducts);
-    setLoading(false);
+    try {
+        const allProducts = await getProducts();
+        setProducts(allProducts);
+    } catch (error) {
+        console.error("Failed to load products:", error);
+        toast({ title: "Error", description: "No se pudieron cargar los productos.", variant: "destructive" });
+    } finally {
+        setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -97,7 +103,7 @@ export default function AdminProductsPage() {
       description: `El producto se ha ${selectedProduct ? 'actualizado' : 'guardado'} correctamente.`,
     });
     setSelectedProduct(null);
-    await loadProducts(); // Refresh the list
+    await loadProducts();
   }
   
   const handleEditClick = (product: Product) => {

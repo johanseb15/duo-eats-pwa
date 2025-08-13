@@ -72,9 +72,15 @@ export default function AdminPromotionsPage() {
 
   const loadPromotions = async () => {
     setLoading(true);
-    const allPromotions = await getPromotions();
-    setPromotions(allPromotions);
-    setLoading(false);
+    try {
+        const allPromotions = await getPromotions();
+        setPromotions(allPromotions);
+    } catch (error) {
+        console.error("Failed to load promotions:", error);
+        toast({ title: "Error", description: "No se pudieron cargar las promociones.", variant: "destructive" });
+    } finally {
+        setLoading(false);
+    }
   };
 
   useEffect(() => {
