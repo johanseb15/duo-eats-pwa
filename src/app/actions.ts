@@ -60,7 +60,7 @@ export async function fetchRecommendations() {
   } catch (error) {
     console.error('Error fetching recommendations:', error);
     // Fallback recommendations
-    return ['Spicy Veggie Pizza', 'Chilli Paneer', 'Gobi Manchurian'];
+    return ['Pizza de Muzzarella', 'Empanadas de Carne', 'Flan con Dulce de Leche'];
   }
 }
 

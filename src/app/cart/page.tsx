@@ -165,7 +165,7 @@ export default function CartPage() {
 
 
   const sendWhatsApp = (orderId?: string, name?: string, address?: string) => {
-    const phone = '5493511234567'; // Replace with the restaurant's number
+    const phone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '549111234567';
     let message = `¡Hola! Quisiera hacer el siguiente pedido:\n`;
     if (orderId) {
       message += `\n*N° de Pedido: ${orderId.slice(0, 6)}*\n`;
@@ -347,7 +347,3 @@ export default function CartPage() {
     </div>
   );
 }
-
-    
-
-    
