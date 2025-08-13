@@ -13,6 +13,7 @@ import {
   User,
   LogOut,
   Shield,
+  UserCog
 } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 
@@ -24,9 +25,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { auth } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 
+const superAdminUids = (process.env.NEXT_PUBLIC_SUPERADMIN_UIDS || "").split(',');
+
 export default function ProfilePage() {
   const router = useRouter();
   const { user, isAdmin, loading } = useAuth();
+  
+  // A super admin is also an admin
+  const isSuperAdmin = user ? superAdminUids.includes(user.uid) : false;
 
   useEffect(() => {
     if (!loading && !user) {
@@ -117,6 +123,15 @@ export default function ProfilePage() {
                       <Shield className="w-6 h-6 mr-4 text-blue-400" />
                       <span className="flex-grow font-semibold text-blue-300">Panel de Administración</span>
                       <ChevronRight className="w-5 h-5 text-blue-400" />
+                  </div>
+              </Link>
+            )}
+             {isSuperAdmin && (
+               <Link href="/superadmin">
+                  <div className="flex items-center p-4 bg-purple-500/20 backdrop-blur-xl rounded-xl shadow-sm hover:bg-purple-500/40 transition-all duration-200 hover:scale-105">
+                      <UserCog className="w-6 h-6 mr-4 text-purple-400" />
+                      <span className="flex-grow font-semibold text-purple-300">Super Admin</span>
+                      <ChevronRight className="w-5 h-5 text-purple-400" />
                   </div>
               </Link>
             )}

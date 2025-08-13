@@ -6,6 +6,28 @@ import { db } from '@/lib/firebase';
 import type { Order, Product } from '@/lib/types';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
+import { getAuth } from 'firebase-admin/auth';
+import { adminApp } from '@/lib/firebase-admin';
+
+
+export async function fetchAllUsers() {
+    try {
+        const auth = getAuth(adminApp);
+        const userRecords = await auth.listUsers();
+        return userRecords.users.map(user => ({
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+        }));
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        // This can happen if the backend service account doesn't have permissions
+        // Or if the environment variables are not set on the server
+        return [];
+    }
+}
+
 
 export async function fetchRecommendations() {
   try {
