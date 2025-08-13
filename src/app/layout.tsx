@@ -20,6 +20,7 @@ const fontPtSans = PT_Sans({
 export const metadata: Metadata = {
   title: 'Dúo Eats',
   description: 'Sabores intensos.',
+  manifest: '/manifest.json',
 };
 
 export const viewport: Viewport = {
@@ -32,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning>
       <body
         className={cn(
           'min-h-screen bg-background font-pt-sans antialiased',
