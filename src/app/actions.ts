@@ -12,6 +12,10 @@ import { adminApp } from '@/lib/firebase-admin';
 
 export async function fetchAllUsers() {
     try {
+        if (!adminApp) {
+          console.log("Admin SDK not initialized. Cannot fetch users.");
+          return [];
+        }
         const auth = getAuth(adminApp);
         const userRecords = await auth.listUsers();
         return userRecords.users.map(user => ({
