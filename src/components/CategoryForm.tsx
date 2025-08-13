@@ -15,9 +15,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { addCategory, updateCategory, type CategoryInput } from '@/app/actions';
-import { useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { addCategory, updateCategory, generateIconSuggestion, type CategoryInput } from '@/app/actions';
+import { useEffect, useState, useTransition } from 'react';
+import { Loader2, Wand2 } from 'lucide-react';
 import type { ProductCategoryData } from '@/lib/types';
 import * as LucideIcons from 'lucide-react';
 
@@ -40,6 +40,7 @@ interface CategoryFormProps {
 
 export function CategoryForm({ onCategorySubmit, category }: CategoryFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuggesting, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -65,6 +66,18 @@ export function CategoryForm({ onCategorySubmit, category }: CategoryFormProps) 
        });
     }
   }, [category, form]);
+
+  const handleSuggestIcon = () => {
+    const categoryName = form.getValues('name');
+    if (!categoryName) return;
+
+    startTransition(async () => {
+      const suggestion = await generateIconSuggestion(categoryName);
+      if (suggestion && (LucideIcons as any)[suggestion]) {
+        form.setValue('icon', suggestion, { shouldValidate: true });
+      }
+    });
+  }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
@@ -99,13 +112,18 @@ export function CategoryForm({ onCategorySubmit, category }: CategoryFormProps) 
           render={({ field }) => (
             <FormItem>
               <FormLabel>Nombre de la Categoría</FormLabel>
-              <FormControl>
-                <Input placeholder="Ej: Platos Fuertes" {...field} onChange={(e) => {
-                  field.onChange(e);
-                  const slug = e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-                  form.setValue('slug', slug);
-                }}/>
-              </FormControl>
+                <div className="flex gap-2 items-center">
+                    <FormControl>
+                        <Input placeholder="Ej: Platos Fuertes" {...field} onChange={(e) => {
+                        field.onChange(e);
+                        const slug = e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                        form.setValue('slug', slug);
+                        }}/>
+                    </FormControl>
+                    <Button type="button" variant="outline" size="icon" onClick={handleSuggestIcon} disabled={isSuggesting}>
+                        {isSuggesting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                    </Button>
+                </div>
               <FormMessage />
             </FormItem>
           )}
@@ -133,7 +151,7 @@ export function CategoryForm({ onCategorySubmit, category }: CategoryFormProps) 
                 <Input placeholder="Ej: Beef" {...field} />
               </FormControl>
                <FormDescription>
-                Busca un nombre de ícono en <a href="https://lucide.dev/icons/" target="_blank" rel="noopener noreferrer" className="underline">lucide.dev</a>.
+                Busca un nombre de ícono en <a href="https://lucide.dev/icons/" target="_blank" rel="noopener noreferrer" className="underline">lucide.dev</a> o usa el sugeridor de IA.
               </FormDescription>
               <FormMessage />
             </FormItem>

@@ -2,6 +2,7 @@
 'use server';
 
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommendations';
+import { suggestCategoryIcon } from '@/ai/flows/suggest-category-icon';
 import { db } from '@/lib/firebase';
 import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone } from '@/lib/types';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc } from 'firebase/firestore';
@@ -63,6 +64,17 @@ export async function fetchRecommendations() {
     return ['Pizza de Muzzarella', 'Empanadas de Carne', 'Flan con Dulce de Leche'];
   }
 }
+
+export async function generateIconSuggestion(categoryName: string): Promise<string> {
+    try {
+        const result = await suggestCategoryIcon({ categoryName });
+        return result.iconName;
+    } catch (error) {
+        console.error('Error suggesting icon:', error);
+        return 'Package'; // Fallback icon
+    }
+}
+
 
 interface CreateOrderInput {
   userId: string;
