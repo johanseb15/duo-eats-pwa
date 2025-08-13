@@ -26,12 +26,13 @@ import { auth } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const superAdminUids = (process.env.NEXT_PUBLIC_SUPERADMIN_UIDS || "").split(',');
+const adminUids = (process.env.NEXT_PUBLIC_ADMIN_UIDS || "").split(',');
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, isAdmin, loading } = useAuth();
+  const { user, loading } = useAuth();
   
-  // A super admin is also an admin
+  const isAdmin = user ? adminUids.includes(user.uid) : false;
   const isSuperAdmin = user ? superAdminUids.includes(user.uid) : false;
 
   useEffect(() => {
