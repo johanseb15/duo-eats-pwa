@@ -2,7 +2,7 @@
 'use client';
 
 import Image from 'next/image';
-import { notFound, useRouter } from 'next/navigation';
+import { notFound, useRouter, useParams } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/store/cart';
@@ -20,19 +20,24 @@ import { Skeleton } from '@/components/ui/skeleton';
 const currentCurrency: Currency = 'ARS';
 const currencySymbol = '$';
 
-export default function ProductPage({ params }: { params: { id: string } }) {
+export default function ProductPage() {
   const router = useRouter();
+  const params = useParams();
   const { addToCart } = useCart();
   const { toast } = useToast();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: string }>({});
+  
+  const productId = Array.isArray(params.id) ? params.id[0] : params.id;
 
   useEffect(() => {
+    if (!productId) return;
+
     const fetchProduct = async () => {
       setLoading(true);
-      const docRef = doc(db, 'products', params.id);
+      const docRef = doc(db, 'products', productId);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
@@ -53,7 +58,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     };
 
     fetchProduct();
-  }, [params.id]);
+  }, [productId]);
 
 
   const finalPrice = useMemo(() => {
@@ -84,8 +89,10 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             <Skeleton className="h-5 w-full" />
             <Skeleton className="h-12 w-1/2 mt-6" />
          </div>
-         <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl border-t">
-            <Skeleton className="h-[52px] w-full rounded-full" />
+         <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl border-t md:static md:border-0">
+            <div className='container mx-auto px-0'>
+                <Skeleton className="h-[52px] w-full rounded-full" />
+            </div>
          </div>
        </div>
     );
