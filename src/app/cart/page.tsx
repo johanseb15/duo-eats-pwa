@@ -11,7 +11,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Minus, Plus, Trash2, ShoppingCart, Loader2 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Currency, CartItem } from '@/lib/types';
 import { useAuth } from '@/hooks/useAuth';
@@ -60,12 +60,41 @@ export default function CartPage() {
   }, []);
 
 
-  const subtotal = items.reduce(
-    (acc, item) => acc + item.finalPrice * item.quantity,
-    0
-  );
+  const { subtotal, duoDinamicoDiscount, finalSubtotal } = useMemo(() => {
+    const rawSubtotal = items.reduce(
+      (acc, item) => acc + item.finalPrice * item.quantity,
+      0
+    );
+
+    // Duo Dinamico Promo Logic
+    const promoItemName = 'Pizza de Muzzarella';
+    const promoItemSize = 'Individual';
+    const promoPrice = 8000.00;
+    
+    let discount = 0;
+    const promoItems = items.filter(
+        item => item.name === promoItemName && item.selectedOptions?.['Tamaño'] === promoItemSize
+    );
+
+    if (promoItems.length > 0) {
+        const promoItem = promoItems[0];
+        const regularPrice = promoItem.price[currentCurrency];
+        const quantity = promoItem.quantity;
+        const numberOfDuos = Math.floor(quantity / 2);
+
+        if (numberOfDuos > 0) {
+            const originalPriceForDuos = numberOfDuos * 2 * regularPrice;
+            const promoPriceForDuos = numberOfDuos * promoPrice;
+            discount = originalPriceForDuos - promoPriceForDuos;
+        }
+    }
+    
+    const finalSubtotal = rawSubtotal - discount;
+
+    return { subtotal: rawSubtotal, duoDinamicoDiscount: discount, finalSubtotal };
+  }, [items]);
   
-  const total = subtotal + deliveryCost;
+  const total = finalSubtotal + deliveryCost;
 
   const handleZoneChange = (zoneName: string) => {
     const zone = deliveryZones.find(z => z.name === zoneName);
@@ -92,7 +121,7 @@ export default function CartPage() {
         userName: user.displayName || 'N/A',
         items: items,
         total: total,
-        subtotal: subtotal,
+        subtotal: finalSubtotal,
         deliveryCost: deliveryCost,
       };
       const result = await createOrder(orderInput);
@@ -157,7 +186,14 @@ export default function CartPage() {
           const optionsString = i.selectedOptions && Object.values(i.selectedOptions).length > 0 ? ` (${Object.values(i.selectedOptions).join(', ')})` : '';
           return `* ${i.name}${optionsString} x ${i.quantity} (${currencySymbol}${(i.finalPrice * i.quantity).toFixed(2)})`
         })
-        .join('\n')}\n\n*Subtotal: ${currencySymbol}${subtotal.toFixed(2)}*\n*Envío: ${currencySymbol}${deliveryCost.toFixed(2)}*\n*Total: ${currencySymbol}${total.toFixed(2)}*`
+        .join('\n')}\n`
+
+    if (duoDinamicoDiscount > 0) {
+        message += `\n*Subtotal: ${currencySymbol}${subtotal.toFixed(2)}*`;
+        message += `\n*Descuento Dúo Dinámico: -${currencySymbol}${duoDinamicoDiscount.toFixed(2)}*`;
+    }
+    
+    message += `\n*Subtotal Final: ${currencySymbol}${finalSubtotal.toFixed(2)}*\n*Envío: ${currencySymbol}${deliveryCost.toFixed(2)}*\n*Total: ${currencySymbol}${total.toFixed(2)}*`
     
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
@@ -282,6 +318,12 @@ export default function CartPage() {
                     <span>Subtotal</span>
                     <span>{currencySymbol} {subtotal.toFixed(2)}</span>
                   </div>
+                  {duoDinamicoDiscount > 0 && (
+                     <div className="flex justify-between text-primary font-semibold">
+                      <span>Descuento Dúo Dinámico</span>
+                      <span>-{currencySymbol} {duoDinamicoDiscount.toFixed(2)}</span>
+                    </div>
+                  )}
                    <div className="flex justify-between text-muted-foreground">
                     <span>Envío</span>
                     <span>{currencySymbol} {deliveryCost.toFixed(2)}</span>
@@ -305,5 +347,7 @@ export default function CartPage() {
     </div>
   );
 }
+
+    
 
     
