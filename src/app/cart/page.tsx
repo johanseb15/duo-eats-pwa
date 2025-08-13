@@ -265,7 +265,7 @@ export default function CartPage() {
             </Button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 pb-32 md:pb-0">
               {items.map((item) => {
                 const cartItemId = getCartItemId(item);
                 return (
