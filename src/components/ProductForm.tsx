@@ -19,10 +19,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { addProduct, updateProduct, type ProductInput } from '@/app/actions';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import type { Currency, Prices, Product } from '@/lib/types';
-
+import type { Currency, Prices, Product, ProductCategory } from '@/lib/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const currentCurrency: Currency = 'ARS';
+const categories: ProductCategory[] = ['Entradas', 'Platos Fuertes', 'Bebidas', 'Postres'];
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -33,6 +34,9 @@ const formSchema = z.object({
   }),
   price: z.coerce.number().positive({
     message: 'El precio debe ser un número positivo.',
+  }),
+  category: z.enum(categories, {
+    required_error: "Debes seleccionar una categoría.",
   }),
   image: z.string().url({
     message: 'Por favor, introduce una URL de imagen válida.',
@@ -58,6 +62,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
       price: 0,
       image: '',
       aiHint: '',
+      category: 'Platos Fuertes',
     },
   });
 
@@ -69,6 +74,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
         price: product.price[currentCurrency],
         image: product.image,
         aiHint: product.aiHint,
+        category: product.category,
       })
     } else {
        form.reset({
@@ -77,6 +83,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
         price: 0,
         image: '',
         aiHint: '',
+        category: 'Platos Fuertes'
        });
     }
   }, [product, form]);
@@ -99,6 +106,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
       name: values.name,
       description: values.description,
       price: prices as Prices,
+      category: values.category,
       image: values.image || `https://placehold.co/400x225.png`,
       aiHint: values.aiHint || values.name.toLowerCase().split(' ').slice(0, 2).join(' '),
     };
@@ -151,19 +159,43 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="price"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Precio (en {currentCurrency})</FormLabel>
-              <FormControl>
-                <Input type="number" step="0.01" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="flex gap-4">
+          <FormField
+            control={form.control}
+            name="price"
+            render={({ field }) => (
+              <FormItem className='flex-1'>
+                <FormLabel>Precio (en {currentCurrency})</FormLabel>
+                <FormControl>
+                  <Input type="number" step="0.01" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+           <FormField
+            control={form.control}
+            name="category"
+            render={({ field }) => (
+              <FormItem className='flex-1'>
+                <FormLabel>Categoría</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona una categoría" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {categories.map(cat => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         <FormField
           control={form.control}
           name="image"

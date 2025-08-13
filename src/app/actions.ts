@@ -144,7 +144,11 @@ export async function updateProduct(productId: string, productData: ProductInput
     await updateDoc(productRef, productData);
     revalidatePath('/admin/products');
     revalidatePath(`/product/${productId}`);
-     revalidatePath('/');
+    revalidatePath('/');
+    revalidatePath('/category/entradas');
+    revalidatePath('/category/platos-fuertes');
+    revalidatePath('/category/bebidas');
+    revalidatePath('/category/postres');
     return { success: true };
   } catch (error) {
     console.error('Error updating product:', error);
@@ -157,7 +161,11 @@ export async function deleteProduct(productId: string) {
     const productRef = doc(db, 'products', productId);
     await deleteDoc(productRef);
     revalidatePath('/admin/products');
-     revalidatePath('/');
+    revalidatePath('/');
+    revalidatePath('/category/entradas');
+    revalidatePath('/category/platos-fuertes');
+    revalidatePath('/category/bebidas');
+    revalidatePath('/category/postres');
     return { success: true };
   } catch (error) {
     console.error('Error deleting product:', error);

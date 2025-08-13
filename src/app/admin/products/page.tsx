@@ -44,6 +44,7 @@ import {
 import { ProductForm } from '@/components/ProductForm';
 import { useToast } from '@/hooks/use-toast';
 import { deleteProduct } from '@/app/actions';
+import { Badge } from '@/components/ui/badge';
 
 async function getProducts(): Promise<Product[]> {
   const productsCol = collection(db, 'products');
@@ -57,6 +58,7 @@ async function getProducts(): Promise<Product[]> {
       price: data.price,
       image: data.image,
       aiHint: data.aiHint,
+      category: data.category,
       options: data.options,
     } as Product;
   });
@@ -151,7 +153,7 @@ export default function AdminProductsPage() {
           <DialogTrigger asChild>
             <Button><PlusCircle className="mr-2 h-4 w-4" /> Añadir Producto</Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-xl">
             <DialogHeader>
               <DialogTitle>{selectedProduct ? 'Editar Producto' : 'Añadir Nuevo Producto'}</DialogTitle>
               <DialogDescription>
@@ -171,6 +173,7 @@ export default function AdminProductsPage() {
             <TableRow>
               <TableHead className="w-[80px]">Imagen</TableHead>
               <TableHead>Nombre</TableHead>
+              <TableHead>Categoría</TableHead>
               <TableHead>Precio Base</TableHead>
               <TableHead className="text-right w-[100px]">Acciones</TableHead>
             </TableRow>
@@ -188,6 +191,9 @@ export default function AdminProductsPage() {
                   />
                 </TableCell>
                 <TableCell className="font-medium">{product.name}</TableCell>
+                <TableCell>
+                  <Badge variant="secondary">{product.category}</Badge>
+                </TableCell>
                 <TableCell>{currencySymbol}{product.price[currentCurrency].toFixed(2)}</TableCell>
                 <TableCell className="text-right">
                    <DropdownMenu>
@@ -234,4 +240,3 @@ export default function AdminProductsPage() {
     </div>
   );
 }
-

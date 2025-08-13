@@ -4,9 +4,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Soup, Beef, GlassWater, IceCream } from 'lucide-react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query as firestoreQuery } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Product } from '@/lib/types';
+import type { Product, ProductCategory } from '@/lib/types';
 
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
@@ -29,7 +29,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 async function getProducts(): Promise<Product[]> {
   const productsCol = collection(db, 'products');
-  const productsSnapshot = await getDocs(productsCol);
+  const q = firestoreQuery(productsCol, orderBy('name'));
+  const productsSnapshot = await getDocs(q);
   const productList = productsSnapshot.docs.map(doc => {
     const data = doc.data();
     return {
@@ -39,6 +40,7 @@ async function getProducts(): Promise<Product[]> {
       price: data.price,
       image: data.image,
       aiHint: data.aiHint,
+      category: data.category,
       options: data.options,
     } as Product;
   });
@@ -60,11 +62,11 @@ export default function Home() {
     fetchProducts();
   }, []);
 
-  const categories = [
-    { name: 'Entradas', icon: Soup },
-    { name: 'Platos Fuertes', icon: Beef },
-    { name: 'Bebidas', icon: GlassWater },
-    { name: 'Postres', icon: IceCream },
+  const categories: { name: ProductCategory, icon: React.ElementType, slug: string }[] = [
+    { name: 'Entradas', icon: Soup, slug: 'entradas' },
+    { name: 'Platos Fuertes', icon: Beef, slug: 'platos-fuertes' },
+    { name: 'Bebidas', icon: GlassWater, slug: 'bebidas' },
+    { name: 'Postres', icon: IceCream, slug: 'postres' },
   ];
   
   const welcomeName = user ? user.displayName?.split(' ')[0] : 'invitado';
@@ -112,7 +114,7 @@ export default function Home() {
           </h2>
           <div className="grid grid-cols-4 gap-4 text-center">
             {categories.map((category) => (
-              <Link href="#" key={category.name} className="flex flex-col items-center gap-2 group">
+              <Link href={`/category/${category.slug}`} key={category.name} className="flex flex-col items-center gap-2 group">
                 <div className="w-20 h-20 bg-card/80 backdrop-blur-xl rounded-2xl shadow-md flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
                   <category.icon className="h-9 w-9 text-primary" />
                 </div>
@@ -126,7 +128,7 @@ export default function Home() {
 
         <section>
           <h2 className="text-xl font-bold mb-4 text-left">
-            Más Populares
+            Menú Completo
           </h2>
            {loading ? (
              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
