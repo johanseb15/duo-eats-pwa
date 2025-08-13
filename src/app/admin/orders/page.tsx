@@ -53,16 +53,25 @@ export default function AdminOrdersPage() {
   const { toast } = useToast();
 
   const loadOrders = async () => {
-    setLoading(true);
-    const allOrders = await fetchAllOrders();
-    setOrders(allOrders);
-    setLoading(false);
+    if (!loading) setLoading(true);
+    try {
+        const allOrders = await fetchAllOrders();
+        setOrders(allOrders);
+    } catch (error) {
+        console.error("Failed to load orders:", error);
+        toast({
+            title: 'Error de Red',
+            description: 'No se pudieron cargar los pedidos. Revisa tu conexión.',
+            variant: 'destructive',
+        });
+    } finally {
+        setLoading(false);
+    }
   };
 
   useEffect(() => {
     loadOrders();
-    // Optional: set up polling to refresh orders periodically
-    const interval = setInterval(loadOrders, 30000); // refresh every 30 seconds
+    const interval = setInterval(loadOrders, 30000); 
     return () => clearInterval(interval);
   }, []);
 
@@ -73,7 +82,6 @@ export default function AdminOrdersPage() {
         title: 'Estado actualizado',
         description: `El pedido #${orderId.slice(0, 6)} ahora está ${newStatus}.`,
       });
-      // Update local state to reflect the change immediately
       setOrders(prevOrders =>
         prevOrders.map(order =>
           order.id === orderId ? { ...order, status: newStatus } : order
@@ -102,7 +110,7 @@ export default function AdminOrdersPage() {
     <>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Pedidos Recibidos</h2>
-        <Button onClick={loadOrders} disabled={loading} size="sm">Refrescar</Button>
+        <Button onClick={() => loadOrders()} disabled={loading} size="sm">Refrescar</Button>
       </div>
 
       {orders.length === 0 ? (

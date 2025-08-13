@@ -51,11 +51,20 @@ export default function OrdersPage() {
     
     if (user) {
       const getOrders = async () => {
-        // No set loading to true on subsequent fetches to avoid skeleton flicker
-        const userOrders = await fetchOrders(user.uid);
-        setOrders(userOrders);
-        if (loading) {
-          setLoading(false);
+        try {
+          const userOrders = await fetchOrders(user.uid);
+          setOrders(userOrders);
+        } catch (error) {
+          console.error("Failed to fetch user orders:", error);
+          toast({
+            title: 'Error de Red',
+            description: 'No se pudieron cargar tus pedidos. Revisa tu conexión.',
+            variant: 'destructive',
+          });
+        } finally {
+          if (loading) {
+            setLoading(false);
+          }
         }
       };
       
@@ -65,7 +74,7 @@ export default function OrdersPage() {
       
       return () => clearInterval(interval); // Cleanup on component unmount
     }
-  }, [user, authLoading, router, loading]);
+  }, [user, authLoading, router, loading, toast]);
 
   const handleReorder = (order: Order) => {
     order.items.forEach(item => {
