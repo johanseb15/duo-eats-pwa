@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { cn } from '@/lib/utils';
-import { ClipboardList, Package, Loader2, Megaphone } from 'lucide-react';
+import { ClipboardList, Package, Loader2, Megaphone, LayoutGrid } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
 
@@ -15,6 +15,7 @@ const adminNavItems = [
   { href: '/admin/orders', label: 'Pedidos', icon: ClipboardList },
   { href: '/admin/products', label: 'Productos', icon: Package },
   { href: '/admin/promotions', label: 'Promociones', icon: Megaphone },
+  { href: '/admin/categories', label: 'Categorías', icon: LayoutGrid },
 ];
 
 export default function AdminLayout({
@@ -59,13 +60,13 @@ export default function AdminLayout({
       <main className="flex-grow container mx-auto px-4 py-6">
         <h1 className="text-3xl font-bold mb-4">Panel de Administración</h1>
         <div className="border-b mb-6">
-            <nav className="flex space-x-4">
+            <nav className="flex space-x-4 overflow-x-auto pb-2">
                 {adminNavItems.map((item) => (
                     <Link
                         key={item.href}
                         href={item.href}
                         className={cn(
-                            'pb-2 px-1 border-b-2 font-medium',
+                            'pb-2 px-1 border-b-2 font-medium shrink-0',
                             pathname === item.href
                             ? 'border-primary text-primary'
                             : 'border-transparent text-muted-foreground hover:text-foreground'

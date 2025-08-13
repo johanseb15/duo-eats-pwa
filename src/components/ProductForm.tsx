@@ -19,11 +19,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { addProduct, updateProduct, type ProductInput } from '@/app/actions';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import type { Currency, Prices, Product, ProductCategory } from '@/lib/types';
+import type { Currency, Prices, Product, ProductCategoryData } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const currentCurrency: Currency = 'ARS';
-const categories: ProductCategory[] = ['Entradas', 'Platos Fuertes', 'Bebidas', 'Postres'];
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -35,7 +36,7 @@ const formSchema = z.object({
   price: z.coerce.number().positive({
     message: 'El precio debe ser un número positivo.',
   }),
-  category: z.enum(categories, {
+  category: z.string({
     required_error: "Debes seleccionar una categoría.",
   }),
   image: z.string().url({
@@ -53,6 +54,18 @@ interface ProductFormProps {
 
 export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [categories, setCategories] = useState<ProductCategoryData[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const categoriesCol = collection(db, 'categories');
+      const q = query(categoriesCol, orderBy('name'));
+      const snapshot = await getDocs(q);
+      const categoryList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductCategoryData));
+      setCategories(categoryList);
+    };
+    fetchCategories();
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -62,7 +75,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
       price: 0,
       image: '',
       aiHint: '',
-      category: 'Platos Fuertes',
+      category: '',
     },
   });
 
@@ -83,10 +96,10 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
         price: 0,
         image: '',
         aiHint: '',
-        category: 'Platos Fuertes'
+        category: categories.length > 0 ? categories[0].name : '',
        });
     }
-  }, [product, form]);
+  }, [product, form, categories]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
@@ -95,11 +108,10 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
       [currentCurrency]: values.price,
     };
     
-    // Add default prices for other currencies if needed
     if (currentCurrency === 'ARS') {
-      prices['USD'] = values.price / 1000; // Example conversion
+      prices['USD'] = values.price / 1000;
     } else {
-      prices['ARS'] = values.price * 1000; // Example conversion
+      prices['ARS'] = values.price * 1000;
     }
 
     const productData: ProductInput = {
@@ -121,7 +133,6 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
     if (result.success) {
       onProductSubmit();
     } else {
-      // Handle error, maybe show a toast
       console.error('Failed to submit product');
     }
     setIsSubmitting(false);
@@ -179,7 +190,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
             render={({ field }) => (
               <FormItem className='flex-1'>
                 <FormLabel>Categoría</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value} disabled={categories.length === 0}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona una categoría" />
@@ -187,7 +198,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
                   </FormControl>
                   <SelectContent>
                     {categories.map(cat => (
-                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

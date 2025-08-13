@@ -158,7 +158,8 @@ export default function CartPage() {
         description: 'Tu pedido será enviado a WhatsApp.',
       });
       clearCart();
-      router.push('/');
+      // Don't redirect for guests, let them stay on the page.
+      // They can close the whatsapp tab and come back.
       setIsProcessing(false);
     }
   };
@@ -347,5 +348,3 @@ export default function CartPage() {
     </div>
   );
 }
-
-    

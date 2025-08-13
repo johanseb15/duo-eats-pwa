@@ -14,7 +14,12 @@ export interface ProductOption {
   values: ProductOptionValue[];
 }
 
-export type ProductCategory = 'Entradas' | 'Platos Fuertes' | 'Bebidas' | 'Postres';
+export interface ProductCategoryData {
+    id: string;
+    name: string;
+    slug: string;
+    icon: string;
+}
 
 export interface Product {
   id: string;
@@ -23,7 +28,7 @@ export interface Product {
   price: Prices;
   image: string;
   aiHint: string;
-  category: ProductCategory;
+  category: string;
   options?: ProductOption[];
 }
 

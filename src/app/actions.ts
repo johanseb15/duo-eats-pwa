@@ -3,7 +3,7 @@
 
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommendations';
 import { db } from '@/lib/firebase';
-import type { Order, Product, Promotion } from '@/lib/types';
+import type { Order, Product, Promotion, ProductCategoryData } from '@/lib/types';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { getAuth } from 'firebase-admin/auth';
@@ -81,6 +81,8 @@ export async function createOrder(input: CreateOrderInput) {
       createdAt: serverTimestamp(),
     };
     const docRef = await addDoc(collection(db, 'orders'), orderData);
+    revalidatePath('/admin/orders');
+    revalidatePath('/orders');
     return { success: true, orderId: docRef.id };
   } catch (error) {
     console.error('Error creating order:', error);
@@ -137,6 +139,7 @@ export async function updateOrderStatus(orderId: string, status: Order['status']
     const orderRef = doc(db, 'orders', orderId);
     await updateDoc(orderRef, { status });
     revalidatePath('/admin/orders');
+    revalidatePath('/orders');
     return { success: true };
   } catch (error) {
     console.error('Error updating order status:', error);
@@ -166,6 +169,7 @@ export async function updateProduct(productId: string, productData: ProductInput
     revalidatePath('/admin/products');
     revalidatePath(`/product/${productId}`);
     revalidatePath('/');
+    revalidatePath('/category', 'layout');
     return { success: true };
   } catch (error) {
     console.error('Error updating product:', error);
@@ -179,6 +183,7 @@ export async function deleteProduct(productId: string) {
     await deleteDoc(productRef);
     revalidatePath('/admin/products');
     revalidatePath('/');
+    revalidatePath('/category', 'layout');
     return { success: true };
   } catch (error) {
     console.error('Error deleting product:', error);
@@ -225,5 +230,47 @@ export async function deletePromotion(promotionId: string) {
   } catch (error) {
     console.error('Error deleting promotion:', error);
     return { success: false, error: 'Failed to delete promotion' };
+  }
+}
+
+export type CategoryInput = Omit<ProductCategoryData, 'id'>;
+
+export async function addCategory(categoryData: CategoryInput) {
+  try {
+    const docRef = await addDoc(collection(db, 'categories'), categoryData);
+    revalidatePath('/admin/categories');
+    revalidatePath('/');
+    return { success: true, categoryId: docRef.id };
+  } catch (error) {
+    console.error('Error adding category:', error);
+    return { success: false, error: 'Failed to add category' };
+  }
+}
+
+export async function updateCategory(categoryId: string, categoryData: CategoryInput) {
+  try {
+    const categoryRef = doc(db, 'categories', categoryId);
+    await updateDoc(categoryRef, categoryData);
+    revalidatePath('/admin/categories');
+    revalidatePath('/');
+    revalidatePath('/category', 'layout');
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating category:', error);
+    return { success: false, error: 'Failed to update category' };
+  }
+}
+
+export async function deleteCategory(categoryId: string) {
+  try {
+    const categoryRef = doc(db, 'categories', categoryId);
+    await deleteDoc(categoryRef);
+    revalidatePath('/admin/categories');
+    revalidatePath('/');
+    revalidatePath('/category', 'layout');
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    return { success: false, error: 'Failed to delete category' };
   }
 }

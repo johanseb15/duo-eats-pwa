@@ -1,27 +1,16 @@
-
-'use client';
-
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Product, ProductCategory } from '@/lib/types';
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import type { Product, ProductCategoryData } from '@/lib/types';
+import { notFound } from 'next/navigation';
 
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { ProductCard } from '@/components/ProductCard';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Frown } from 'lucide-react';
+import Link from 'next/link';
 
-const categoryMap: Record<string, ProductCategory> = {
-  'entradas': 'Entradas',
-  'platos-fuertes': 'Platos Fuertes',
-  'bebidas': 'Bebidas',
-  'postres': 'Postres',
-};
-
-async function getProductsByCategory(category: ProductCategory): Promise<Product[]> {
+async function getProductsByCategory(category: string): Promise<Product[]> {
   const productsCol = collection(db, 'products');
   const q = query(productsCol, where('category', '==', category));
   const productsSnapshot = await getDocs(q);
@@ -41,28 +30,29 @@ async function getProductsByCategory(category: ProductCategory): Promise<Product
   return productList;
 }
 
-export default function CategoryPage() {
-  const router = useRouter();
-  const params = useParams();
-  const slug = params.slug as string;
-  const categoryName = categoryMap[slug];
+async function getCategoryBySlug(slug: string): Promise<ProductCategoryData | null> {
+    const categoriesCol = collection(db, 'categories');
+    const q = query(categoriesCol, where('slug', '==', slug));
+    const categorySnapshot = await getDocs(q);
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (categoryName) {
-      const fetchProducts = async () => {
-        setLoading(true);
-        const fetchedProducts = await getProductsByCategory(categoryName);
-        setProducts(fetchedProducts);
-        setLoading(false);
-      };
-      fetchProducts();
-    } else {
-        setLoading(false);
+    if (categorySnapshot.empty) {
+        return null;
     }
-  }, [categoryName]);
+
+    const doc = categorySnapshot.docs[0];
+    return { id: doc.id, ...doc.data() } as ProductCategoryData;
+}
+
+
+export default async function CategoryPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
+  const category = await getCategoryBySlug(slug);
+
+  if (!category) {
+    notFound();
+  }
+
+  const products = await getProductsByCategory(category.name);
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-28">
@@ -73,22 +63,18 @@ export default function CategoryPage() {
             variant="ghost"
             size="icon"
             className="absolute left-0 rounded-full"
-            onClick={() => router.push('/')}
+            asChild
           >
-            <ChevronLeft className="h-6 w-6" />
+            <Link href="/">
+              <ChevronLeft className="h-6 w-6" />
+            </Link>
           </Button>
           <h1 className="text-2xl font-bold text-center flex-grow">
-            {categoryName || 'Categoría no encontrada'}
+            {category.name}
           </h1>
         </div>
 
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Skeleton className="h-72 w-full rounded-3xl" />
-            <Skeleton className="h-72 w-full rounded-3xl" />
-            <Skeleton className="h-72 w-full rounded-3xl" />
-          </div>
-        ) : products.length > 0 ? (
+        {products.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
@@ -99,7 +85,7 @@ export default function CategoryPage() {
             <Frown className="mx-auto h-24 w-24 text-muted-foreground" />
             <h2 className="mt-6 text-2xl font-semibold">No hay productos aquí</h2>
             <p className="mt-2 text-muted-foreground">
-              Parece que aún no hay productos en la categoría "{categoryName}".
+              Parece que aún no hay productos en la categoría "{category.name}".
             </p>
           </div>
         )}
@@ -108,3 +94,6 @@ export default function CategoryPage() {
     </div>
   );
 }
+
+// Revalidate every 60 seconds
+export const revalidate = 60;
