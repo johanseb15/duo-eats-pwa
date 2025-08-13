@@ -7,11 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { cn } from '@/lib/utils';
-import { ClipboardList, Package, Loader2, Megaphone, LayoutGrid, Truck } from 'lucide-react';
+import { ClipboardList, Package, Loader2, Megaphone, LayoutGrid, Truck, LineChart } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
 
 const adminNavItems = [
+  { href: '/admin', label: 'Dashboard', icon: LineChart },
   { href: '/admin/orders', label: 'Pedidos', icon: ClipboardList },
   { href: '/admin/products', label: 'Productos', icon: Package },
   { href: '/admin/promotions', label: 'Promociones', icon: Megaphone },

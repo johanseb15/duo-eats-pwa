@@ -63,3 +63,23 @@ export interface DeliveryZone {
     name: string;
     cost: number;
 }
+
+// Analytics Types
+export interface ProductSale {
+  name: string;
+  total: number;
+}
+
+export interface OrderOverTime {
+    date: string;
+    orders: number;
+}
+
+export interface DashboardAnalytics {
+    totalRevenue: number;
+    totalOrders: number;
+    averageOrderValue: number;
+    recentOrders: Order[];
+    productSales: ProductSale[];
+    ordersOverTime: OrderOverTime[];
+}

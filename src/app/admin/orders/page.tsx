@@ -32,7 +32,7 @@ const orderStatuses: Order['status'][] = [
   'Cancelado',
 ];
 
-const getStatusVariant = (status: string) => {
+export const getStatusVariant = (status: string) => {
   switch (status) {
     case 'Entregado':
       return 'bg-green-500';
@@ -82,11 +82,7 @@ export default function AdminOrdersPage() {
         title: 'Estado actualizado',
         description: `El pedido #${orderId.slice(0, 6)} ahora está ${newStatus}.`,
       });
-      setOrders(prevOrders =>
-        prevOrders.map(order =>
-          order.id === orderId ? { ...order, status: newStatus } : order
-        )
-      );
+      await loadOrders();
     } else {
       toast({
         title: 'Error al actualizar',

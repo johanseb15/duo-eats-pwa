@@ -4,12 +4,13 @@
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommendations';
 import { suggestCategoryIcon } from '@/ai/flows/suggest-category-icon';
 import { db } from '@/lib/firebase';
-import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone } from '@/lib/types';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone, DashboardAnalytics, ProductSale, OrderOverTime } from '@/lib/types';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, limit } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { getAuth } from 'firebase-admin/auth';
 import { adminApp } from '@/lib/firebase-admin';
 import { auth } from '@/lib/firebase';
+import { subDays, format } from 'date-fns';
 
 
 export async function fetchAllUsers() {
@@ -28,8 +29,6 @@ export async function fetchAllUsers() {
         }));
     } catch (error) {
         console.error('Error fetching users:', error);
-        // This can happen if the backend service account doesn't have permissions
-        // Or if the environment variables are not set on the server
         return [];
     }
 }
@@ -44,23 +43,21 @@ export async function fetchRecommendations() {
       const userOrders = await fetchOrders(currentUser.uid);
       if (userOrders.length > 0) {
         const productNames = userOrders.flatMap(order => order.items.map(item => item.name));
-        userOrderHistory = [...new Set(productNames)]; // Get unique product names
+        userOrderHistory = [...new Set(productNames)];
       }
     }
 
-    // If no history, provide a generic one to get some recommendations
     if (userOrderHistory.length === 0) {
       return ['Pizza de Muzzarella', 'Empanadas de Carne', 'Flan con Dulce de Leche'];
     }
 
     const result = await getPersonalizedRecommendations({
       userOrderHistory: JSON.stringify(userOrderHistory),
-      userPreferences: '[]', // Preferences not implemented yet
+      userPreferences: '[]',
     });
     return result.recommendations;
   } catch (error) {
     console.error('Error fetching recommendations:', error);
-    // Fallback recommendations
     return ['Pizza de Muzzarella', 'Empanadas de Carne', 'Flan con Dulce de Leche'];
   }
 }
@@ -71,7 +68,7 @@ export async function generateIconSuggestion(categoryName: string): Promise<stri
         return result.iconName;
     } catch (error) {
         console.error('Error suggesting icon:', error);
-        return 'Package'; // Fallback icon
+        return 'Package';
     }
 }
 
@@ -95,6 +92,7 @@ export async function createOrder(input: CreateOrderInput) {
     const docRef = await addDoc(collection(db, 'orders'), orderData);
     revalidatePath('/admin/orders');
     revalidatePath('/orders');
+    revalidatePath('/admin');
     return { success: true, orderId: docRef.id };
   } catch (error) {
     console.error('Error creating order:', error);
@@ -152,6 +150,7 @@ export async function updateOrderStatus(orderId: string, status: Order['status']
     await updateDoc(orderRef, { status });
     revalidatePath('/admin/orders');
     revalidatePath('/orders');
+    revalidatePath('/admin');
     return { success: true };
   } catch (error) {
     console.error('Error updating order status:', error);
@@ -159,7 +158,6 @@ export async function updateOrderStatus(orderId: string, status: Order['status']
   }
 }
 
-// Omit 'id' and other read-only fields for creation/updates
 export type ProductInput = Omit<Product, 'id' | 'options'>; 
 
 export async function addProduct(productData: ProductInput) {
@@ -204,7 +202,6 @@ export async function deleteProduct(productId: string) {
 }
 
 
-// Omit 'id' and other read-only fields for creation/updates
 export type PromotionInput = Omit<Promotion, 'id'>;
 
 export async function addPromotion(promotionData: PromotionInput) {
@@ -324,5 +321,67 @@ export async function deleteDeliveryZone(zoneId: string) {
     } catch (error) {
         console.error('Error deleting delivery zone:', error);
         return { success: false, error: 'Failed to delete delivery zone' };
+    }
+}
+
+// Analytics Actions
+export async function fetchDashboardAnalytics(): Promise<DashboardAnalytics> {
+    try {
+        const allOrders = await fetchAllOrders();
+        const deliveredOrders = allOrders.filter(o => o.status === 'Entregado');
+        
+        const totalRevenue = deliveredOrders.reduce((sum, order) => sum + order.total, 0);
+        const totalOrders = allOrders.length;
+        const averageOrderValue = totalOrders > 0 ? totalRevenue / deliveredOrders.length : 0;
+        
+        const recentOrders = allOrders.slice(0, 5);
+
+        // Product Sales
+        const sales: { [key: string]: number } = {};
+        allOrders.forEach(order => {
+            order.items.forEach(item => {
+                sales[item.name] = (sales[item.name] || 0) + item.quantity;
+            });
+        });
+        const productSales: ProductSale[] = Object.entries(sales)
+            .map(([name, total]) => ({ name, total }))
+            .sort((a, b) => b.total - a.total)
+            .slice(0, 5);
+
+        // Orders over time (last 7 days)
+        const ordersByDate: { [key: string]: number } = {};
+        for (let i = 6; i >= 0; i--) {
+            const date = format(subDays(new Date(), i), 'MMM d');
+            ordersByDate[date] = 0;
+        }
+
+        allOrders.forEach(order => {
+            const date = format(new Date(order.createdAt), 'MMM d');
+            if (date in ordersByDate) {
+                ordersByDate[date]++;
+            }
+        });
+        const ordersOverTime: OrderOverTime[] = Object.entries(ordersByDate)
+            .map(([date, orders]) => ({ date, orders }));
+
+        return {
+            totalRevenue,
+            totalOrders,
+            averageOrderValue,
+            recentOrders,
+            productSales,
+            ordersOverTime
+        };
+
+    } catch (error) {
+        console.error("Error fetching dashboard analytics:", error);
+        return {
+            totalRevenue: 0,
+            totalOrders: 0,
+            averageOrderValue: 0,
+            recentOrders: [],
+            productSales: [],
+            ordersOverTime: []
+        };
     }
 }
