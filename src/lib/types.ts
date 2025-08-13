@@ -1,5 +1,5 @@
 
-export type Currency = 'PEN' | 'USD';
+export type Currency = 'ARS' | 'USD';
 export type Prices = { [key in Currency]: number };
 
 

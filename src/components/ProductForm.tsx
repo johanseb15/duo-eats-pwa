@@ -22,7 +22,7 @@ import { Loader2 } from 'lucide-react';
 import type { Currency, Prices, Product } from '@/lib/types';
 
 
-const currentCurrency: Currency = 'PEN';
+const currentCurrency: Currency = 'ARS';
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -89,10 +89,10 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
     };
     
     // Add default prices for other currencies if needed
-    if (currentCurrency === 'PEN') {
-      prices['USD'] = values.price / 3.7; // Example conversion
+    if (currentCurrency === 'ARS') {
+      prices['USD'] = values.price / 1000; // Example conversion
     } else {
-      prices['PEN'] = values.price * 3.7; // Example conversion
+      prices['ARS'] = values.price * 1000; // Example conversion
     }
 
     const productData: ProductInput = {

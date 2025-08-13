@@ -63,8 +63,8 @@ async function getProducts(): Promise<Product[]> {
   return productList;
 }
 
-const currencySymbol = 'S/.';
-const currentCurrency = 'PEN';
+const currencySymbol = '$';
+const currentCurrency = 'ARS';
 
 
 export default function AdminProductsPage() {

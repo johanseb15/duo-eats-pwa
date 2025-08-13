@@ -19,8 +19,8 @@ import { createOrder } from '@/app/actions';
 
 
 // TODO: Replace with a settings store
-const currentCurrency: Currency = 'PEN';
-const currencySymbol = 'S/.';
+const currentCurrency: Currency = 'ARS';
+const currencySymbol = '$';
 
 const getCartItemId = (item: any) => {
   const optionsIdentifier = item.selectedOptions
@@ -109,7 +109,7 @@ export default function CartPage() {
 
 
   const sendWhatsApp = (orderId?: string) => {
-    const phone = '1234567890'; // Replace with the restaurant's number
+    const phone = '5493511234567'; // Replace with the restaurant's number
     let message = `¡Hola! Quisiera hacer el siguiente pedido:\n`;
     if (orderId) {
       message += `\n*N° de Pedido: ${orderId}*\n`;

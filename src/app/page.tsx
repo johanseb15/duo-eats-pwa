@@ -92,7 +92,7 @@ export default function Home() {
              <CardContent className="relative flex items-center justify-between p-6">
                <div className="text-white">
                  <h2 className="text-2xl font-bold">¡Dúo Dinámico!</h2>
-                 <p className="text-sm">2 Pizzas Medianas por S/ 49.90</p>
+                 <p className="text-sm">2 Pizzas Medianas por $ 4990</p>
                </div>
                 <Image
                   src="https://placehold.co/100x100.png"

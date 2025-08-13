@@ -17,8 +17,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 
 // TODO: Replace with a settings store
-const currentCurrency: Currency = 'PEN';
-const currencySymbol = 'S/.';
+const currentCurrency: Currency = 'ARS';
+const currencySymbol = '$';
 
 export default function ProductPage({ params }: { params: { id: string } }) {
   const router = useRouter();

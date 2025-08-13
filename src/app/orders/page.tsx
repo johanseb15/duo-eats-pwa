@@ -19,7 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 
 
 // TODO: Replace with a settings store
-const currencySymbol = 'S/.';
+const currencySymbol = '$';
 
 const getStatusVariant = (status: string) => {
   switch (status) {
@@ -64,7 +64,7 @@ export default function OrdersPage() {
       const productItem = {
         ...item,
         // Ensure all Product fields are present, even if undefined
-        price: item.price || { PEN: 0, USD: 0 },
+        price: item.price || { ARS: 0, USD: 0 },
         options: item.options || [],
         aiHint: item.aiHint || '',
       };

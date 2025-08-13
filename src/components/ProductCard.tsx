@@ -22,8 +22,8 @@ interface ProductCardProps {
 }
 
 // TODO: Replace with a settings store
-const currentCurrency = 'PEN';
-const currencySymbol = 'S/.';
+const currentCurrency = 'ARS';
+const currencySymbol = '$';
 
 export function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();

@@ -23,7 +23,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const currencySymbol = 'S/.';
+const currencySymbol = '$';
 const orderStatuses: Order['status'][] = [
   'Pendiente',
   'En preparación',
