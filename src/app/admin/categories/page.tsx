@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense, lazy } from 'react';
 import type { ProductCategoryData } from '@/lib/types';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -42,8 +42,9 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { deleteCategory } from '@/app/actions';
-import { CategoryForm } from '@/components/CategoryForm';
 import * as LucideIcons from 'lucide-react';
+
+const CategoryForm = lazy(() => import('@/components/CategoryForm').then(module => ({ default: module.CategoryForm })));
 
 
 async function getCategories(): Promise<ProductCategoryData[]> {
@@ -63,7 +64,8 @@ async function getCategories(): Promise<ProductCategoryData[]> {
 }
 
 const getIcon = (name: string): React.ElementType => {
-    return (LucideIcons as any)[name] || LucideIcons.Package;
+    const Icon = (LucideIcons as any)[name];
+    return Icon || LucideIcons.Package;
 };
 
 export default function AdminCategoriesPage() {
@@ -132,6 +134,15 @@ export default function AdminCategoriesPage() {
     setIsFormOpen(open);
   }
 
+   const FormSkeleton = () => (
+    <div className="space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full mt-4" />
+    </div>
+  )
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -157,10 +168,12 @@ export default function AdminCategoriesPage() {
                 {selectedCategory ? 'Modifica los detalles de la categoría.' : 'Crea una nueva categoría para tus productos.'}
               </DialogDescription>
             </DialogHeader>
-            <CategoryForm 
-              onCategorySubmit={handleFormSubmit}
-              category={selectedCategory}
-            />
+             <Suspense fallback={<FormSkeleton />}>
+                <CategoryForm 
+                  onCategorySubmit={handleFormSubmit}
+                  category={selectedCategory}
+                />
+            </Suspense>
           </DialogContent>
         </Dialog>
       </div>

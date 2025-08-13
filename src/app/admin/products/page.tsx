@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense, lazy } from 'react';
 import Image from 'next/image';
 import type { Product } from '@/lib/types';
 import { collection, getDocs } from 'firebase/firestore';
@@ -41,10 +41,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { ProductForm } from '@/components/ProductForm';
 import { useToast } from '@/hooks/use-toast';
 import { deleteProduct } from '@/app/actions';
 import { Badge } from '@/components/ui/badge';
+
+const ProductForm = lazy(() => import('@/components/ProductForm').then(module => ({ default: module.ProductForm })));
+
 
 async function getProducts(): Promise<Product[]> {
   const productsCol = collection(db, 'products');
@@ -135,6 +137,19 @@ export default function AdminProductsPage() {
     setIsFormOpen(open);
   }
 
+  const FormSkeleton = () => (
+    <div className="space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-20 w-full" />
+        <div className="flex gap-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+        </div>
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full mt-4" />
+    </div>
+  )
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -160,10 +175,12 @@ export default function AdminProductsPage() {
                 {selectedProduct ? 'Modifica los detalles del producto.' : 'Rellena los detalles del nuevo producto que se añadirá al menú.'}
               </DialogDescription>
             </DialogHeader>
-            <ProductForm 
-              onProductSubmit={handleFormSubmit}
-              product={selectedProduct}
-            />
+            <Suspense fallback={<FormSkeleton />}>
+                <ProductForm 
+                  onProductSubmit={handleFormSubmit}
+                  product={selectedProduct}
+                />
+            </Suspense>
           </DialogContent>
         </Dialog>
       </div>

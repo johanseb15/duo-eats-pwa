@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense, lazy } from 'react';
 import Image from 'next/image';
 import type { Promotion } from '@/lib/types';
 import { collection, getDocs } from 'firebase/firestore';
@@ -41,9 +41,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { PromotionForm } from '@/components/PromotionForm';
 import { useToast } from '@/hooks/use-toast';
 import { deletePromotion } from '@/app/actions';
+
+const PromotionForm = lazy(() => import('@/components/PromotionForm').then(module => ({ default: module.PromotionForm })));
 
 async function getPromotions(): Promise<Promotion[]> {
   const promotionsCol = collection(db, 'promotions');
@@ -127,6 +128,16 @@ export default function AdminPromotionsPage() {
     setIsFormOpen(open);
   }
 
+  const FormSkeleton = () => (
+    <div className="space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full mt-4" />
+    </div>
+  )
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -152,10 +163,12 @@ export default function AdminPromotionsPage() {
                 {selectedPromotion ? 'Modifica los detalles de la promoción.' : 'Rellena los detalles de la nueva promoción.'}
               </DialogDescription>
             </DialogHeader>
-            <PromotionForm 
-              onPromotionSubmit={handleFormSubmit}
-              promotion={selectedPromotion}
-            />
+            <Suspense fallback={<FormSkeleton />}>
+                <PromotionForm 
+                  onPromotionSubmit={handleFormSubmit}
+                  promotion={selectedPromotion}
+                />
+            </Suspense>
           </DialogContent>
         </Dialog>
       </div>
