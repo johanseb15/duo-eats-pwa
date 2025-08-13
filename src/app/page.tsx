@@ -100,7 +100,6 @@ async function getProducts(): Promise<Product[]> {
     const productsSnapshot = await getDocs(q);
     
     if (productsSnapshot.empty) {
-        console.log("Firestore 'products' collection is empty. Returning test data.");
         return testProducts;
     }
     
@@ -119,9 +118,7 @@ async function getProducts(): Promise<Product[]> {
     });
     return productList;
   } catch (error) {
-    console.error("Error fetching products:", error);
-    // This can happen if Firestore is not set up correctly
-    // or if the security rules are too restrictive.
+    console.error("Error fetching products, falling back to test data:", error);
     return testProducts;
   }
 }
@@ -132,7 +129,6 @@ async function getPromotions(): Promise<Promotion[]> {
       const promotionsSnapshot = await getDocs(promotionsCol);
       
       if (promotionsSnapshot.empty) {
-        console.log("Firestore 'promotions' collection is empty. Returning test data.");
         return testPromotions;
       }
 
@@ -148,7 +144,7 @@ async function getPromotions(): Promise<Promotion[]> {
       });
       return promotionList;
     } catch (error) {
-      console.error("Error fetching promotions:", error);
+      console.error("Error fetching promotions, falling back to test data:", error);
       return testPromotions;
     }
 }
@@ -160,7 +156,6 @@ async function getCategories(): Promise<ProductCategoryData[]> {
       const categoriesSnapshot = await getDocs(q);
 
       if (categoriesSnapshot.empty) {
-        console.log("Firestore 'categories' collection is empty. Returning test data.");
         return testCategories;
       }
 
@@ -175,7 +170,7 @@ async function getCategories(): Promise<ProductCategoryData[]> {
       });
       return categoryList;
     } catch (error) {
-      console.error("Error fetching categories:", error);
+      console.error("Error fetching categories, falling back to test data:", error);
       return testCategories;
     }
 }

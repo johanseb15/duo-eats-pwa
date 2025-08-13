@@ -73,6 +73,7 @@ export default function AdminOrdersPage() {
     loadOrders();
     const interval = setInterval(loadOrders, 30000); 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleStatusChange = async (orderId: string, newStatus: Order['status']) => {

@@ -5,7 +5,6 @@ import { notFound } from 'next/navigation';
 
 import CategoryClientPage from './page.client';
 
-// Added for example data
 const testProducts: Product[] = [
     {
         id: '1',
@@ -77,7 +76,6 @@ async function getProductsByCategory(categoryName: string): Promise<Product[]> {
     const productsSnapshot = await getDocs(q);
     
     if (productsSnapshot.empty) {
-        // This case is for when the DB is reachable but the collection for this category is empty
         return testProducts.filter(p => p.category === categoryName);
     }
     
@@ -96,7 +94,6 @@ async function getProductsByCategory(categoryName: string): Promise<Product[]> {
     });
     return productList;
   } catch (error) {
-    // This case is for when the DB is NOT reachable (permissions, config, etc)
     console.error(`Error fetching products for category ${categoryName}, falling back to test data:`, error);
     return testProducts.filter(p => p.category === categoryName);
   }
@@ -120,11 +117,9 @@ async function getCategoryBySlug(slug: string): Promise<ProductCategoryData | nu
            return { id: doc.id, ...doc.data() } as ProductCategoryData;
         }
 
-        // If not found in Firestore, fallback to test data
         return testCategories.find(c => c.slug === slug) || null;
 
     } catch (error) {
-        // If Firestore call fails, fallback to test data
         console.error(`Error fetching category for slug '${slug}', falling back to test data:`, error);
         return testCategories.find(c => c.slug === slug) || null;
     }
@@ -146,5 +141,4 @@ export default async function CategoryPage({ params }: { params: { slug: string 
   );
 }
 
-// Revalidate every 60 seconds
 export const revalidate = 60;
