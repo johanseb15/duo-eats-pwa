@@ -99,6 +99,13 @@ export default function ProfilePage() {
           </Avatar>
           <h2 className="text-2xl font-bold">{user.displayName}</h2>
           <p className="text-sm text-muted-foreground">{user.email}</p>
+          
+          {/* UID VISIBLE TEMPORALMENTE */}
+          <div className="mt-4 p-4 bg-yellow-100 border border-yellow-400 rounded-lg">
+            <p className="text-sm font-medium text-yellow-800">Tu UID de Administrador es:</p>
+            <p className="text-lg font-bold text-yellow-900 break-all">{user.uid}</p>
+          </div>
+
         </div>
 
         <div className="mt-8 space-y-3">
