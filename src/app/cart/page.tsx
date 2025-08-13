@@ -335,7 +335,7 @@ export default function CartPage() {
                 </CardContent>
               </Card>
 
-              <div className="md:mt-6 md:p-0 p-4 md:relative md:bottom-auto md:left-auto md:right-auto fixed bottom-24 left-0 right-0">
+              <div className="md:mt-6 md:p-0 p-4 md:static md:bottom-auto md:left-auto md:right-auto fixed bottom-24 left-0 right-0">
                  <Button onClick={handleCheckout} size="lg" className="w-full rounded-full text-lg py-7 bg-green-500 hover:bg-green-600 text-white" disabled={isProcessing}>
                     {isProcessing ? <Loader2 className="animate-spin" /> : 'Finalizar y Enviar por WhatsApp'}
                   </Button>
@@ -347,3 +347,5 @@ export default function CartPage() {
     </div>
   );
 }
+
+    
