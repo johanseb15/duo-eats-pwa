@@ -81,14 +81,14 @@ export default function AdminPromotionsPage() {
     loadPromotions();
   }, []);
 
-  const handleFormSubmit = () => {
+  const handleFormSubmit = async () => {
     setIsFormOpen(false);
     toast({
       title: selectedPromotion ? "Promoción actualizada" : "Promoción añadida",
       description: `La promoción se ha ${selectedPromotion ? 'actualizado' : 'guardado'} correctamente.`,
     });
     setSelectedPromotion(null);
-    loadPromotions();
+    await loadPromotions();
   }
   
   const handleEditClick = (promotion: Promotion) => {
@@ -109,7 +109,7 @@ export default function AdminPromotionsPage() {
         title: "Promoción eliminada",
         description: "La promoción ha sido eliminada.",
       });
-      loadPromotions();
+      await loadPromotions();
     } else {
        toast({
         title: "Error",

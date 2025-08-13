@@ -90,14 +90,14 @@ export default function AdminProductsPage() {
     loadProducts();
   }, []);
 
-  const handleFormSubmit = () => {
+  const handleFormSubmit = async () => {
     setIsFormOpen(false);
     toast({
       title: selectedProduct ? "Producto actualizado" : "Producto añadido",
       description: `El producto se ha ${selectedProduct ? 'actualizado' : 'guardado'} correctamente.`,
     });
     setSelectedProduct(null);
-    loadProducts(); // Refresh the list
+    await loadProducts(); // Refresh the list
   }
   
   const handleEditClick = (product: Product) => {
@@ -118,7 +118,7 @@ export default function AdminProductsPage() {
         title: "Producto eliminado",
         description: "El producto ha sido eliminado del catálogo.",
       });
-      loadProducts();
+      await loadProducts();
     } else {
        toast({
         title: "Error",

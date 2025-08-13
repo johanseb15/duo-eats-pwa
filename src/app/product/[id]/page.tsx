@@ -4,10 +4,8 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-// This page is a fallback.
-// If a user somehow navigates to /product/some-id,
-// we redirect them to the homepage to prevent errors.
-// The main product interaction now happens in the ProductSheet component.
+// This page is a fallback to prevent errors from old URLs.
+// It redirects all traffic to the homepage.
 export default function ProductRedirectPage() {
   const router = useRouter();
 

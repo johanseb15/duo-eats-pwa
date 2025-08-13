@@ -28,7 +28,7 @@ const currentCurrency: Currency = 'ARS';
 const currencySymbol = '$';
 
 const getCartItemId = (item: CartItem) => {
-    const optionsIdentifier = item.selectedOptions
+    const optionsIdentifier = item.selectedOptions && Object.keys(item.selectedOptions).length > 0
       ? Object.entries(item.selectedOptions).sort().map(([key, value]) => `${key}:${value}`).join('-')
       : '';
     return `${item.id}-${optionsIdentifier}`;

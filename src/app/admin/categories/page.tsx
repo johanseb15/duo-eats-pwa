@@ -87,14 +87,14 @@ export default function AdminCategoriesPage() {
     loadCategories();
   }, []);
 
-  const handleFormSubmit = () => {
+  const handleFormSubmit = async () => {
     setIsFormOpen(false);
     toast({
       title: selectedCategory ? "Categoría actualizada" : "Categoría añadida",
       description: `La categoría se ha ${selectedCategory ? 'actualizado' : 'guardado'} correctamente.`,
     });
     setSelectedCategory(null);
-    loadCategories();
+    await loadCategories();
   }
   
   const handleEditClick = (category: ProductCategoryData) => {
@@ -115,7 +115,7 @@ export default function AdminCategoriesPage() {
         title: "Categoría eliminada",
         description: "La categoría ha sido eliminada.",
       });
-      loadCategories();
+      await loadCategories();
     } else {
        toast({
         title: "Error",
