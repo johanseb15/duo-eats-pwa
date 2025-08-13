@@ -1,4 +1,5 @@
 
+
 export type Currency = 'ARS' | 'USD';
 export type Prices = { [key in Currency]: number };
 
@@ -43,3 +44,12 @@ export interface Order {
   status: 'Pendiente' | 'En preparación' | 'En camino' | 'Entregado' | 'Cancelado';
   createdAt: string; // ISO 8601 date string
 }
+
+export interface Promotion {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  aiHint: string;
+}
+

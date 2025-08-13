@@ -4,22 +4,22 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Soup, Beef, GlassWater, IceCream } from 'lucide-react';
-import type { Product, ProductCategory } from '@/lib/types';
+import type { Product, ProductCategory, Promotion } from '@/lib/types';
 
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { ProductCard } from '@/components/ProductCard';
 import Recommendations from '@/components/Recommendations';
-import { Card, CardContent } from '@/components/ui/card';
+import { PromotionsCarousel } from '@/components/PromotionsCarousel';
 import { useAuth } from '@/hooks/useAuth';
-import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface HomeClientProps {
   products: Product[];
+  promotions: Promotion[];
 }
 
-export default function HomeClient({ products }: HomeClientProps) {
+export default function HomeClient({ products, promotions }: HomeClientProps) {
   const { user, loading: authLoading } = useAuth();
   
   const categories: { name: ProductCategory, icon: React.ElementType, slug: string }[] = [
@@ -49,22 +49,7 @@ export default function HomeClient({ products }: HomeClientProps) {
         </div>
 
         <section className="mb-12">
-           <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-r from-primary to-accent">
-             <CardContent className="relative flex items-center justify-between p-6">
-               <div className="text-white">
-                 <h2 className="text-2xl font-bold">¡Dúo Dinámico!</h2>
-                 <p className="text-sm">2 Pizzas Medianas por $8000</p>
-               </div>
-                <Image
-                  src="https://placehold.co/100x100.png"
-                  alt="Promo"
-                  width={80}
-                  height={80}
-                  className="rounded-full"
-                  data-ai-hint="pizza promo"
-                />
-             </CardContent>
-           </Card>
+           <PromotionsCarousel promotions={promotions} />
          </section>
         
         <section className="mb-12">
