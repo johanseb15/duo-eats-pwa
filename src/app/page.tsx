@@ -88,30 +88,6 @@ const testProducts: Product[] = [
     },
 ];
 
-const testPromotions: Promotion[] = [
-    {
-        id: 'promo1',
-        title: '¡Dúo Dinámico!',
-        description: '2 Pizzas Medianas por $8000',
-        image: 'https://placehold.co/300x150.png',
-        aiHint: 'pizza promo',
-    },
-    {
-        id: 'promo2',
-        title: 'Happy Hour de Empanadas',
-        description: 'Docena de empanadas con 20% OFF',
-        image: 'https://placehold.co/300x150.png',
-        aiHint: 'empanadas deal',
-    },
-    {
-        id: 'promo3',
-        title: 'Postre Gratis',
-        description: 'Con la compra de 2 platos fuertes',
-        image: 'https://placehold.co/300x150.png',
-        aiHint: 'dessert offer',
-    }
-];
-
 async function getProducts(): Promise<Product[]> {
   const productsCol = collection(db, 'products');
   const q = firestoreQuery(productsCol, orderBy('name'));
@@ -141,9 +117,7 @@ async function getProducts(): Promise<Product[]> {
 async function getPromotions(): Promise<Promotion[]> {
     const promotionsCol = collection(db, 'promotions');
     const promotionsSnapshot = await getDocs(promotionsCol);
-    if (promotionsSnapshot.empty) {
-        return testPromotions;
-    }
+    
     const promotionList = promotionsSnapshot.docs.map(doc => {
         const data = doc.data();
         return {
