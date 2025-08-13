@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 74 64">
+  <path
+    fill="black"
+    d="M37.5274 0L73.9999 64H0L37.5274 0Z"
+    className="triangle"
+  ></path>
+  <g className="v">
+    <path
+      fill="white"
+      d="M28.9501 40.3101H34.4801V53.8101H40.6001V40.3101H45.9101V35.4801H28.9501V40.3101Z"
+    ></path>
+  </g>
+</svg>
