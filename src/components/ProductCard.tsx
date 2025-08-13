@@ -28,8 +28,7 @@ const currencySymbol = '$';
 export function ProductCard({ product }: ProductCardProps) {
   return (
     <Sheet>
-      <SheetTrigger asChild>
-        <div className="w-full overflow-hidden transition-all duration-300 rounded-2xl group bg-card/80 backdrop-blur-xl border-white/20 shadow-md hover:shadow-xl hover:-translate-y-1 cursor-pointer">
+        <div className="w-full overflow-hidden transition-all duration-300 rounded-2xl group bg-card/80 backdrop-blur-xl border-white/20 shadow-md hover:shadow-xl hover:-translate-y-1">
           <Card className="border-0 bg-transparent shadow-none">
             <CardContent className="p-0 flex items-center gap-4">
               <div className="relative w-28 h-28 flex-shrink-0">
@@ -48,12 +47,18 @@ export function ProductCard({ product }: ProductCardProps) {
                 <CardDescription className="text-muted-foreground mt-1 h-10 overflow-hidden text-sm">
                   {product.description}
                 </CardDescription>
-                 <p className="text-lg font-bold text-foreground mt-2">{currencySymbol}{product.price[currentCurrency].toFixed(2)}</p>
+                <div className='flex justify-between items-center mt-2'>
+                    <p className="text-lg font-bold text-foreground">{currencySymbol}{product.price[currentCurrency].toFixed(2)}</p>
+                    <SheetTrigger asChild>
+                        <Button size='icon' className='rounded-full h-9 w-9'>
+                            <Plus/>
+                        </Button>
+                    </SheetTrigger>
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
-      </SheetTrigger>
       <SheetContent className="w-full max-w-lg p-0">
          <ProductSheet product={product} />
       </SheetContent>
