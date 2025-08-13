@@ -58,11 +58,15 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const categoriesCol = collection(db, 'categories');
-      const q = query(categoriesCol, orderBy('name'));
-      const snapshot = await getDocs(q);
-      const categoryList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductCategoryData));
-      setCategories(categoryList);
+      try {
+        const categoriesCol = collection(db, 'categories');
+        const q = query(categoriesCol, orderBy('name'));
+        const snapshot = await getDocs(q);
+        const categoryList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductCategoryData));
+        setCategories(categoryList);
+      } catch (error) {
+        console.error("Error fetching categories for Product Form:", error);
+      }
     };
     fetchCategories();
   }, []);

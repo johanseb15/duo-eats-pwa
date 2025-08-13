@@ -50,11 +50,15 @@ export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormPro
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const productsCol = collection(db, 'products');
-      const q = query(productsCol, orderBy('name'));
-      const snapshot = await getDocs(q);
-      const productList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-      setProducts(productList);
+      try {
+        const productsCol = collection(db, 'products');
+        const q = query(productsCol, orderBy('name'));
+        const snapshot = await getDocs(q);
+        const productList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        setProducts(productList);
+      } catch (error) {
+        console.error("Error fetching products for Promotion Form:", error);
+      }
     };
     fetchProducts();
   }, []);
