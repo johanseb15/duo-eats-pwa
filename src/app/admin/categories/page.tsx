@@ -159,7 +159,7 @@ export default function AdminCategoriesPage() {
         <h2 className="text-2xl font-bold">Categorías</h2>
          <Dialog open={isFormOpen} onOpenChange={handleDialogClose}>
           <DialogTrigger asChild>
-            <Button><PlusCircle className="mr-2 h-4 w-4" /> Añadir Categoría</Button>
+            <Button onClick={() => setIsFormOpen(true)}><PlusCircle className="mr-2 h-4 w-4" /> Añadir Categoría</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -170,7 +170,7 @@ export default function AdminCategoriesPage() {
             </DialogHeader>
              <Suspense fallback={<FormSkeleton />}>
                 <CategoryForm 
-                  onCategorySubmit={handleFormSubmit}
+                  onSubmitSuccess={handleFormSubmit}
                   category={selectedCategory}
                 />
             </Suspense>

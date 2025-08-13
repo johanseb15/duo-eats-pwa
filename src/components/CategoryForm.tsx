@@ -34,11 +34,11 @@ const formSchema = z.object({
 });
 
 interface CategoryFormProps {
-  onCategorySubmit: () => void;
+  onSubmitSuccess: () => void;
   category?: ProductCategoryData | null;
 }
 
-export function CategoryForm({ onCategorySubmit, category }: CategoryFormProps) {
+export function CategoryForm({ onSubmitSuccess, category }: CategoryFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuggesting, startTransition] = useTransition();
 
@@ -88,19 +88,19 @@ export function CategoryForm({ onCategorySubmit, category }: CategoryFormProps) 
       icon: values.icon,
     };
 
-    let result;
-    if (category) {
-       result = await updateCategory(category.id, categoryData);
-    } else {
-       result = await addCategory(categoryData);
+    try {
+        if (category) {
+            await updateCategory(category.id, categoryData);
+        } else {
+            await addCategory(categoryData);
+        }
+        onSubmitSuccess();
+    } catch (error) {
+      console.error('Failed to submit category', error);
+      // Optionally, show an error toast to the user
+    } finally {
+        setIsSubmitting(false);
     }
-
-    if (result.success) {
-      onCategorySubmit();
-    } else {
-      console.error('Failed to submit category');
-    }
-    setIsSubmitting(false);
   }
 
   return (
