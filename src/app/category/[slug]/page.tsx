@@ -10,37 +10,113 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, Frown } from 'lucide-react';
 import Link from 'next/link';
 
-async function getProductsByCategory(category: string): Promise<Product[]> {
-  const productsCol = collection(db, 'products');
-  const q = query(productsCol, where('category', '==', category));
-  const productsSnapshot = await getDocs(q);
-  const productList = productsSnapshot.docs.map(doc => {
-    const data = doc.data();
-    return {
-      id: doc.id,
-      name: data.name,
-      description: data.description,
-      price: data.price,
-      image: data.image,
-      aiHint: data.aiHint,
-      category: data.category,
-      options: data.options,
-    } as Product;
-  });
-  return productList;
+// Added for example data
+const testProducts: Product[] = [
+    {
+        id: '1',
+        name: 'Pizza de Muzzarella',
+        description: 'Clásica pizza con salsa de tomate, muzzarella y aceitunas.',
+        price: { ARS: 10000, USD: 10 },
+        image: 'https://placehold.co/400x225.png',
+        aiHint: 'mozzarella pizza',
+        category: 'Pizzas',
+        options: [
+            {
+                name: 'Tamaño',
+                values: [
+                    { name: 'Individual', priceModifier: { ARS: 0, USD: 0 } },
+                    { name: 'Grande', priceModifier: { ARS: 2000, USD: 2 } },
+                ],
+            },
+             {
+                name: 'Borde',
+                values: [
+                    { name: 'Normal', priceModifier: { ARS: 0, USD: 0 } },
+                    { name: 'Relleno de Queso', priceModifier: { ARS: 1500, USD: 1.5 } },
+                ],
+            }
+        ]
+    },
+    {
+        id: '4',
+        name: 'Pizza Napolitana',
+        description: 'Pizza con salsa de tomate, muzzarella, rodajas de tomate fresco y ajo.',
+        price: { ARS: 11000, USD: 11 },
+        image: 'https://placehold.co/400x225.png',
+        aiHint: 'neapolitan pizza',
+        category: 'Pizzas',
+         options: [
+            {
+                name: 'Tamaño',
+                values: [
+                    { name: 'Individual', priceModifier: { ARS: 0, USD: 0 } },
+                    { name: 'Grande', priceModifier: { ARS: 2200, USD: 2.2 } },
+                ],
+            }
+        ]
+    },
+];
+
+async function getProductsByCategory(categoryName: string): Promise<Product[]> {
+  try {
+    const productsCol = collection(db, 'products');
+    const q = query(productsCol, where('category', '==', categoryName));
+    const productsSnapshot = await getDocs(q);
+    
+    if (productsSnapshot.empty) {
+        // Return example data if firestore is empty and category matches
+        const exampleProducts = testProducts.filter(p => p.category === categoryName);
+        if (exampleProducts.length > 0) {
+            console.log(`Firestore is empty for category ${categoryName}. Returning test data.`);
+            return exampleProducts;
+        }
+        return [];
+    }
+    
+    const productList = productsSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        image: data.image,
+        aiHint: data.aiHint,
+        category: data.category,
+        options: data.options,
+      } as Product;
+    });
+    return productList;
+  } catch (error) {
+    console.error(`Error fetching products for category ${categoryName}:`, error);
+    // Fallback to test data on error
+    return testProducts.filter(p => p.category === categoryName);
+  }
 }
 
 async function getCategoryBySlug(slug: string): Promise<ProductCategoryData | null> {
-    const categoriesCol = collection(db, 'categories');
-    const q = query(categoriesCol, where('slug', '==', slug));
-    const categorySnapshot = await getDocs(q);
+    try {
+        const categoriesCol = collection(db, 'categories');
+        const q = query(categoriesCol, where('slug', '==', slug));
+        const categorySnapshot = await getDocs(q);
 
-    if (categorySnapshot.empty) {
+        if (categorySnapshot.empty) {
+            // Fallback for example data
+            const testCategories: ProductCategoryData[] = [
+              { id: '1', name: 'Pizzas', slug: 'pizzas', icon: 'Pizza' },
+              { id: '2', name: 'Empanadas', slug: 'empanadas', icon: 'Wind' },
+              { id: '3', name: 'Bebidas', slug: 'bebidas', icon: 'CupSoda' },
+              { id: '4', name: 'Postres', slug: 'postres', icon: 'CakeSlice' },
+            ];
+            return testCategories.find(c => c.slug === slug) || null;
+        }
+
+        const doc = categorySnapshot.docs[0];
+        return { id: doc.id, ...doc.data() } as ProductCategoryData;
+    } catch (error) {
+        console.error(`Error fetching category for slug ${slug}:`, error);
         return null;
     }
-
-    const doc = categorySnapshot.docs[0];
-    return { id: doc.id, ...doc.data() } as ProductCategoryData;
 }
 
 
