@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Minus, Plus, Trash2, ShoppingCart, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -44,8 +46,13 @@ export default function CartPage() {
   const { toast } = useToast();
 
   const [deliveryCost, setDeliveryCost] = useState(0);
+  const [selectedZone, setSelectedZone] = useState('');
   const [isClient, setIsClient] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Guest info
+  const [guestName, setGuestName] = useState('');
+  const [guestAddress, setGuestAddress] = useState('');
 
 
   useEffect(() => {
@@ -63,20 +70,12 @@ export default function CartPage() {
   const handleZoneChange = (zoneName: string) => {
     const zone = deliveryZones.find(z => z.name === zoneName);
     setDeliveryCost(zone ? zone.cost : 0);
+    setSelectedZone(zoneName);
   }
 
   const handleCheckout = async () => {
-    if (!user) {
-      toast({
-        title: 'Debes iniciar sesión',
-        description: 'Para poder realizar un pedido, necesitas iniciar sesión.',
-        variant: 'destructive',
-      });
-      router.push('/auth/signin');
-      return;
-    }
-
-    if (deliveryCost === 0 && !deliveryZones.find(z => z.cost === 0)) {
+    // For both guests and users, a delivery zone must be selected
+     if (!selectedZone) {
         toast({
             title: 'Selecciona una zona',
             description: 'Por favor, elige una zona de entrega para continuar.',
@@ -85,46 +84,74 @@ export default function CartPage() {
         return;
     }
 
-
-    setIsProcessing(true);
-
-    const orderInput = {
-      userId: user.uid,
-      userName: user.displayName || 'N/A',
-      items: items,
-      total: total,
-      subtotal: subtotal,
-      deliveryCost: deliveryCost,
-    };
-
-    const result = await createOrder(orderInput);
-
-    if (result.success) {
-      sendWhatsApp(result.orderId);
+    if (user) {
+      // User is logged in, create order in DB
+      setIsProcessing(true);
+      const orderInput = {
+        userId: user.uid,
+        userName: user.displayName || 'N/A',
+        items: items,
+        total: total,
+        subtotal: subtotal,
+        deliveryCost: deliveryCost,
+      };
+      const result = await createOrder(orderInput);
+      if (result.success) {
+        sendWhatsApp(result.orderId, user.displayName || undefined, undefined);
+        toast({
+          title: '¡Pedido guardado!',
+          description: 'Tu pedido ha sido guardado y será enviado a WhatsApp.',
+        });
+        clearCart();
+        router.push(`/orders?orderId=${result.orderId}`);
+      } else {
+        toast({
+          title: 'Error al crear el pedido',
+          description: 'Hubo un problema al guardar tu pedido. Por favor, intenta de nuevo.',
+          variant: 'destructive',
+        });
+      }
+      setIsProcessing(false);
+    } else {
+      // Guest checkout
+      if (!guestName || !guestAddress) {
+        toast({
+          title: 'Faltan datos',
+          description: 'Por favor, completa tu nombre y dirección para continuar.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      setIsProcessing(true);
+      sendWhatsApp(undefined, guestName, guestAddress);
       toast({
-        title: '¡Pedido guardado!',
-        description: 'Tu pedido ha sido guardado y será enviado a WhatsApp.',
+        title: '¡Pedido listo para enviar!',
+        description: 'Tu pedido será enviado a WhatsApp.',
       });
       clearCart();
-      router.push(`/orders?orderId=${result.orderId}`);
-    } else {
-      toast({
-        title: 'Error al crear el pedido',
-        description: 'Hubo un problema al guardar tu pedido. Por favor, intenta de nuevo.',
-        variant: 'destructive',
-      });
+      router.push('/');
+      setIsProcessing(false);
     }
-
-    setIsProcessing(false);
   };
 
 
-  const sendWhatsApp = (orderId?: string) => {
+  const sendWhatsApp = (orderId?: string, name?: string, address?: string) => {
     const phone = '5493511234567'; // Replace with the restaurant's number
     let message = `¡Hola! Quisiera hacer el siguiente pedido:\n`;
     if (orderId) {
       message += `\n*N° de Pedido: ${orderId.slice(0, 6)}*\n`;
     }
+    if (name) {
+      message += `*Cliente: ${name}*\n`;
+    }
+     if (address) {
+      message += `*Dirección: ${address}*\n`;
+    }
+    
+    const deliveryZoneInfo = deliveryZones.find(z => z.name === selectedZone)?.name || 'No especificada';
+
+    message += `*Zona de Entrega: ${deliveryZoneInfo}*\n`
+
     message += `\n${items
         .map((i) => {
           const optionsString = i.selectedOptions && Object.values(i.selectedOptions).length > 0 ? ` (${Object.values(i.selectedOptions).join(', ')})` : '';
@@ -213,12 +240,30 @@ export default function CartPage() {
                 )
               })}
 
+              {!user && (
+                 <Card className="shadow-xl rounded-2xl bg-card/60 backdrop-blur-xl border-white/20 p-4">
+                    <CardHeader className="p-2">
+                        <CardTitle>Tus Datos</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-2 space-y-4">
+                        <div>
+                            <Label htmlFor="guestName">Nombre</Label>
+                            <Input id="guestName" value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Tu nombre completo" />
+                        </div>
+                         <div>
+                            <Label htmlFor="guestAddress">Dirección</Label>
+                            <Input id="guestAddress" value={guestAddress} onChange={(e) => setGuestAddress(e.target.value)} placeholder="Calle, número, depto, etc." />
+                        </div>
+                    </CardContent>
+                 </Card>
+              )}
+
               <Card className="shadow-xl rounded-2xl bg-card/60 backdrop-blur-xl border-white/20 p-4">
                 <CardHeader className="p-2">
                   <CardTitle>Zona de Entrega</CardTitle>
                 </CardHeader>
                 <CardContent className="p-2">
-                   <Select onValueChange={handleZoneChange}>
+                   <Select onValueChange={handleZoneChange} value={selectedZone}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecciona tu zona" />
                     </SelectTrigger>
@@ -250,7 +295,7 @@ export default function CartPage() {
 
               <div className="md:mt-6 md:p-0 p-4 md:relative md:bottom-auto md:left-auto md:right-auto fixed bottom-24 left-0 right-0">
                  <Button onClick={handleCheckout} size="lg" className="w-full rounded-full text-lg py-7 bg-green-500 hover:bg-green-600 text-white" disabled={isProcessing}>
-                    {isProcessing ? <Loader2 className="animate-spin" /> : 'Enviar por WhatsApp'}
+                    {isProcessing ? <Loader2 className="animate-spin" /> : 'Finalizar y Enviar por WhatsApp'}
                   </Button>
               </div>
           </div>
@@ -260,3 +305,5 @@ export default function CartPage() {
     </div>
   );
 }
+
+    
