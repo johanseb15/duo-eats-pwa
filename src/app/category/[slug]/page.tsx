@@ -2,14 +2,8 @@
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Product, ProductCategoryData } from '@/lib/types';
-import { notFound, useRouter } from 'next/navigation';
+import { notFound } from 'next/navigation';
 
-import { Header } from '@/components/Header';
-import { BottomNav } from '@/components/BottomNav';
-import { ProductCard } from '@/components/ProductCard';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, Frown } from 'lucide-react';
-import Link from 'next/link';
 import CategoryClientPage from './page.client';
 
 // Added for example data
