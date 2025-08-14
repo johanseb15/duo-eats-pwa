@@ -2,6 +2,9 @@
 
 describe('Flujo de Checkout como Invitado', () => {
   beforeEach(() => {
+    // Interceptar la llamada a la API de Google Maps antes de visitar la página
+    cy.intercept('https://maps.googleapis.com/maps/api/place/js/AutocompletionService*').as('googleMapsApi');
+    
     // Visitar la página de inicio antes de cada prueba
     cy.visit('/');
   });
@@ -36,9 +39,12 @@ describe('Flujo de Checkout como Invitado', () => {
     // Escribir una dirección en el autocompletado de Google
     cy.get('input#address-input').type('Av. Corrientes 1234, Buenos Aires');
     
-    // Esperamos a que Google Maps responda y aparezca el costo de envío
-    // Este `wait` puede ser necesario si la API es lenta. Ajustar si es necesario.
-    cy.wait(2000); 
+    // Esperamos a que la petición a la API se complete
+    cy.wait('@googleMapsApi');
+
+    // Esperamos un breve instante para que la UI se actualice con el resultado
+    cy.wait(500);
+    
     cy.contains('span', 'A calcular').should('not.exist');
     cy.contains('span', /^\$\d+\.\d{2}$/).should('be.visible'); // Verificar que el costo de envío aparece
 
