@@ -21,26 +21,9 @@ export default function Recommendations() {
     getRecs();
   }, []);
 
+  // Skeleton is handled by Suspense in HomeClient now
   if (loading) {
-    return (
-      <section className="mb-12">
-        <Card className="bg-card/60 backdrop-blur-xl border-primary/50 border-dashed">
-          <CardHeader>
-            <CardTitle className="text-xl font-bold flex items-center gap-3">
-              <Wand2 className="h-6 w-6 text-primary" />
-              Recomendado para ti
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-3">
-              <Skeleton className="h-10 w-40 bg-muted/50 rounded-full" />
-              <Skeleton className="h-10 w-32 bg-muted/50 rounded-full" />
-              <Skeleton className="h-10 w-48 bg-muted/50 rounded-full" />
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-    );
+    return null;
   }
 
   if (recommendations.length === 0) {

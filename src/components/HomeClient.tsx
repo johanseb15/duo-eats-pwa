@@ -5,16 +5,19 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Product, ProductCategoryData, Promotion } from '@/lib/types';
 import * as LucideIcons from 'lucide-react';
-
-import { Header } from '@/components/Header';
-import { BottomNav } from '@/components/BottomNav';
-import { ProductCard } from '@/components/ProductCard';
-import Recommendations from '@/components/Recommendations';
-import { PromotionsCarousel } from '@/components/PromotionsCarousel';
 import { useAuth } from '@/hooks/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from './ui/button';
 import { FileText, PlusCircle } from 'lucide-react';
+import React, { Suspense } from 'react';
+import { Header } from '@/components/Header';
+import { BottomNav } from '@/components/BottomNav';
+import { ProductCard } from './ProductCard';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+
+const PromotionsCarousel = React.lazy(() => import('@/components/PromotionsCarousel').then(module => ({ default: module.PromotionsCarousel })));
+const Recommendations = React.lazy(() => import('@/components/Recommendations'));
+
 
 interface HomeClientProps {
   products: Product[];
@@ -50,7 +53,9 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
         </div>
 
         <section className="mb-12">
-           <PromotionsCarousel promotions={promotions} />
+          <Suspense fallback={<Skeleton className="h-[120px] w-full rounded-2xl" />}>
+            <PromotionsCarousel promotions={promotions} />
+          </Suspense>
          </section>
         
         <section className="mb-12">
@@ -81,7 +86,25 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
           )}
         </section>
 
-        <Recommendations />
+        <Suspense fallback={
+            <div className="mb-12">
+                <Card className="bg-card/60 backdrop-blur-xl border-primary/50 border-dashed">
+                    <CardHeader>
+                        <Skeleton className="h-7 w-48" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex flex-wrap gap-3">
+                            <Skeleton className="h-10 w-40 bg-muted/50 rounded-full" />
+                            <Skeleton className="h-10 w-32 bg-muted/50 rounded-full" />
+                            <Skeleton className="h-10 w-48 bg-muted/50 rounded-full" />
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        }>
+            <Recommendations />
+        </Suspense>
+
 
         <section>
           <h2 className="text-xl font-bold mb-4 text-left">

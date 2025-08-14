@@ -18,7 +18,7 @@ interface PromotionsCarouselProps {
   promotions: Promotion[];
 }
 
-export function PromotionsCarousel({ promotions }: PromotionsCarouselProps) {
+export default function PromotionsCarousel({ promotions }: PromotionsCarouselProps) {
     const plugin = useRef(
       Autoplay({ delay: 5000, stopOnInteraction: false, stopOnMouseEnter: true })
     )
