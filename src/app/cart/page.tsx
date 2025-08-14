@@ -13,11 +13,11 @@ import { Label } from '@/components/ui/label';
 import { Minus, Plus, Trash2, ShoppingCart, Loader2, CalendarIcon, Clock, Home, Briefcase, MapPin } from 'lucide-react';
 import { useState, useEffect, useMemo, lazy, Suspense, useCallback } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { Currency, CartItem, UserAddress, DeliveryZone } from '@/lib/types';
+import type { Currency, CartItem, UserAddress, DeliveryZone, RestaurantSettings } from '@/lib/types';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { createOrder, fetchAddressesByUserId } from '@/app/actions';
+import { createOrder, fetchAddressesByUserId, fetchRestaurantSettings } from '@/app/actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -77,6 +77,9 @@ export default function CartPage() {
   const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
   const [loadingZones, setLoadingZones] = useState(true);
 
+  // Restaurant Settings
+  const [restaurantSettings, setRestaurantSettings] = useState<RestaurantSettings | null>(null);
+
   // Scheduled Order
   const [scheduleOption, setScheduleOption] = useState<'now' | 'later'>('now');
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>();
@@ -88,7 +91,7 @@ export default function CartPage() {
 
   useEffect(() => {
     setIsClient(true);
-    const fetchZones = async () => {
+    const fetchInitialData = async () => {
         setLoadingZones(true);
         try {
             const zonesCol = collection(db, 'deliveryZones');
@@ -101,14 +104,18 @@ export default function CartPage() {
                 const zoneList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DeliveryZone));
                 setDeliveryZones(zoneList);
             }
+
+            const settings = await fetchRestaurantSettings();
+            setRestaurantSettings(settings);
+
         } catch (error) {
-            console.error("Error fetching delivery zones, using defaults:", error);
+            console.error("Error fetching initial data, using defaults:", error);
             setDeliveryZones(defaultDeliveryZones);
         } finally {
             setLoadingZones(false);
         }
     };
-    fetchZones();
+    fetchInitialData();
   }, []);
 
   useEffect(() => {
@@ -171,12 +178,10 @@ export default function CartPage() {
 
 
   const handleCheckout = async () => {
-     if (!selectedZoneId) {
+     if (!selectedZoneId && deliveryOption === 'delivery') {
         toast({
             title: 'Completa tu pedido',
-            description: deliveryOption === 'delivery'
-              ? 'Por favor, introduce o selecciona una dirección válida para calcular el envío.'
-              : 'Selecciona una opción para continuar.',
+            description: 'Por favor, introduce o selecciona una dirección válida para calcular el envío.',
             variant: 'destructive',
         });
         return;
@@ -244,7 +249,7 @@ export default function CartPage() {
 
 
   const sendWhatsApp = (orderId?: string, name?: string, address?: string, deliveryDate?: string, addressDetails?: string) => {
-    const phone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '549111234567';
+    const phone = restaurantSettings?.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '549111234567';
     let message = `¡Hola! Quisiera hacer el siguiente pedido:\n`;
     if (orderId) {
       message += `\n*N° de Pedido: ${orderId.slice(0, 6)}*\n`;
@@ -282,10 +287,10 @@ export default function CartPage() {
   };
 
   const handleSuccessAlertClose = () => {
+    setIsSuccessAlertOpen(false);
     if (lastOrderId) {
         router.push(`/order/${lastOrderId}`);
     }
-    setIsSuccessAlertOpen(false);
     setLastOrderId(null);
   };
 
@@ -297,6 +302,11 @@ export default function CartPage() {
     if (lowerName.includes('trabajo')) return <Briefcase className="w-5 h-5" />;
     return <MapPin className="w-5 h-5" />;
   }
+  
+  const canCheckout = useMemo(() => {
+    return deliveryOption === 'pickup' || (deliveryOption === 'delivery' && selectedZoneId !== null);
+  }, [deliveryOption, selectedZoneId]);
+
 
   if (!isClient || authLoading) {
     return (
@@ -502,7 +512,7 @@ export default function CartPage() {
               </Card>
 
               <div className="md:mt-6 md:p-0 p-4 md:static md:bottom-auto md:left-auto md:right-auto fixed bottom-24 left-0 right-0">
-                 <Button onClick={handleCheckout} size="lg" className="w-full rounded-full text-lg py-7 bg-green-500 hover:bg-green-600 text-white" disabled={isProcessing || !selectedZoneId}>
+                 <Button onClick={handleCheckout} size="lg" className="w-full rounded-full text-lg py-7 bg-green-500 hover:bg-green-600 text-white" disabled={isProcessing || !canCheckout}>
                     {isProcessing ? <Loader2 className="animate-spin" /> : 'Finalizar y Enviar por WhatsApp'}
                   </Button>
               </div>
@@ -510,7 +520,7 @@ export default function CartPage() {
         )}
       </main>
       <BottomNav />
-      <AlertDialog open={isSuccessAlertOpen} onOpenChange={setIsSuccessAlertOpen}>
+      <AlertDialog open={isSuccessAlertOpen} onOpenChange={handleSuccessAlertClose}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¡Pedido Realizado con Éxito!</AlertDialogTitle>
@@ -528,5 +538,7 @@ export default function CartPage() {
     </div>
   );
 }
+
+    
 
     
