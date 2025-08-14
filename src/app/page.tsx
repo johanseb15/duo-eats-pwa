@@ -13,6 +13,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800',
         aiHint: 'double cheeseburger',
         category: 'hamburguesas',
+        stock: 15,
     },
     {
         id: '2',
@@ -22,6 +23,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1601924582971-c8b3b4fa6a8a?w=800',
         aiHint: 'neapolitan pizza',
         category: 'pizzas',
+        stock: 10,
     },
     {
         id: '3',
@@ -31,6 +33,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=800',
         aiHint: 'lomito sandwich',
         category: 'lomitos',
+        stock: 20,
     },
     {
         id: '4',
@@ -40,6 +43,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1604908177522-4327d4d1d2d2?w=800',
         aiHint: 'meat empanadas',
         category: 'empanadas',
+        stock: 50,
     },
     {
         id: '5',
@@ -49,6 +53,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1583947215259-38e31be8752b?w=800',
         aiHint: 'coca-cola bottle',
         category: 'bebidas',
+        stock: 100,
     },
     {
         id: '6',
@@ -58,6 +63,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1606755962773-d324e0a13085?w=800',
         aiHint: 'bbq burger',
         category: 'hamburguesas',
+        stock: 18,
     },
     {
         id: '7',
@@ -67,6 +73,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1601924994987-69c3b35b4f69?w=800',
         aiHint: 'pepperoni pizza',
         category: 'pizzas',
+        stock: 8,
     },
     {
         id: '8',
@@ -76,6 +83,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1605479085026-2d2a3e3aa87e?w=800',
         aiHint: 'simple lomito',
         category: 'lomitos',
+        stock: 25,
     },
     {
         id: '9',
@@ -85,6 +93,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1617196036985-fd5f1a9b735e?w=800',
         aiHint: 'chicken empanadas',
         category: 'empanadas',
+        stock: 45,
     },
     {
         id: '10',
@@ -94,6 +103,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1599981715701-0f08df5b6d8b?w=800',
         aiHint: 'mineral water',
         category: 'bebidas',
+        stock: 120,
     },
     {
         id: '11',
@@ -103,6 +113,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1598136490944-bc07f12d3d4a?w=800',
         aiHint: 'classic burger',
         category: 'hamburguesas',
+        stock: 20,
     },
     {
         id: '12',
@@ -112,6 +123,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1603079849119-65e8adba6b60?w=800',
         aiHint: 'four cheese pizza',
         category: 'pizzas',
+        stock: 6,
     },
     {
         id: '13',
@@ -121,6 +133,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1585238342020-96629b5d1d9d?w=800',
         aiHint: 'vegetarian sandwich',
         category: 'lomitos',
+        stock: 15,
     },
     {
         id: '14',
@@ -130,6 +143,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1625949727792-3a58d5ec6b06?w=800',
         aiHint: 'caprese empanadas',
         category: 'empanadas',
+        stock: 40,
     },
     {
         id: '15',
@@ -139,6 +153,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1597688389271-15f3f41faeef?w=800',
         aiHint: 'sprite bottle',
         category: 'bebidas',
+        stock: 90,
     },
     {
         id: '16',
@@ -148,6 +163,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1572802419224-296b0aeee0f6?w=800',
         aiHint: 'burger with egg',
         category: 'hamburguesas',
+        stock: 14,
     },
     {
         id: '17',
@@ -157,6 +173,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1617196036985-fd5f1a9b735e?w=800',
         aiHint: 'fugazzeta pizza',
         category: 'pizzas',
+        stock: 9,
     },
     {
         id: '18',
@@ -166,6 +183,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1605479085026-2d2a3e3aa87e?w=800',
         aiHint: 'special lomito',
         category: 'lomitos',
+        stock: 18,
     },
     {
         id: '19',
@@ -175,6 +193,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1625949727792-3a58d5ec6b06?w=800',
         aiHint: 'ham cheese empanadas',
         category: 'empanadas',
+        stock: 35,
     },
     {
         id: '20',
@@ -184,6 +203,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1626125156777-6c8b7b2e2a9a?w=800',
         aiHint: 'fanta bottle',
         category: 'bebidas',
+        stock: 85,
     },
     {
         id: '21',
@@ -193,6 +213,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800',
         aiHint: 'double bacon burger',
         category: 'hamburguesas',
+        stock: 12,
     },
     {
         id: '22',
@@ -202,6 +223,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1603079849119-65e8adba6b60?w=800',
         aiHint: 'margarita pizza',
         category: 'pizzas',
+        stock: 7,
     },
     {
         id: '23',
@@ -211,6 +233,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1585238342020-96629b5d1d9d?w=800',
         aiHint: 'bbq lomito',
         category: 'lomitos',
+        stock: 16,
     },
     {
         id: '24',
@@ -220,6 +243,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1625949727792-3a58d5ec6b06?w=800',
         aiHint: 'vegetable empanadas',
         category: 'empanadas',
+        stock: 38,
     },
     {
         id: '25',
@@ -229,6 +253,7 @@ const testProducts: Product[] = [
         image: 'https://images.unsplash.com/photo-1599981715701-0f08df5b6d8b?w=800',
         aiHint: 'sparkling water',
         category: 'bebidas',
+        stock: 110,
     },
 ];
 
@@ -279,6 +304,7 @@ async function getProducts(): Promise<Product[]> {
         aiHint: data.aiHint,
         category: data.category,
         options: data.options,
+        stock: data.stock || 0,
       } as Product;
     });
     return productList;

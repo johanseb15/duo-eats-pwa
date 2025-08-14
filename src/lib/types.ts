@@ -29,6 +29,7 @@ export interface Product {
   image: string;
   aiHint: string;
   category: string;
+  stock: number;
   options?: ProductOption[];
 }
 

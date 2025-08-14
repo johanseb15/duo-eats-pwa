@@ -4,7 +4,7 @@
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommendations';
 import { suggestCategoryIcon } from '@/ai/flows/suggest-category-icon';
 import { db } from '@/lib/firebase';
-import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone, DashboardAnalytics, ProductSale, OrderOverTime } from '@/lib/types';
+import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone, DashboardAnalytics, ProductSale, OrderOverTime, CartItem } from '@/lib/types';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, limit } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { getAuth } from 'firebase-admin/auth';

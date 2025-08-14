@@ -36,6 +36,9 @@ const formSchema = z.object({
   price: z.coerce.number().positive({
     message: 'El precio debe ser un número positivo.',
   }),
+  stock: z.coerce.number().min(0, {
+    message: 'El stock no puede ser negativo.'
+  }),
   category: z.string({
     required_error: "Debes seleccionar una categoría.",
   }),
@@ -77,6 +80,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
       name: '',
       description: '',
       price: 0,
+      stock: 0,
       image: '',
       aiHint: '',
       category: '',
@@ -89,6 +93,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
         name: product.name,
         description: product.description,
         price: product.price[currentCurrency],
+        stock: product.stock,
         image: product.image,
         aiHint: product.aiHint,
         category: product.category,
@@ -98,6 +103,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
         name: '',
         description: '',
         price: 0,
+        stock: 0,
         image: '',
         aiHint: '',
         category: '',
@@ -113,7 +119,6 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
     };
     
     if (currentCurrency === 'ARS') {
-      // Simulate a conversion for USD, replace with real logic if needed
       prices['USD'] = values.price / 1000;
     } else {
       prices['ARS'] = values.price * 1000;
@@ -123,6 +128,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
       name: values.name,
       description: values.description,
       price: prices as Prices,
+      stock: values.stock,
       category: values.category,
       image: values.image || `https://placehold.co/400x225.png`,
       aiHint: values.aiHint || values.name.toLowerCase().split(' ').slice(0, 2).join(' '),
@@ -174,13 +180,13 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
             </FormItem>
           )}
         />
-        <div className="flex gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="price"
             render={({ field }) => (
-              <FormItem className='flex-1'>
-                <FormLabel>Precio (en {currentCurrency})</FormLabel>
+              <FormItem>
+                <FormLabel>Precio ({currentCurrency})</FormLabel>
                 <FormControl>
                   <Input type="number" step="0.01" {...field} />
                 </FormControl>
@@ -190,9 +196,23 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
           />
            <FormField
             control={form.control}
+            name="stock"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Stock</FormLabel>
+                <FormControl>
+                  <Input type="number" step="1" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <FormField
+            control={form.control}
             name="category"
             render={({ field }) => (
-              <FormItem className='flex-1'>
+              <FormItem>
                 <FormLabel>Categoría</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value} disabled={categories.length === 0}>
                   <FormControl>
@@ -210,7 +230,6 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
               </FormItem>
             )}
           />
-        </div>
         <FormField
           control={form.control}
           name="image"

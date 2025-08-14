@@ -4,7 +4,7 @@
 import { useEffect, useState, Suspense, lazy } from 'react';
 import Image from 'next/image';
 import type { Product } from '@/lib/types';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import {
@@ -50,7 +50,8 @@ const ProductForm = lazy(() => import('@/components/ProductForm').then(module =>
 
 async function getProducts(): Promise<Product[]> {
   const productsCol = collection(db, 'products');
-  const productsSnapshot = await getDocs(productsCol);
+  const q = query(productsCol, orderBy('name'));
+  const productsSnapshot = await getDocs(q);
   const productList = productsSnapshot.docs.map(doc => {
     const data = doc.data();
     return {
@@ -61,6 +62,7 @@ async function getProducts(): Promise<Product[]> {
       image: data.image,
       aiHint: data.aiHint,
       category: data.category,
+      stock: data.stock,
       options: data.options,
     } as Product;
   });
@@ -198,6 +200,7 @@ export default function AdminProductsPage() {
               <TableHead>Nombre</TableHead>
               <TableHead>Categoría</TableHead>
               <TableHead>Precio Base</TableHead>
+              <TableHead>Stock</TableHead>
               <TableHead className="text-right w-[100px]">Acciones</TableHead>
             </TableRow>
           </TableHeader>
@@ -218,6 +221,7 @@ export default function AdminProductsPage() {
                   <Badge variant="secondary">{product.category}</Badge>
                 </TableCell>
                 <TableCell>{currencySymbol}{product.price[currentCurrency].toFixed(2)}</TableCell>
+                <TableCell>{product.stock}</TableCell>
                 <TableCell className="text-right">
                    <DropdownMenu>
                     <DropdownMenuTrigger asChild>
