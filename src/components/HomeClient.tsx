@@ -16,7 +16,7 @@ import { ProductCard } from './ProductCard';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 const PromotionsCarousel = React.lazy(() => import('@/components/PromotionsCarousel'));
-const Recommendations = React.lazy(() => import('@/components/Recommendations').then(module => ({ default: module.default })));
+const Recommendations = React.lazy(() => import('@/components/Recommendations'));
 
 
 interface HomeClientProps {
@@ -102,7 +102,7 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
                 </Card>
             </div>
         }>
-            <Recommendations />
+            <Recommendations products={products} />
         </Suspense>
 
 
