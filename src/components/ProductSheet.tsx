@@ -96,7 +96,7 @@ export function ProductSheet({ product }: ProductSheetProps) {
                             className="object-cover"
                             data-ai-hint={product.aiHint}
                         />
-                        {product.stock === 0 && (
+                        {product.stock <= 0 && (
                             <Badge variant="destructive" className="absolute top-4 left-4 text-lg">Sin Stock</Badge>
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
@@ -144,8 +144,8 @@ export function ProductSheet({ product }: ProductSheetProps) {
                         {currencySymbol}{finalPrice.toFixed(2)}
                     </p>
                     <SheetClose asChild>
-                      <Button onClick={handleAddToCart} size="lg" className="rounded-full flex-grow" disabled={product.stock === 0}>
-                          {product.stock === 0 ? 'Sin Stock' : 'Agregar al carrito'}
+                      <Button onClick={handleAddToCart} size="lg" className="rounded-full flex-grow" disabled={product.stock <= 0}>
+                          {product.stock <= 0 ? 'Sin Stock' : 'Agregar al carrito'}
                       </Button>
                     </SheetClose>
                 </div>
@@ -153,3 +153,6 @@ export function ProductSheet({ product }: ProductSheetProps) {
         </div>
     )
 }
+
+
+    
