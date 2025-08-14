@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { cn } from '@/lib/utils';
-import { ClipboardList, Package, Loader2, Megaphone, LayoutGrid, Truck, LineChart } from 'lucide-react';
+import { ClipboardList, Package, Loader2, Megaphone, LayoutGrid, Truck, LineChart, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect } from 'react';
 
@@ -18,6 +18,7 @@ const adminNavItems = [
   { href: '/admin/promotions', label: 'Promociones', icon: Megaphone },
   { href: '/admin/categories', label: 'Categorías', icon: LayoutGrid },
   { href: '/admin/delivery-zones', label: 'Zonas de Entrega', icon: Truck },
+  { href: '/admin/settings', label: 'Configuración', icon: Settings },
 ];
 
 export default function AdminLayout({
@@ -76,5 +77,3 @@ export default function AdminLayout({
     </div>
   );
 }
-
-    

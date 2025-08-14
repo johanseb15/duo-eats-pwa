@@ -17,11 +17,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { addPromotion, updatePromotion, type PromotionInput } from '@/app/actions';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useTransition } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { Product, Promotion } from '@/lib/types';
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const formSchema = z.object({
@@ -43,26 +41,11 @@ const formSchema = z.object({
 interface PromotionFormProps {
   onPromotionSubmit: () => Promise<void>;
   promotion?: Promotion | null;
+  products: Product[];
 }
 
-export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormProps) {
+export function PromotionForm({ onPromotionSubmit, promotion, products }: PromotionFormProps) {
   const [isSubmitting, startTransition] = useTransition();
-  const [products, setProducts] = useState<Product[]>([]);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const productsCol = collection(db, 'products');
-        const q = query(productsCol, orderBy('name'));
-        const snapshot = await getDocs(q);
-        const productList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-        setProducts(productList);
-      } catch (error) {
-        console.error("Error fetching products for Promotion Form:", error);
-      }
-    };
-    fetchProducts();
-  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -160,21 +143,22 @@ export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormPro
             name="productId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Producto Asociado</FormLabel>
-                <Select onValueChange={handleProductSelect} value={field.value} disabled={products.length === 0}>
+                <FormLabel>Producto Asociado (Opcional)</FormLabel>
+                <Select onValueChange={handleProductSelect} value={field.value}>
                     <FormControl>
                     <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar un producto para la promoción" />
+                        <SelectValue placeholder="Seleccionar un producto" />
                     </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                    <SelectItem value="">Ninguno</SelectItem>
                     {products.map(p => (
                         <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                     ))}
                     </SelectContent>
                 </Select>
                 <FormDescription>
-                    Al seleccionar un producto, se usará su imagen y se podrá agregar al carrito desde el banner.
+                    Asocia un producto para que se pueda añadir al carrito desde el banner.
                 </FormDescription>
                  <FormMessage />
               </FormItem>
@@ -207,7 +191,7 @@ export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormPro
                 <Input placeholder="Ej: pizza promo" {...field} />
               </FormControl>
                <FormDescription>
-                Se rellenará automáticamente si seleccionas un producto.
+                Se autocompleta al elegir un producto.
               </FormDescription>
               <FormMessage />
             </FormItem>

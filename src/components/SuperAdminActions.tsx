@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useTransition } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import {
@@ -21,7 +21,7 @@ interface FileUploaderProps {
 
 function FileUploaderAction({ title, onFileUpload }: FileUploaderProps) {
     const [file, setFile] = useState<File | null>(null);
-    const [loading, setLoading] = useState(false);
+    const [isUploading, startUploading] = useTransition();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,14 +33,14 @@ function FileUploaderAction({ title, onFileUpload }: FileUploaderProps) {
 
     const handleUpload = async () => {
         if (!file) return;
-        setLoading(true);
-        await onFileUpload(file);
-        setLoading(false);
-        setFile(null);
-        // Clear the file input
-        if(fileInputRef.current) {
-            fileInputRef.current.value = "";
-        }
+        startUploading(async () => {
+            await onFileUpload(file);
+            setFile(null);
+            // Clear the file input
+            if(fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+        });
     };
 
     return (
@@ -54,8 +54,8 @@ function FileUploaderAction({ title, onFileUpload }: FileUploaderProps) {
                     onChange={handleFileChange}
                     className="flex-grow file:mr-2 file:text-primary file:font-semibold file:border-0 file:bg-transparent"
                 />
-                <Button onClick={handleUpload} disabled={!file || loading}>
-                    {loading ? <Loader2 className="animate-spin" /> : <UploadCloud />}
+                <Button onClick={handleUpload} disabled={!file || isUploading}>
+                    {isUploading ? <Loader2 className="animate-spin" /> : <UploadCloud />}
                 </Button>
             </div>
         </div>
@@ -64,6 +64,7 @@ function FileUploaderAction({ title, onFileUpload }: FileUploaderProps) {
 
 export function SuperAdminActions() {
     const { toast } = useToast();
+    const [isDeleting, startDeleting] = useTransition();
 
     const handleFileAction = async (actionFn: (data: any) => Promise<{ success: boolean; message: string }>, file: File) => {
         try {
@@ -92,7 +93,9 @@ export function SuperAdminActions() {
          if (!window.confirm("¿Estás seguro de que quieres borrar TODOS los pedidos? Esta acción no se puede deshacer.")) {
             return;
         }
-        await handleAction(deleteAllOrders);
+        startDeleting(async () => {
+            await handleAction(deleteAllOrders);
+        });
     }
     
     const handleAction = async (actionFn: () => Promise<{ success: boolean; message: string }>) => {
@@ -118,42 +121,54 @@ export function SuperAdminActions() {
 
 
     return (
-        <Card className="border-destructive/50">
-            <CardHeader>
-                <div className='flex items-center gap-3'>
-                    <AlertTriangle className="h-8 w-8 text-destructive" />
-                    <div>
-                        <CardTitle className="text-destructive">Zona de Peligro</CardTitle>
-                        <CardDescription>
-                            Las siguientes acciones son permanentes y no se pueden deshacer. Úsalas con precaución.
-                        </CardDescription>
+        <div className="space-y-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Importación de Datos</CardTitle>
+                    <CardDescription>
+                        Importa productos, categorías o zonas de entrega desde un archivo JSON.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FileUploaderAction
+                        title="Importar Productos (.json)"
+                        onFileUpload={(file) => handleFileAction(importProductsFromFile, file)}
+                    />
+                    <FileUploaderAction
+                        title="Importar Categorías (.json)"
+                        onFileUpload={(file) => handleFileAction(importCategoriesFromFile, file)}
+                    />
+                    <FileUploaderAction
+                        title="Importar Zonas de Entrega (.json)"
+                        onFileUpload={(file) => handleFileAction(importDeliveryZonesFromFile, file)}
+                    />
+                </CardContent>
+            </Card>
+
+            <Card className="border-destructive/50">
+                 <CardHeader>
+                    <div className='flex items-center gap-3'>
+                        <AlertTriangle className="h-8 w-8 text-destructive" />
+                        <div>
+                            <CardTitle className="text-destructive">Zona de Peligro</CardTitle>
+                            <CardDescription>
+                                La siguiente acción es permanente y no se puede deshacer. Úsala con precaución.
+                            </CardDescription>
+                        </div>
                     </div>
-                </div>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <FileUploaderAction
-                    title="Importar Productos (.json)"
-                    onFileUpload={(file) => handleFileAction(importProductsFromFile, file)}
-                />
-                 <FileUploaderAction
-                    title="Importar Categorías (.json)"
-                    onFileUpload={(file) => handleFileAction(importCategoriesFromFile, file)}
-                />
-                 <FileUploaderAction
-                    title="Importar Zonas de Entrega (.json)"
-                    onFileUpload={(file) => handleFileAction(importDeliveryZonesFromFile, file)}
-                />
-                <div className="p-4 border rounded-lg bg-card/50 flex flex-col justify-center">
+                </CardHeader>
+                <CardContent>
                      <Button 
                         variant='destructive'
                         onClick={handleDeleteAllOrders}
                         className="w-full"
+                        disabled={isDeleting}
                     >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Borrar TODOS los Pedidos
+                        {isDeleting ? <Loader2 className="animate-spin mr-2"/> : <Trash2 className="mr-2 h-4 w-4" />}
+                        {isDeleting ? 'Borrando...' : 'Borrar TODOS los Pedidos'}
                     </Button>
-                </div>
-            </CardContent>
-        </Card>
+                </CardContent>
+            </Card>
+        </div>
     )
 }

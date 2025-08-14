@@ -67,6 +67,7 @@ async function getPromotions(): Promise<Promotion[]> {
 
 async function getProducts(): Promise<Product[]> {
   const productsCol = collection(db, 'products');
+  const q = query(productsCol, orderBy('name'));
   const productsSnapshot = await getDocs(q);
   const productList = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
   return productList;
@@ -209,6 +210,7 @@ export default function AdminPromotionsPage() {
                 <PromotionForm 
                   onPromotionSubmit={handleFormSubmit}
                   promotion={selectedPromotion}
+                  products={products}
                 />
             </Suspense>
           </DialogContent>

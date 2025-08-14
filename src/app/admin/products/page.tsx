@@ -266,7 +266,9 @@ export default function AdminProductsPage() {
                   <Badge variant="secondary">{getCategoryName(product.category)}</Badge>
                 </TableCell>
                 <TableCell>{product.price[currentCurrency] ? `${currencySymbol}${product.price[currentCurrency].toFixed(2)}` : 'N/A'}</TableCell>
-                <TableCell>{product.stock}</TableCell>
+                <TableCell>
+                    {product.stock > 0 ? product.stock : <Badge variant="destructive">Sin Stock</Badge>}
+                </TableCell>
                 <TableCell className="text-right">
                    <DropdownMenu>
                     <DropdownMenuTrigger asChild>
