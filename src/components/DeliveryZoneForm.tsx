@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { addDeliveryZone, updateDeliveryZone, type DeliveryZoneInput } from '@/app/actions';
-import { useEffect, useState } from 'react';
+import { useEffect, useTransition } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { DeliveryZone } from '@/lib/types';
 import { Textarea } from './ui/textarea';
@@ -38,7 +38,7 @@ interface DeliveryZoneFormProps {
 const currentCurrency = 'ARS';
 
 export function DeliveryZoneForm({ onFormSubmit, zone }: DeliveryZoneFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -62,32 +62,25 @@ export function DeliveryZoneForm({ onFormSubmit, zone }: DeliveryZoneFormProps) 
     }
   }, [zone, form]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-    
-    const zoneData: DeliveryZoneInput = {
-      neighborhoods: values.neighborhoods.split(',').map(n => n.trim()).filter(Boolean),
-      cost: values.cost,
-    };
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    startTransition(async () => {
+      const zoneData: DeliveryZoneInput = {
+        neighborhoods: values.neighborhoods.split(',').map(n => n.trim()).filter(Boolean),
+        cost: values.cost,
+      };
 
-    if (zoneData.neighborhoods.length === 0) {
-        form.setError('neighborhoods', { message: 'Debes añadir al menos un barrio válido.' });
-        setIsSubmitting(false);
-        return;
-    }
+      if (zoneData.neighborhoods.length === 0) {
+          form.setError('neighborhoods', { message: 'Debes añadir al menos un barrio válido.' });
+          return;
+      }
 
-    try {
-        if (zone) {
-           await updateDeliveryZone(zone.id, zoneData);
-        } else {
-           await addDeliveryZone(zoneData);
-        }
-        await onFormSubmit();
-    } catch (error) {
-        console.error('Failed to submit delivery zone', error);
-    } finally {
-        setIsSubmitting(false);
-    }
+      if (zone) {
+         await updateDeliveryZone(zone.id, zoneData);
+      } else {
+         await addDeliveryZone(zoneData);
+      }
+      await onFormSubmit();
+    });
   }
 
   return (

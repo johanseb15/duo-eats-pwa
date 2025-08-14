@@ -17,7 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { addPromotion, updatePromotion, type PromotionInput } from '@/app/actions';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { Product, Promotion } from '@/lib/types';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
@@ -45,7 +45,7 @@ interface PromotionFormProps {
 }
 
 export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, startTransition] = useTransition();
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -99,28 +99,22 @@ export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormPro
     }
   }
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-    
-    const promotionData: PromotionInput = {
-      title: values.title,
-      description: values.description,
-      image: values.image || `https://placehold.co/300x150.png`,
-      aiHint: values.aiHint || values.title.toLowerCase().split(' ').slice(0, 2).join(' '),
-    };
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    startTransition(async () => {
+      const promotionData: PromotionInput = {
+        title: values.title,
+        description: values.description,
+        image: values.image || `https://placehold.co/300x150.png`,
+        aiHint: values.aiHint || values.title.toLowerCase().split(' ').slice(0, 2).join(' '),
+      };
 
-    try {
-        if (promotion) {
-           await updatePromotion(promotion.id, promotionData);
-        } else {
-           await addPromotion(promotionData);
-        }
-        await onPromotionSubmit();
-    } catch (error) {
-        console.error('Failed to submit promotion', error);
-    } finally {
-        setIsSubmitting(false);
-    }
+      if (promotion) {
+         await updatePromotion(promotion.id, promotionData);
+      } else {
+         await addPromotion(promotionData);
+      }
+      await onPromotionSubmit();
+    });
   }
 
   return (

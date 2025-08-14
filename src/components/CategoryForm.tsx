@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { addCategory, updateCategory, generateIconSuggestion, type CategoryInput } from '@/app/actions';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useTransition } from 'react';
 import { Loader2, Wand2 } from 'lucide-react';
 import type { ProductCategoryData } from '@/lib/types';
 import * as LucideIcons from 'lucide-react';
@@ -39,8 +39,8 @@ interface CategoryFormProps {
 }
 
 export function CategoryForm({ onSubmitSuccess, category }: CategoryFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuggesting, startTransition] = useTransition();
+  const [isSubmitting, startTransition] = useTransition();
+  const [isSuggesting, startSuggestingTransition] = useTransition();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -71,7 +71,7 @@ export function CategoryForm({ onSubmitSuccess, category }: CategoryFormProps) {
     const categoryName = form.getValues('name');
     if (!categoryName) return;
 
-    startTransition(async () => {
+    startSuggestingTransition(async () => {
       const suggestion = await generateIconSuggestion(categoryName);
       if (suggestion && (LucideIcons as any)[suggestion]) {
         form.setValue('icon', suggestion, { shouldValidate: true });
@@ -79,28 +79,21 @@ export function CategoryForm({ onSubmitSuccess, category }: CategoryFormProps) {
     });
   }
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-    
-    const categoryData: CategoryInput = {
-      name: values.name,
-      slug: values.slug,
-      icon: values.icon,
-    };
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    startTransition(async () => {
+      const categoryData: CategoryInput = {
+        name: values.name,
+        slug: values.slug,
+        icon: values.icon,
+      };
 
-    try {
-        if (category) {
-            await updateCategory(category.id, categoryData);
-        } else {
-            await addCategory(categoryData);
-        }
-        await onSubmitSuccess();
-    } catch (error) {
-      console.error('Failed to submit category', error);
-      // Optionally, show an error toast to the user
-    } finally {
-        setIsSubmitting(false);
-    }
+      if (category) {
+        await updateCategory(category.id, categoryData);
+      } else {
+        await addCategory(categoryData);
+      }
+      await onSubmitSuccess();
+    });
   }
 
   return (

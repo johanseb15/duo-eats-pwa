@@ -17,7 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { addProduct, updateProduct, type ProductInput } from '@/app/actions';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { Loader2, PlusCircle, Trash2 } from 'lucide-react';
 import type { Currency, Prices, Product, ProductCategoryData } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -68,7 +68,7 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, startTransition] = useTransition();
   const [categories, setCategories] = useState<ProductCategoryData[]>([]);
 
   useEffect(() => {
@@ -139,57 +139,51 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
     }
   }, [product, form]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-    
-    const prices: Partial<Prices> = {
-      [currentCurrency]: values.price,
-    };
-    
-    if (currentCurrency === 'ARS') {
-      prices['USD'] = values.price / 1000;
-    } else {
-      prices['ARS'] = values.price * 1000;
-    }
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    startTransition(async () => {
+      const prices: Partial<Prices> = {
+        [currentCurrency]: values.price,
+      };
+      
+      if (currentCurrency === 'ARS') {
+        prices['USD'] = values.price / 1000;
+      } else {
+        prices['ARS'] = values.price * 1000;
+      }
 
-    const finalOptions = values.options?.map(opt => ({
-      name: opt.name,
-      values: opt.values.map(val => {
-        const valuePrices: Partial<Prices> = {};
-        valuePrices[currentCurrency] = val.priceModifier;
-        if (currentCurrency === 'ARS') {
-           valuePrices['USD'] = val.priceModifier / 1000;
-        } else {
-            valuePrices['ARS'] = val.priceModifier * 1000;
-        }
-        return { name: val.name, priceModifier: valuePrices as Prices };
-      })
-    })) || [];
+      const finalOptions = values.options?.map(opt => ({
+        name: opt.name,
+        values: opt.values.map(val => {
+          const valuePrices: Partial<Prices> = {};
+          valuePrices[currentCurrency] = val.priceModifier;
+          if (currentCurrency === 'ARS') {
+             valuePrices['USD'] = val.priceModifier / 1000;
+          } else {
+              valuePrices['ARS'] = val.priceModifier * 1000;
+          }
+          return { name: val.name, priceModifier: valuePrices as Prices };
+        })
+      })) || [];
 
 
-    const productData: ProductInput = {
-      name: values.name,
-      description: values.description,
-      price: prices as Prices,
-      stock: values.stock,
-      category: values.category,
-      image: values.image || `https://placehold.co/400x225.png`,
-      aiHint: values.aiHint || values.name.toLowerCase().split(' ').slice(0, 2).join(' '),
-      options: finalOptions,
-    };
+      const productData: ProductInput = {
+        name: values.name,
+        description: values.description,
+        price: prices as Prices,
+        stock: values.stock,
+        category: values.category,
+        image: values.image || `https://placehold.co/400x225.png`,
+        aiHint: values.aiHint || values.name.toLowerCase().split(' ').slice(0, 2).join(' '),
+        options: finalOptions,
+      };
 
-    try {
-        if (product) {
-           await updateProduct(product.id, productData);
-        } else {
-           await addProduct(productData);
-        }
-        await onProductSubmit();
-    } catch (error) {
-        console.error('Failed to submit product', error);
-    } finally {
-        setIsSubmitting(false);
-    }
+      if (product) {
+         await updateProduct(product.id, productData);
+      } else {
+         await addProduct(productData);
+      }
+      await onProductSubmit();
+    });
   }
 
   return (
@@ -419,5 +413,3 @@ function OptionField({ control, optionIndex, remove }: OptionFieldProps) {
         </div>
     )
 }
-
-    
