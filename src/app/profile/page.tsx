@@ -56,6 +56,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 
 const AddressForm = lazy(() => import('@/components/AddressForm').then(module => ({ default: module.AddressForm })));
@@ -247,9 +248,9 @@ export default function ProfilePage() {
                 <CardHeader>
                   <div className="flex justify-between items-center">
                     <CardTitle>Mis Direcciones</CardTitle>
-                     <Dialog open={isAddressFormOpen} onOpenChange={(open) => { setIsAddressFormOpen(open); if (!open) setSelectedAddress(null); }}>
+                      <Dialog open={isAddressFormOpen} onOpenChange={(open) => { setIsAddressFormOpen(open); if (!open) setSelectedAddress(null); }}>
                       <DialogTrigger asChild>
-                         <Button size="sm" onClick={() => setSelectedAddress(null)}><PlusCircle className='mr-2' />Añadir</Button>
+                         <Button size="sm" onClick={() => { setSelectedAddress(null); setIsAddressFormOpen(true); }}><PlusCircle className='mr-2' />Añadir</Button>
                       </DialogTrigger>
                       <DialogContent>
                           <DialogHeader>
@@ -337,3 +338,5 @@ export default function ProfilePage() {
     </>
   );
 }
+
+    

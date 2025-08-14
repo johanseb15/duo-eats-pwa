@@ -16,7 +16,6 @@ interface AddressAutocompleteProps {
 
 const defaultDeliveryZones: DeliveryZone[] = [
   { id: 'retiro', neighborhoods: ['Retiro en local'], cost: 0.00 },
-  { id: 'caba-1', neighborhoods: ['Palermo', 'Recoleta', 'Belgrano'], cost: 500.00 },
 ];
 
 const AddressAutocomplete = ({onAddressSelect, disabled}: AddressAutocompleteProps) => {

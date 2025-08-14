@@ -96,7 +96,6 @@ export default function CartPage() {
             const snapshot = await getDocs(q);
 
             if (snapshot.empty) {
-                console.log("No delivery zones found, using defaults.")
                 setDeliveryZones(defaultDeliveryZones);
             } else {
                 const zoneList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DeliveryZone));
@@ -130,33 +129,12 @@ export default function CartPage() {
     }
   }, [user]);
   
-  const updateDeliveryDetails = useCallback((neighborhood: string | null) => {
-    if (!neighborhood) {
-        setDeliveryCost(0);
-        setSelectedZoneId(null);
-        return;
-    }
-    const zone = deliveryZones.find(z => z.neighborhoods.some(n => neighborhood.includes(n)));
-    if (zone) {
-        setDeliveryCost(zone.cost);
-        setSelectedZoneId(zone.id);
-        if (zone.cost === 0 && deliveryOption === 'delivery') {
-             toast({
-                title: "Envío Gratis",
-                description: `¡El envío para ${neighborhood} es gratis!`
-            });
-        }
-    } else {
-        setDeliveryCost(0);
-        setSelectedZoneId(null);
-        toast({
-            title: "Zona no cubierta",
-            description: `Actualmente no cubrimos la zona de "${neighborhood}".`,
-            variant: "destructive"
-        });
-    }
-  }, [deliveryZones, toast, deliveryOption]);
-
+  const handleAddressSelect = (address: string, neighborhood: string | null, cost: number, zoneId: string | null) => {
+    setManualAddress({ address, neighborhood: neighborhood || '' });
+    setDeliveryCost(cost);
+    setSelectedZoneId(zoneId);
+  };
+  
   useEffect(() => {
     if (loadingZones) return;
 
@@ -168,13 +146,17 @@ export default function CartPage() {
       if (user && userAddresses.length > 0 && addressSelection !== 'new') {
         const selectedAddr = userAddresses.find(a => a.id === addressSelection);
         setFinalAddress(selectedAddr || null);
-        updateDeliveryDetails(selectedAddr?.neighborhood || null);
-      } else {
-        setFinalAddress(null);
-        updateDeliveryDetails(manualAddress.neighborhood || null);
+        const zone = deliveryZones.find(z => z.neighborhoods.some(n => selectedAddr?.neighborhood.includes(n)));
+        if(zone){
+            setDeliveryCost(zone.cost);
+            setSelectedZoneId(zone.id);
+        } else {
+            setDeliveryCost(0);
+            setSelectedZoneId(null);
+        }
       }
     }
-  }, [deliveryOption, addressSelection, user, userAddresses, loadingZones, updateDeliveryDetails, manualAddress]);
+  }, [deliveryOption, addressSelection, user, userAddresses, loadingZones, deliveryZones]);
 
   const { subtotal, finalSubtotal } = useMemo(() => {
     const rawSubtotal = items.reduce(
@@ -187,9 +169,6 @@ export default function CartPage() {
   
   const total = finalSubtotal + deliveryCost;
 
-  const handleManualAddressSelect = (address: string, neighborhood: string | null) => {
-    setManualAddress({ address, neighborhood: neighborhood || '' });
-  };
 
   const handleCheckout = async () => {
      if (!selectedZoneId) {
@@ -444,7 +423,7 @@ export default function CartPage() {
                             )}
                              <div className={cn((user && userAddresses.length > 0 && addressSelection !== 'new') && 'hidden')}>
                                 <Suspense fallback={<Skeleton className='h-10 w-full' />}>
-                                    <AddressAutocomplete onAddressSelect={handleManualAddressSelect} disabled={deliveryOption === 'pickup'} />
+                                    <AddressAutocomplete onAddressSelect={handleAddressSelect} disabled={deliveryOption === 'pickup'} />
                                 </Suspense>
                             </div>
                         </div>
@@ -549,3 +528,5 @@ export default function CartPage() {
     </div>
   );
 }
+
+    

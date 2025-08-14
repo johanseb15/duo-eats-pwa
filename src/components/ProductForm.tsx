@@ -52,7 +52,7 @@ const formSchema = z.object({
   }).default(0),
   category: z.string({
     required_error: "Debes seleccionar una categoría.",
-  }),
+  }).min(1, "Debes seleccionar una categoría."),
   image: z.string().url({
     message: 'Por favor, introduce una URL de imagen válida.',
   }).or(z.literal('')),
@@ -270,7 +270,6 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
                     ))}
                   </SelectContent>
                 </Select>
-                 <FormDescription>La categoría debe ser un "slug", ej: "pizzas"</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -420,3 +419,5 @@ function OptionField({ control, optionIndex, remove }: OptionFieldProps) {
         </div>
     )
 }
+
+    
