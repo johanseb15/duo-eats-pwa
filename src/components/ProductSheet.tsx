@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import type { Currency, Product } from '@/lib/types';
 import { Button } from './ui/button';
-import { SheetHeader, SheetTitle, SheetDescription, SheetFooter } from './ui/sheet';
+import { SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from './ui/sheet';
 import { ScrollArea } from './ui/scroll-area';
 import { Badge } from './ui/badge';
 
@@ -66,8 +66,6 @@ export function ProductSheet({ product }: ProductSheetProps) {
           title: '¡Añadido al carrito!',
           description: `${product.name} está ahora en tu carrito.`,
         });
-        // Close the sheet - this is handled by the Sheet's default behavior,
-        // no need for router.push or router.back()
     };
     
     const isOutOfStock = product.stock <= 0;
@@ -76,19 +74,21 @@ export function ProductSheet({ product }: ProductSheetProps) {
     return (
         <div className="flex flex-col h-full">
             <ScrollArea className="flex-grow">
-                <div className="relative h-72 w-full">
-                    <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                        data-ai-hint={product.aiHint}
-                    />
-                     {isOutOfStock && (
-                        <Badge variant="destructive" className="absolute top-4 left-4 text-lg">Sin Stock</Badge>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
-                </div>
+                <SheetClose asChild>
+                    <div className="relative h-72 w-full">
+                        <Image
+                            src={product.image}
+                            alt={product.name}
+                            fill
+                            className="object-cover"
+                            data-ai-hint={product.aiHint}
+                        />
+                        {isOutOfStock && (
+                            <Badge variant="destructive" className="absolute top-4 left-4 text-lg">Sin Stock</Badge>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+                    </div>
+                </SheetClose>
                 <SheetHeader className="p-6 -mt-16 relative bg-background rounded-t-3xl text-left">
                     <SheetTitle className="text-3xl font-bold text-foreground">{product.name}</SheetTitle>
                     <SheetDescription className="text-muted-foreground mt-2">{product.description}</SheetDescription>
@@ -125,9 +125,11 @@ export function ProductSheet({ product }: ProductSheetProps) {
                      <p className="text-2xl font-extrabold text-foreground">
                         {currencySymbol}{finalPrice.toFixed(2)}
                     </p>
-                    <Button onClick={handleAddToCart} size="lg" className="rounded-full flex-grow" disabled={isOutOfStock}>
-                        {isOutOfStock ? 'Sin Stock' : 'Agregar al carrito'}
-                    </Button>
+                    <SheetClose asChild>
+                      <Button onClick={handleAddToCart} size="lg" className="rounded-full flex-grow">
+                          {isOutOfStock ? 'Sin Stock' : 'Agregar al carrito'}
+                      </Button>
+                    </SheetClose>
                 </div>
             </SheetFooter>
         </div>

@@ -50,7 +50,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 <div className='flex justify-between items-center mt-2'>
                     <p className="text-lg font-bold text-foreground">{currencySymbol}{product.price[currentCurrency].toFixed(2)}</p>
                     <SheetTrigger asChild>
-                        <Button size='icon' className='rounded-full h-9 w-9'>
+                        <Button size='icon' className='rounded-full h-9 w-9' aria-label="Añadir al carrito">
                             <Plus/>
                         </Button>
                     </SheetTrigger>
