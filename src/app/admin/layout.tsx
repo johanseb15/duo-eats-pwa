@@ -9,7 +9,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { cn } from '@/lib/utils';
 import { ClipboardList, Package, Loader2, Megaphone, LayoutGrid, Truck, LineChart } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 const adminNavItems = [
   { href: '/admin', label: 'Dashboard', icon: LineChart },
@@ -27,25 +27,15 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { user, isAdmin, loading } = useAuth();
 
   useEffect(() => {
     if (loading) return;
 
-    if (!user) {
-      router.push('/');
-      return;
-    }
-
-    const adminUids = process.env.NEXT_PUBLIC_ADMIN_UIDS?.split(',') || [];
-    const isUserAdmin = adminUids.includes(user.uid);
-    setIsAdmin(isUserAdmin);
-
-    if (!isUserAdmin) {
+    if (!user || !isAdmin) {
       router.push('/');
     }
-  }, [user, loading, router]);
+  }, [user, isAdmin, loading, router]);
   
   if (loading || !isAdmin) {
     return (

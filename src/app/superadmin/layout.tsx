@@ -8,7 +8,6 @@ import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { Loader2 } from 'lucide-react';
 
-const superAdminUids = (process.env.NEXT_PUBLIC_SUPERADMIN_UIDS || "").split(',');
 
 export default function SuperAdminLayout({
   children,
@@ -16,12 +15,12 @@ export default function SuperAdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, isSuperAdmin, loading } = useAuth();
   
-  const isSuperAdmin = user ? superAdminUids.includes(user.uid) : false;
-
   useEffect(() => {
-    if (!loading && !isSuperAdmin) {
+    if (loading) return;
+
+    if (!user || !isSuperAdmin) {
       router.push('/');
     }
   }, [user, isSuperAdmin, loading, router]);
