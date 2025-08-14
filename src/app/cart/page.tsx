@@ -202,10 +202,10 @@ export default function CartPage() {
         sendWhatsApp(result.orderId, userName, guestAddress);
         toast({
           title: '¡Pedido guardado!',
-          description: 'Tu pedido ha sido guardado y será enviado a WhatsApp.',
+          description: 'Tu pedido ha sido guardado y serás redirigido para el seguimiento.',
         });
         clearCart();
-        router.push(`/orders?orderId=${result.orderId}`);
+        router.push(`/order/${result.orderId}`);
     } else {
         toast({
           title: 'Error al crear el pedido',
