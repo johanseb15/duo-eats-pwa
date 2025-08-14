@@ -8,64 +8,228 @@ import CategoryClientPage from './page.client';
 const testProducts: Product[] = [
     {
         id: '1',
-        name: 'Pizza de Muzzarella',
-        description: 'Clásica pizza con salsa de tomate, muzzarella y aceitunas.',
-        price: { ARS: 10000, USD: 10 },
-        image: 'https://placehold.co/600x400.png',
-        aiHint: 'mozzarella pizza',
-        category: 'Pizzas',
-        options: [
-            {
-                name: 'Tamaño',
-                values: [
-                    { name: 'Individual', priceModifier: { ARS: 0, USD: 0 } },
-                    { name: 'Grande', priceModifier: { ARS: 2000, USD: 2 } },
-                ],
-            },
-             {
-                name: 'Borde',
-                values: [
-                    { name: 'Normal', priceModifier: { ARS: 0, USD: 0 } },
-                    { name: 'Relleno de Queso', priceModifier: { ARS: 1500, USD: 1.5 } },
-                ],
-            }
-        ]
+        name: 'Hamburguesa Doble Queso',
+        description: 'Doble carne de res, queso cheddar, cebolla caramelizada y salsa especial.',
+        price: { ARS: 3200, USD: 3.2 },
+        image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=400',
+        aiHint: 'double cheeseburger',
+        category: 'hamburguesas',
     },
     {
         id: '2',
-        name: 'Empanadas de Carne',
-        description: 'Empanadas jugosas de carne cortada a cuchillo.',
-        price: { ARS: 1000, USD: 1 },
-        image: 'https://placehold.co/600x400.png',
-        aiHint: 'meat empanada',
-        category: 'Empanadas',
+        name: 'Pizza Napolitana',
+        description: 'Masa fina, salsa de tomate, mozzarella, rodajas de tomate y orégano.',
+        price: { ARS: 2800, USD: 2.8 },
+        image: 'https://images.unsplash.com/photo-1601924582971-c8b3b4fa6a8a?w=400',
+        aiHint: 'neapolitan pizza',
+        category: 'pizzas',
     },
     {
         id: '3',
-        name: 'Flan con Dulce de Leche',
-        description: 'Flan casero tradicional con una generosa porción de dulce de leche.',
-        price: { ARS: 3000, USD: 3 },
-        image: 'https://placehold.co/600x400.png',
-        aiHint: 'flan caramel',
-        category: 'Postres',
+        name: 'Lomito Completo',
+        description: 'Pan casero, carne vacuna, lechuga, tomate, jamón, queso, huevo y mayonesa.',
+        price: { ARS: 2500, USD: 2.5 },
+        image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=400',
+        aiHint: 'lomito sandwich',
+        category: 'lomitos',
     },
     {
         id: '4',
-        name: 'Pizza Napolitana',
-        description: 'Pizza con salsa de tomate, muzzarella, rodajas de tomate fresco y ajo.',
-        price: { ARS: 11000, USD: 11 },
-        image: 'https://placehold.co/600x400.png',
-        aiHint: 'neapolitan pizza',
-        category: 'Pizzas',
-         options: [
-            {
-                name: 'Tamaño',
-                values: [
-                    { name: 'Individual', priceModifier: { ARS: 0, USD: 0 } },
-                    { name: 'Grande', priceModifier: { ARS: 2200, USD: 2.2 } },
-                ],
-            }
-        ]
+        name: 'Empanadas de Carne',
+        description: 'Empanadas al horno rellenas de carne, cebolla y especias.',
+        price: { ARS: 350, USD: 0.35 },
+        image: 'https://images.unsplash.com/photo-1604908177522-4327d4d1d2d2?w=400',
+        aiHint: 'meat empanadas',
+        category: 'empanadas',
+    },
+    {
+        id: '5',
+        name: 'Coca-Cola 500ml',
+        description: 'Bebida gaseosa sabor cola en botella de 500ml.',
+        price: { ARS: 500, USD: 0.5 },
+        image: 'https://images.unsplash.com/photo-1583947215259-38e31be8752b?w=400',
+        aiHint: 'coca-cola bottle',
+        category: 'bebidas',
+    },
+    {
+        id: '6',
+        name: 'Hamburguesa BBQ',
+        description: 'Carne de res, queso cheddar, cebolla frita y salsa barbacoa.',
+        price: { ARS: 3300, USD: 3.3 },
+        image: 'https://images.unsplash.com/photo-1606755962773-d324e0a13085?w=400',
+        aiHint: 'bbq burger',
+        category: 'hamburguesas',
+    },
+    {
+        id: '7',
+        name: 'Pizza Pepperoni',
+        description: 'Masa crujiente, salsa de tomate, mozzarella y pepperoni.',
+        price: { ARS: 3000, USD: 3.0 },
+        image: 'https://images.unsplash.com/photo-1601924994987-69c3b35b4f69?w=400',
+        aiHint: 'pepperoni pizza',
+        category: 'pizzas',
+    },
+    {
+        id: '8',
+        name: 'Lomito Simple',
+        description: 'Pan baguette, carne vacuna, lechuga, tomate y mayonesa.',
+        price: { ARS: 2000, USD: 2.0 },
+        image: 'https://images.unsplash.com/photo-1605479085026-2d2a3e3aa87e?w=400',
+        aiHint: 'simple lomito',
+        category: 'lomitos',
+    },
+    {
+        id: '9',
+        name: 'Empanadas de Pollo',
+        description: 'Empanadas fritas rellenas de pollo y cebolla.',
+        price: { ARS: 350, USD: 0.35 },
+        image: 'https://images.unsplash.com/photo-1617196036985-fd5f1a9b735e?w=400',
+        aiHint: 'chicken empanadas',
+        category: 'empanadas',
+    },
+    {
+        id: '10',
+        name: 'Agua Mineral 500ml',
+        description: 'Agua mineral sin gas en botella de 500ml.',
+        price: { ARS: 400, USD: 0.4 },
+        image: 'https://images.unsplash.com/photo-1599981715701-0f08df5b6d8b?w=400',
+        aiHint: 'mineral water',
+        category: 'bebidas',
+    },
+    {
+        id: '11',
+        name: 'Hamburguesa Clásica',
+        description: 'Carne de res, lechuga, tomate, cebolla y mayonesa.',
+        price: { ARS: 2800, USD: 2.8 },
+        image: 'https://images.unsplash.com/photo-1598136490944-bc07f12d3d4a?w=400',
+        aiHint: 'classic burger',
+        category: 'hamburguesas',
+    },
+    {
+        id: '12',
+        name: 'Pizza Cuatro Quesos',
+        description: 'Mozzarella, gorgonzola, parmesano y provolone.',
+        price: { ARS: 3200, USD: 3.2 },
+        image: 'https://images.unsplash.com/photo-1603079849119-65e8adba6b60?w=400',
+        aiHint: 'four cheese pizza',
+        category: 'pizzas',
+    },
+    {
+        id: '13',
+        name: 'Lomito Vegetariano',
+        description: 'Pan integral, hamburguesa de lentejas, lechuga, tomate y palta.',
+        price: { ARS: 2200, USD: 2.2 },
+        image: 'https://images.unsplash.com/photo-1585238342020-96629b5d1d9d?w=400',
+        aiHint: 'vegetarian sandwich',
+        category: 'lomitos',
+    },
+    {
+        id: '14',
+        name: 'Empanadas Caprese',
+        description: 'Empanadas rellenas de tomate, mozzarella y albahaca.',
+        price: { ARS: 350, USD: 0.35 },
+        image: 'https://images.unsplash.com/photo-1625949727792-3a58d5ec6b06?w=400',
+        aiHint: 'caprese empanadas',
+        category: 'empanadas',
+    },
+    {
+        id: '15',
+        name: 'Sprite 500ml',
+        description: 'Bebida gaseosa sabor lima-limón en botella de 500ml.',
+        price: { ARS: 500, USD: 0.5 },
+        image: 'https://images.unsplash.com/photo-1597688389271-15f3f41faeef?w=400',
+        aiHint: 'sprite bottle',
+        category: 'bebidas',
+    },
+    {
+        id: '16',
+        name: 'Hamburguesa con Huevo',
+        description: 'Carne de res, queso cheddar, huevo frito y mayonesa.',
+        price: { ARS: 3000, USD: 3.0 },
+        image: 'https://images.unsplash.com/photo-1572802419224-296b0aeee0f6?w=400',
+        aiHint: 'burger with egg',
+        category: 'hamburguesas',
+    },
+    {
+        id: '17',
+        name: 'Pizza Fugazzeta',
+        description: 'Masa alta, mozzarella y cebolla.',
+        price: { ARS: 2900, USD: 2.9 },
+        image: 'https://images.unsplash.com/photo-1617196036985-fd5f1a9b735e?w=400',
+        aiHint: 'fugazzeta pizza',
+        category: 'pizzas',
+    },
+    {
+        id: '18',
+        name: 'Lomito Especial',
+        description: 'Pan casero, carne, huevo, queso y salsa criolla.',
+        price: { ARS: 2600, USD: 2.6 },
+        image: 'https://images.unsplash.com/photo-1605479085026-2d2a3e3aa87e?w=400',
+        aiHint: 'special lomito',
+        category: 'lomitos',
+    },
+    {
+        id: '19',
+        name: 'Empanadas de Jamón y Queso',
+        description: 'Empanadas fritas rellenas de jamón y queso.',
+        price: { ARS: 350, USD: 0.35 },
+        image: 'https://images.unsplash.com/photo-1625949727792-3a58d5ec6b06?w=400',
+        aiHint: 'ham cheese empanadas',
+        category: 'empanadas',
+    },
+    {
+        id: '20',
+        name: 'Fanta 500ml',
+        description: 'Bebida gaseosa sabor naranja en botella de 500ml.',
+        price: { ARS: 500, USD: 0.5 },
+        image: 'https://images.unsplash.com/photo-1626125156777-6c8b7b2e2a9a?w=400',
+        aiHint: 'fanta bottle',
+        category: 'bebidas',
+    },
+    {
+        id: '21',
+        name: 'Hamburguesa Doble Bacon',
+        description: 'Doble carne de res, queso cheddar y bacon crocante.',
+        price: { ARS: 3400, USD: 3.4 },
+        image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400',
+        aiHint: 'double bacon burger',
+        category: 'hamburguesas',
+    },
+    {
+        id: '22',
+        name: 'Pizza Margarita',
+        description: 'Masa fina, salsa de tomate, mozzarella y albahaca fresca.',
+        price: { ARS: 2800, USD: 2.8 },
+        image: 'https://images.unsplash.com/photo-1603079849119-65e8adba6b60?w=400',
+        aiHint: 'margarita pizza',
+        category: 'pizzas',
+    },
+    {
+        id: '23',
+        name: 'Lomito BBQ',
+        description: 'Pan baguette, carne de res, cebolla caramelizada y salsa BBQ.',
+        price: { ARS: 2700, USD: 2.7 },
+        image: 'https://images.unsplash.com/photo-1585238342020-96629b5d1d9d?w=400',
+        aiHint: 'bbq lomito',
+        category: 'lomitos',
+    },
+    {
+        id: '24',
+        name: 'Empanadas de Verdura',
+        description: 'Empanadas al horno rellenas de espinaca y ricotta.',
+        price: { ARS: 350, USD: 0.35 },
+        image: 'https://images.unsplash.com/photo-1625949727792-3a58d5ec6b06?w=400',
+        aiHint: 'vegetable empanadas',
+        category: 'empanadas',
+    },
+    {
+        id: '25',
+        name: 'Agua con Gas 500ml',
+        description: 'Agua mineral con gas en botella de 500ml.',
+        price: { ARS: 450, USD: 0.45 },
+        image: 'https://images.unsplash.com/photo-1599981715701-0f08df5b6d8b?w=400',
+        aiHint: 'sparkling water',
+        category: 'bebidas',
     },
 ];
 
@@ -76,7 +240,9 @@ async function getProductsByCategory(categoryName: string): Promise<Product[]> {
     const productsSnapshot = await getDocs(q);
     
     if (productsSnapshot.empty) {
-        return testProducts.filter(p => p.category === categoryName);
+        // Normalize category name from slug before filtering
+        const normalizedCategoryName = categoryName.toLowerCase();
+        return testProducts.filter(p => p.category.toLowerCase() === normalizedCategoryName);
     }
     
     const productList = productsSnapshot.docs.map(doc => {
@@ -95,16 +261,18 @@ async function getProductsByCategory(categoryName: string): Promise<Product[]> {
     return productList;
   } catch (error) {
     console.error(`Error fetching products for category ${categoryName}, falling back to test data:`, error);
-    return testProducts.filter(p => p.category === categoryName);
+    const normalizedCategoryName = categoryName.toLowerCase();
+    return testProducts.filter(p => p.category.toLowerCase() === normalizedCategoryName);
   }
 }
 
 async function getCategoryBySlug(slug: string): Promise<ProductCategoryData | null> {
     const testCategories: ProductCategoryData[] = [
-      { id: '1', name: 'Pizzas', slug: 'pizzas', icon: 'Pizza' },
-      { id: '2', name: 'Empanadas', slug: 'empanadas', icon: 'Wind' },
-      { id: '3', name: 'Bebidas', slug: 'bebidas', icon: 'CupSoda' },
-      { id: '4', name: 'Postres', slug: 'postres', icon: 'CakeSlice' },
+      { id: '1', name: 'Hamburguesas', slug: 'hamburguesas', icon: 'Beef' },
+      { id: '2', name: 'Pizzas', slug: 'pizzas', icon: 'Pizza' },
+      { id: '3', name: 'Lomitos', slug: 'lomitos', icon: 'Sandwich' },
+      { id: '4', name: 'Empanadas', slug: 'empanadas', icon: 'Wind' },
+      { id: '5', name: 'Bebidas', slug: 'bebidas', icon: 'CupSoda' },
     ];
     
     try {
@@ -134,6 +302,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
     notFound();
   }
 
+  // Use category.name for filtering, as test data uses full names
   const products = await getProductsByCategory(category.name);
 
   return (
