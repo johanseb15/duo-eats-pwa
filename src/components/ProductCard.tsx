@@ -20,6 +20,7 @@ import { ProductSheet } from './ProductSheet';
 import { useFavorites } from '@/store/favorites';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from './ui/badge';
 
 interface ProductCardProps {
   product: Product;
@@ -55,6 +56,9 @@ export function ProductCard({ product }: ProductCardProps) {
                   className="object-cover"
                   data-ai-hint={product.aiHint}
                 />
+                 {product.stock <= 0 && (
+                  <Badge variant="destructive" className="absolute top-2 left-2">Sin Stock</Badge>
+                )}
               </div>
               <div className="py-3 pr-3 flex-grow">
                 <CardTitle className="text-lg font-semibold truncate">
@@ -70,7 +74,7 @@ export function ProductCard({ product }: ProductCardProps) {
                             <Heart className={cn("h-5 w-5", isFav && "fill-current")} />
                         </Button>
                         <SheetTrigger asChild>
-                            <Button size='icon' className='rounded-full h-9 w-9' aria-label="Añadir al carrito">
+                            <Button size='icon' className='rounded-full h-9 w-9' aria-label="Añadir al carrito" disabled={product.stock <= 0}>
                                 <Plus/>
                             </Button>
                         </SheetTrigger>

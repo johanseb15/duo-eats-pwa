@@ -153,6 +153,3 @@ export function ProductSheet({ product }: ProductSheetProps) {
         </div>
     )
 }
-
-
-    
