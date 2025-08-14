@@ -66,6 +66,7 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<Order['status'] | 'Todos'>('Todos');
   const [isUpdating, startUpdateTransition] = useTransition();
 
   // State for cancellation dialog
@@ -100,11 +101,13 @@ export default function AdminOrdersPage() {
   }, []);
   
   const filteredOrders = useMemo(() => {
-    return orders.filter(o => 
-        o.userName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        o.id.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [orders, searchTerm]);
+    return orders.filter(o => {
+      const matchesSearch = o.userName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                            o.id.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === 'Todos' || o.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [orders, searchTerm, statusFilter]);
 
 
   const handleStatusChange = async (orderId: string, newStatus: Order['status']) => {
@@ -172,16 +175,29 @@ export default function AdminOrdersPage() {
 
   return (
     <>
-      <div className="flex justify-between items-center mb-6 gap-4">
+      <div className="flex justify-between items-center mb-6 gap-4 flex-wrap">
         <h2 className="text-2xl font-bold shrink-0">Pedidos ({filteredOrders.length})</h2>
-         <div className="relative w-full max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input 
-                placeholder="Buscar por cliente o ID..." 
-                className="pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-            />
+         <div className="flex gap-2 w-full sm:w-auto">
+            <div className="relative w-full sm:w-auto flex-grow">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input 
+                    placeholder="Buscar..." 
+                    className="pl-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filtrar por estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Todos">Todos</SelectItem>
+                {orderStatuses.map(status => (
+                  <SelectItem key={status} value={status}>{status}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
         </div>
         <Button onClick={() => loadOrders()} disabled={loading} size="sm">Refrescar</Button>
       </div>
@@ -197,7 +213,7 @@ export default function AdminOrdersPage() {
          <div className="text-center py-20">
           <h2 className="text-2xl font-semibold">No se encontraron pedidos</h2>
           <p className="mt-2 text-muted-foreground">
-            Prueba con otro término de búsqueda.
+            Prueba con otro término de búsqueda o filtro de estado.
           </p>
         </div>
       ) : (
