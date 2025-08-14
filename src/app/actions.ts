@@ -390,7 +390,7 @@ export async function fetchDashboardAnalytics(): Promise<DashboardAnalytics> {
         });
         const productSales: ProductSale[] = Object.entries(sales)
             .map(([name, total]) => ({ name, total }))
-            .sort((a, b) => b.total)
+            .sort((a, b) => b.total - b.total)
             .slice(0, 5);
 
         // Orders over time (last 7 days)
