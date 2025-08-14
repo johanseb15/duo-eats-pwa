@@ -81,7 +81,6 @@ export function ProductSheet({ product }: ProductSheetProps) {
                         src={product.image}
                         alt={product.name}
                         fill
-                        style={{objectFit:"cover"}}
                         className="object-cover"
                         data-ai-hint={product.aiHint}
                     />
