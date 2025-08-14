@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingCart, User } from 'lucide-react';
+import { ShoppingCart, User, UtensilsCrossed } from 'lucide-react';
 import { useCart } from '@/store/cart';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -22,6 +22,7 @@ export function Header() {
     <header className="sticky top-0 z-40 w-full border-b bg-background/60 backdrop-blur-xl hidden md:block">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 font-playfair transition-opacity hover:opacity-80">
+          <UtensilsCrossed className="h-7 w-7 text-primary" />
           <span className="text-2xl font-bold text-foreground">Duo Eats</span>
         </Link>
         <div className="flex items-center gap-2">
