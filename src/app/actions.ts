@@ -5,7 +5,7 @@ import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommen
 import { suggestCategoryIcon } from '@/ai/flows/suggest-category-icon';
 import { db } from '@/lib/firebase';
 import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone, DashboardAnalytics, ProductSale, OrderOverTime, CartItem } from '@/lib/types';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, limit } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, limit, getDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { getAuth } from 'firebase-admin/auth';
 import { adminApp } from '@/lib/firebase-admin';
@@ -40,7 +40,7 @@ export async function fetchRecommendations() {
     let userOrderHistory: string[] = [];
     
     if (currentUser) {
-      const userOrders = await fetchOrders(currentUser.uid);
+      const userOrders = await fetchOrdersByUserId(currentUser.uid);
       if (userOrders.length > 0) {
         const productNames = userOrders.flatMap(order => order.items.map(item => item.name));
         userOrderHistory = [...new Set(productNames)];
@@ -74,7 +74,7 @@ export async function generateIconSuggestion(categoryName: string): Promise<stri
 
 
 interface CreateOrderInput {
-  userId: string;
+  userId?: string; // Optional for guest checkouts
   userName: string;
   items: CartItem[];
   total: number;
@@ -86,6 +86,7 @@ export async function createOrder(input: CreateOrderInput) {
   try {
     const orderData = {
       ...input,
+      userId: input.userId || null, // Store null if it's a guest
       status: 'Pendiente',
       createdAt: serverTimestamp(),
     };
@@ -100,7 +101,7 @@ export async function createOrder(input: CreateOrderInput) {
   }
 }
 
-export async function fetchOrders(userId: string): Promise<Order[]> {
+export async function fetchOrdersByUserId(userId: string): Promise<Order[]> {
   if (!userId) {
     return [];
   }
@@ -121,6 +122,31 @@ export async function fetchOrders(userId: string): Promise<Order[]> {
     console.error("Error fetching orders: ", error);
     return [];
   }
+}
+
+export async function fetchOrderById(orderId: string): Promise<Order | null> {
+    if (!orderId) {
+        return null;
+    }
+    try {
+        const orderRef = doc(db, 'orders', orderId);
+        const orderSnap = await getDoc(orderRef);
+
+        if (!orderSnap.exists()) {
+            return null;
+        }
+        
+        const data = orderSnap.data();
+        return {
+            id: orderSnap.id,
+            ...data,
+            createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
+        } as Order;
+
+    } catch (error) {
+        console.error("Error fetching order by ID:", error);
+        return null;
+    }
 }
 
 

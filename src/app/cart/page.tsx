@@ -175,52 +175,46 @@ export default function CartPage() {
         return;
     }
 
-    if (user) {
-      setIsProcessing(true);
-      const orderInput = {
-        userId: user.uid,
-        userName: user.displayName || 'N/A',
-        items: items,
-        total: total,
-        subtotal: finalSubtotal,
-        deliveryCost: deliveryCost,
-      };
-      const result = await createOrder(orderInput);
-      if (result.success) {
-        sendWhatsApp(result.orderId, user.displayName || undefined, guestAddress);
+    const userName = user?.displayName || guestName;
+    if (!userName) {
+        toast({
+            title: 'Faltan datos',
+            description: 'Por favor, completa tu nombre para continuar.',
+            variant: 'destructive',
+        });
+        return;
+    }
+    
+    setIsProcessing(true);
+
+    const orderInput = {
+      userId: user?.uid,
+      userName: userName,
+      items: items,
+      total: total,
+      subtotal: finalSubtotal,
+      deliveryCost: deliveryCost,
+    };
+
+    const result = await createOrder(orderInput);
+
+    if (result.success && result.orderId) {
+        sendWhatsApp(result.orderId, userName, guestAddress);
         toast({
           title: '¡Pedido guardado!',
           description: 'Tu pedido ha sido guardado y será enviado a WhatsApp.',
         });
         clearCart();
         router.push(`/orders?orderId=${result.orderId}`);
-      } else {
+    } else {
         toast({
           title: 'Error al crear el pedido',
           description: 'Hubo un problema al guardar tu pedido. Por favor, intenta de nuevo.',
           variant: 'destructive',
         });
-      }
-      setIsProcessing(false);
-    } else {
-      // Guest checkout
-      if (!guestName || !guestAddress) {
-        toast({
-          title: 'Faltan datos',
-          description: 'Por favor, completa tu nombre y dirección para continuar.',
-          variant: 'destructive',
-        });
-        return;
-      }
-      setIsProcessing(true);
-      sendWhatsApp(undefined, guestName, guestAddress);
-      toast({
-        title: '¡Pedido listo para enviar!',
-        description: 'Tu pedido será enviado a WhatsApp.',
-      });
-      clearCart();
-      setIsProcessing(false);
     }
+
+    setIsProcessing(false);
   };
 
 

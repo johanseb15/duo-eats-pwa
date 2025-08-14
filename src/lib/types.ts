@@ -41,7 +41,7 @@ export interface CartItem extends Product {
 
 export interface Order {
   id: string;
-  userId: string;
+  userId: string | null; // Can be null for guest orders
   userName: string;
   items: CartItem[];
   total: number;
