@@ -15,8 +15,8 @@ import { BottomNav } from '@/components/BottomNav';
 import { ProductCard } from './ProductCard';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
-const PromotionsCarousel = React.lazy(() => import('@/components/PromotionsCarousel').then(module => ({ default: module.PromotionsCarousel })));
-const Recommendations = React.lazy(() => import('@/components/Recommendations'));
+const PromotionsCarousel = React.lazy(() => import('@/components/PromotionsCarousel'));
+const Recommendations = React.lazy(() => import('@/components/Recommendations').then(module => ({ default: module.default })));
 
 
 interface HomeClientProps {
