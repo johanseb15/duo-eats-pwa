@@ -13,7 +13,7 @@ if (process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
     clientEmail: process.env.GOOGLE_CLIENT_EMAIL,
     // The private key must be formatted correctly.
     // In your .env file, it should be enclosed in quotes like this:
-    // GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n ... \n-----END PRIVATE KEY-----\n"
+    // GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\n ... \\n-----END PRIVATE KEY-----\\n"
     privateKey: (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
   };
   
@@ -34,5 +34,3 @@ if (process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
 
 
 export { adminApp };
-
-    
