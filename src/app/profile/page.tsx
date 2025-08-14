@@ -12,7 +12,8 @@ import {
   User,
   LogOut,
   Shield,
-  UserCog
+  UserCog,
+  Moon
 } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 
@@ -23,6 +24,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
 import { auth } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const superAdminUids = (process.env.NEXT_PUBLIC_SUPERADMIN_UIDS || "").split(',');
 const adminUids = (process.env.NEXT_PUBLIC_ADMIN_UIDS || "").split(',');
@@ -107,6 +109,11 @@ export default function ProfilePage() {
                   </div>
               </Link>
             ))}
+            <div className="flex items-center p-4 bg-card/60 backdrop-blur-xl rounded-xl shadow-sm">
+                <Moon className="w-6 h-6 mr-4 text-primary" />
+                <span className="flex-grow font-semibold">Modo Oscuro</span>
+                <ThemeToggle />
+            </div>
              {isAdmin && (
                <Link href="/admin">
                   <div className="flex items-center p-4 bg-blue-500/20 backdrop-blur-xl rounded-xl shadow-sm hover:bg-blue-500/40 transition-all duration-200 hover:scale-105">
@@ -139,5 +146,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
