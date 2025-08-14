@@ -62,6 +62,8 @@ export function ProductSheet({ product }: ProductSheetProps) {
         setSelectedOptions(prev => ({ ...prev, [optionName]: valueName }));
     };
     
+    const isOutOfStock = product.stock <= 0;
+
     const handleAddToCart = () => {
         if (isOutOfStock) return;
         const cartItem = {
@@ -84,8 +86,6 @@ export function ProductSheet({ product }: ProductSheetProps) {
         });
     };
     
-    const isOutOfStock = product.stock <= 0;
-
 
     return (
         <div className="flex flex-col h-full">
@@ -156,3 +156,5 @@ export function ProductSheet({ product }: ProductSheetProps) {
         </div>
     )
 }
+
+    

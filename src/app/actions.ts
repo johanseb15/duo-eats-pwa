@@ -109,9 +109,15 @@ export async function createOrder(input: CreateOrderInput) {
             }
             
             const currentStock = productDoc.data().stock;
-            // Only decrement if stock is a number
+            // Only decrement if stock is a number and defined
             if (typeof currentStock === 'number') {
                 const newStock = currentStock - item.quantity;
+                if (newStock < 0) {
+                    // This could happen in a race condition.
+                    // Decide how to handle it: throw an error to fail the transaction,
+                    // or just set stock to 0. Failing is safer.
+                    throw new Error(`Not enough stock for product ${item.name}.`);
+                }
                 transaction.update(productRef, { stock: newStock });
             }
         }
@@ -441,3 +447,5 @@ export async function fetchDashboardAnalytics(): Promise<DashboardAnalytics> {
         };
     }
 }
+
+    

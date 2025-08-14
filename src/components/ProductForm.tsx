@@ -49,7 +49,7 @@ const formSchema = z.object({
   }),
   stock: z.coerce.number().min(0, {
     message: 'El stock no puede ser negativo.'
-  }),
+  }).default(0),
   category: z.string({
     required_error: "Debes seleccionar una categoría.",
   }),
@@ -420,3 +420,5 @@ function OptionField({ control, optionIndex, remove }: OptionFieldProps) {
         </div>
     )
 }
+
+    
