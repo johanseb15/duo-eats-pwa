@@ -28,7 +28,7 @@ export default async function AdminDashboardPage() {
     return (
         <div className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <Card>
+                <Card className="shadow-lg rounded-2xl bg-card/60 backdrop-blur-xl border-white/20">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Ingresos Totales (Entregados)</CardTitle>
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -38,7 +38,7 @@ export default async function AdminDashboardPage() {
                         <p className="text-xs text-muted-foreground">Basado en pedidos completados</p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="shadow-lg rounded-2xl bg-card/60 backdrop-blur-xl border-white/20">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Pedidos Totales</CardTitle>
                         <ShoppingCart className="h-4 w-4 text-muted-foreground" />
@@ -48,7 +48,7 @@ export default async function AdminDashboardPage() {
                         <p className="text-xs text-muted-foreground">Todos los estados de pedido incluidos</p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="shadow-lg rounded-2xl bg-card/60 backdrop-blur-xl border-white/20">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Ticket Promedio</CardTitle>
                         <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -60,7 +60,7 @@ export default async function AdminDashboardPage() {
                 </Card>
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="col-span-4">
+                <Card className="col-span-4 rounded-2xl bg-card/60 backdrop-blur-xl border-white/20">
                      <CardHeader>
                         <CardTitle>Pedidos en los Últimos 7 Días</CardTitle>
                     </CardHeader>
@@ -76,7 +76,7 @@ export default async function AdminDashboardPage() {
                         </ChartContainer>
                     </CardContent>
                 </Card>
-                 <Card className="col-span-4 lg:col-span-3">
+                 <Card className="col-span-4 lg:col-span-3 rounded-2xl bg-card/60 backdrop-blur-xl border-white/20">
                     <CardHeader>
                         <CardTitle>Productos Más Vendidos</CardTitle>
                         <CardDescription>Top 5 productos más vendidos en todos los pedidos.</CardDescription>
@@ -94,7 +94,7 @@ export default async function AdminDashboardPage() {
                 </Card>
             </div>
 
-            <Card>
+            <div className="rounded-2xl border bg-card/60 backdrop-blur-xl overflow-hidden">
                 <CardHeader>
                     <CardTitle>Pedidos Recientes</CardTitle>
                     <CardDescription>Un vistazo a los 5 pedidos más recientes.</CardDescription>
@@ -128,10 +128,8 @@ export default async function AdminDashboardPage() {
                         </TableBody>
                     </Table>
                 </CardContent>
-            </Card>
+            </div>
 
         </div>
     )
 }
-
-    

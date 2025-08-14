@@ -153,7 +153,7 @@ export default function OrderTrackingPage() {
                   ))}
             </ul>
             </CardContent>
-             <CardFooter className="flex-col items-start gap-2 p-4">
+             <CardFooter className="flex-col items-start gap-2 p-4 bg-muted/20">
                 <div className="w-full flex justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
                     <span>{currencySymbol}{order.subtotal.toFixed(2)}</span>

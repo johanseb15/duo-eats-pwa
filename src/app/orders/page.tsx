@@ -119,7 +119,7 @@ export default function OrdersPage() {
             ) : (
                 <div className="space-y-4">
                 {orders.map((order) => (
-                    <Card key={order.id} className="shadow-md rounded-2xl bg-card/60 backdrop-blur-xl border-white/20 overflow-hidden">
+                    <Card key={order.id} className="shadow-lg rounded-2xl bg-card/60 backdrop-blur-xl border-white/20 overflow-hidden">
                     <CardHeader className="flex flex-row justify-between items-center p-4">
                         <div>
                         <CardTitle className="text-lg font-bold">Pedido #{order.id.slice(0, 6)}</CardTitle>
@@ -143,7 +143,7 @@ export default function OrdersPage() {
                         ))}
                         </ul>
                     </CardContent>
-                    <CardFooter className="flex justify-between items-center p-4">
+                    <CardFooter className="flex justify-between items-center p-4 bg-muted/20">
                         <p className="text-lg font-bold">Total: {currencySymbol} {order.total.toFixed(2)}</p>
                         <Button asChild variant="outline" className="rounded-full">
                            <Link href={`/order/${order.id}`}>Ver detalles</Link>
