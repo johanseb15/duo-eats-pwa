@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState, Suspense, lazy } from 'react';
+import { useEffect, useState, Suspense, lazy, useMemo } from 'react';
 import type { ProductCategoryData } from '@/lib/types';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MoreHorizontal, PlusCircle, Trash2, Edit } from 'lucide-react';
+import { MoreHorizontal, PlusCircle, Trash2, Edit, Search } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,6 +43,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { deleteCategory } from '@/app/actions';
 import * as LucideIcons from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 const CategoryForm = lazy(() => import('@/components/CategoryForm').then(module => ({ default: module.CategoryForm })));
 
@@ -74,6 +75,7 @@ export default function AdminCategoriesPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<ProductCategoryData | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
   const loadCategories = async () => {
@@ -139,6 +141,10 @@ export default function AdminCategoriesPage() {
     }
     setIsFormOpen(open);
   }
+  
+  const filteredCategories = useMemo(() => {
+    return categories.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  }, [categories, searchTerm]);
 
    const FormSkeleton = () => (
     <div className="space-y-4">
@@ -161,8 +167,17 @@ export default function AdminCategoriesPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Categorías</h2>
+      <div className="flex justify-between items-center mb-6 gap-4">
+        <h2 className="text-2xl font-bold shrink-0">Categorías ({filteredCategories.length})</h2>
+         <div className="relative w-full max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input 
+                placeholder="Buscar por nombre..." 
+                className="pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+            />
+        </div>
          <Dialog open={isFormOpen} onOpenChange={handleDialogClose}>
           <DialogTrigger asChild>
             <Button onClick={() => setIsFormOpen(true)}><PlusCircle className="mr-2 h-4 w-4" /> Añadir Categoría</Button>
@@ -194,7 +209,7 @@ export default function AdminCategoriesPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {categories.map((category) => {
+            {filteredCategories.map((category) => {
                 const Icon = getIcon(category.icon);
                 return (
                   <TableRow key={category.id}>
@@ -227,6 +242,11 @@ export default function AdminCategoriesPage() {
             })}
           </TableBody>
         </Table>
+         {filteredCategories.length === 0 && (
+          <div className="text-center p-10">
+            <p className="text-muted-foreground">No se encontraron categorías con ese nombre.</p>
+          </div>
+        )}
       </div>
       
        <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>

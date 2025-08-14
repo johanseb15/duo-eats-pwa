@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState, Suspense, lazy } from 'react';
+import { useEffect, useState, Suspense, lazy, useMemo } from 'react';
 import Image from 'next/image';
 import type { Product, ProductCategoryData } from '@/lib/types';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
@@ -16,7 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MoreHorizontal, PlusCircle, Trash2, Edit } from 'lucide-react';
+import { MoreHorizontal, PlusCircle, Trash2, Edit, Search } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,6 +44,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { deleteProduct } from '@/app/actions';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 
 const ProductForm = lazy(() => import('@/components/ProductForm').then(module => ({ default: module.ProductForm })));
 
@@ -80,6 +81,7 @@ export default function AdminProductsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
   const loadData = async () => {
@@ -167,6 +169,10 @@ export default function AdminProductsPage() {
     return categories.find(c => c.slug === slug)?.name || slug;
   }
 
+  const filteredProducts = useMemo(() => {
+    return products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  }, [products, searchTerm]);
+
 
   const FormSkeleton = () => (
     <div className="space-y-4">
@@ -193,8 +199,17 @@ export default function AdminProductsPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Productos</h2>
+      <div className="flex justify-between items-center mb-6 gap-4">
+        <h2 className="text-2xl font-bold shrink-0">Productos ({filteredProducts.length})</h2>
+         <div className="relative w-full max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input 
+                placeholder="Buscar por nombre..." 
+                className="pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+            />
+        </div>
          <Dialog open={isFormOpen} onOpenChange={handleDialogClose}>
           <DialogTrigger asChild>
             <Button onClick={() => { setSelectedProduct(null); setIsFormOpen(true); }}><PlusCircle className="mr-2 h-4 w-4" /> Añadir Producto</Button>
@@ -228,7 +243,7 @@ export default function AdminProductsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <TableRow key={product.id}>
                 <TableCell>
                   <Image
@@ -268,6 +283,11 @@ export default function AdminProductsPage() {
             ))}
           </TableBody>
         </Table>
+         {filteredProducts.length === 0 && (
+          <div className="text-center p-10">
+            <p className="text-muted-foreground">No se encontraron productos con ese nombre.</p>
+          </div>
+        )}
       </div>
       
        <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>

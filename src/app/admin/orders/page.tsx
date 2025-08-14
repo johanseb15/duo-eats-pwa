@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import type { Order } from '@/lib/types';
 import { fetchAllOrders, updateOrderStatus } from '@/app/actions';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +22,8 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 
 const currencySymbol = '$';
 const orderStatuses: Order['status'][] = [
@@ -50,6 +52,7 @@ export const getStatusVariant = (status: string) => {
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
   const loadOrders = async () => {
@@ -75,6 +78,14 @@ export default function AdminOrdersPage() {
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  
+  const filteredOrders = useMemo(() => {
+    return orders.filter(o => 
+        o.userName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        o.id.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [orders, searchTerm]);
+
 
   const handleStatusChange = async (orderId: string, newStatus: Order['status']) => {
     const result = await updateOrderStatus(orderId, newStatus);
@@ -105,8 +116,17 @@ export default function AdminOrdersPage() {
 
   return (
     <>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Pedidos Recibidos</h2>
+      <div className="flex justify-between items-center mb-6 gap-4">
+        <h2 className="text-2xl font-bold shrink-0">Pedidos ({filteredOrders.length})</h2>
+         <div className="relative w-full max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input 
+                placeholder="Buscar por cliente o ID..." 
+                className="pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+            />
+        </div>
         <Button onClick={() => loadOrders()} disabled={loading} size="sm">Refrescar</Button>
       </div>
 
@@ -117,9 +137,16 @@ export default function AdminOrdersPage() {
             Cuando un cliente haga un pedido, aparecerá aquí.
           </p>
         </div>
+      ) : filteredOrders.length === 0 ? (
+         <div className="text-center py-20">
+          <h2 className="text-2xl font-semibold">No se encontraron pedidos</h2>
+          <p className="mt-2 text-muted-foreground">
+            Prueba con otro término de búsqueda.
+          </p>
+        </div>
       ) : (
         <div className="space-y-6">
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <Card key={order.id} className="shadow-lg rounded-2xl bg-card/60 backdrop-blur-xl border-white/20">
               <CardHeader className="flex flex-row justify-between items-start">
                 <div>

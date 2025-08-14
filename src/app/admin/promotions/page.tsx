@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState, Suspense, lazy } from 'react';
+import { useEffect, useState, Suspense, lazy, useMemo } from 'react';
 import Image from 'next/image';
 import type { Promotion } from '@/lib/types';
 import { collection, getDocs } from 'firebase/firestore';
@@ -16,7 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MoreHorizontal, PlusCircle, Trash2, Edit } from 'lucide-react';
+import { MoreHorizontal, PlusCircle, Trash2, Edit, Search } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,6 +43,7 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { deletePromotion } from '@/app/actions';
+import { Input } from '@/components/ui/input';
 
 const PromotionForm = lazy(() => import('@/components/PromotionForm').then(module => ({ default: module.PromotionForm })));
 
@@ -68,6 +69,7 @@ export default function AdminPromotionsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
   const loadPromotions = async () => {
@@ -134,6 +136,10 @@ export default function AdminPromotionsPage() {
     setIsFormOpen(open);
   }
 
+  const filteredPromotions = useMemo(() => {
+    return promotions.filter(p => p.title.toLowerCase().includes(searchTerm.toLowerCase()));
+  }, [promotions, searchTerm]);
+
   const FormSkeleton = () => (
     <div className="space-y-4">
         <Skeleton className="h-10 w-full" />
@@ -156,8 +162,17 @@ export default function AdminPromotionsPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Promociones</h2>
+      <div className="flex justify-between items-center mb-6 gap-4">
+        <h2 className="text-2xl font-bold shrink-0">Promociones ({filteredPromotions.length})</h2>
+         <div className="relative w-full max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input 
+                placeholder="Buscar por título..." 
+                className="pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+            />
+        </div>
          <Dialog open={isFormOpen} onOpenChange={handleDialogClose}>
           <DialogTrigger asChild>
             <Button onClick={() => setIsFormOpen(true)}><PlusCircle className="mr-2 h-4 w-4" /> Añadir Promoción</Button>
@@ -189,7 +204,7 @@ export default function AdminPromotionsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {promotions.map((promotion) => (
+            {filteredPromotions.map((promotion) => (
               <TableRow key={promotion.id}>
                 <TableCell>
                   <Image
@@ -227,6 +242,11 @@ export default function AdminPromotionsPage() {
             ))}
           </TableBody>
         </Table>
+          {filteredPromotions.length === 0 && (
+            <div className="text-center p-10">
+                <p className="text-muted-foreground">No se encontraron promociones con ese nombre.</p>
+            </div>
+            )}
       </div>
       
        <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
