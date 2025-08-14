@@ -5,7 +5,7 @@ import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommen
 import { suggestCategoryIcon } from '@/ai/flows/suggest-category-icon';
 import { db } from '@/lib/firebase';
 import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone, DashboardAnalytics, ProductSale, OrderOverTime, CartItem, ProductOption } from '@/lib/types';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, limit, getDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, limit, getDoc, runTransaction } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { getAuth } from 'firebase-admin/auth';
 import { adminApp } from '@/lib/firebase-admin';
@@ -91,9 +91,27 @@ export async function createOrder(input: CreateOrderInput) {
       createdAt: serverTimestamp(),
     };
     const docRef = await addDoc(collection(db, 'orders'), orderData);
+    
+    // Decrement stock for each item in the order
+    await runTransaction(db, async (transaction) => {
+        for (const item of input.items) {
+            const productRef = doc(db, 'products', item.id);
+            const productDoc = await transaction.get(productRef);
+            if (!productDoc.exists()) {
+                throw new Error(`Product with ID ${item.id} not found!`);
+            }
+            const currentStock = productDoc.data().stock || 0;
+            const newStock = currentStock - item.quantity;
+            transaction.update(productRef, { stock: newStock });
+        }
+    });
+
     revalidatePath('/admin/orders');
     revalidatePath('/orders');
     revalidatePath('/admin');
+    revalidatePath('/admin/products');
+    revalidatePath('/');
+
     return { success: true, orderId: docRef.id };
   } catch (error) {
     console.error('Error creating order:', error);

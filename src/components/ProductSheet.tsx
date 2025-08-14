@@ -11,6 +11,7 @@ import type { Currency, Product } from '@/lib/types';
 import { Button } from './ui/button';
 import { SheetHeader, SheetTitle, SheetDescription, SheetFooter } from './ui/sheet';
 import { ScrollArea } from './ui/scroll-area';
+import { Badge } from './ui/badge';
 
 interface ProductSheetProps {
     product: Product;
@@ -68,6 +69,8 @@ export function ProductSheet({ product }: ProductSheetProps) {
         // Close the sheet - this is handled by the Sheet's default behavior,
         // no need for router.push or router.back()
     };
+    
+    const isOutOfStock = product.stock <= 0;
 
 
     return (
@@ -82,6 +85,9 @@ export function ProductSheet({ product }: ProductSheetProps) {
                         className="object-cover"
                         data-ai-hint={product.aiHint}
                     />
+                     {isOutOfStock && (
+                        <Badge variant="destructive" className="absolute top-4 left-4 text-lg">Sin Stock</Badge>
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
                 </div>
                 <SheetHeader className="p-6 -mt-16 relative bg-background rounded-t-3xl text-left">
@@ -120,8 +126,8 @@ export function ProductSheet({ product }: ProductSheetProps) {
                      <p className="text-2xl font-extrabold text-foreground">
                         {currencySymbol}{finalPrice.toFixed(2)}
                     </p>
-                    <Button onClick={handleAddToCart} size="lg" className="rounded-full flex-grow">
-                        Agregar al carrito
+                    <Button onClick={handleAddToCart} size="lg" className="rounded-full flex-grow" disabled={isOutOfStock}>
+                        {isOutOfStock ? 'Sin Stock' : 'Agregar al carrito'}
                     </Button>
                 </div>
             </SheetFooter>
