@@ -1,4 +1,3 @@
-
 import { fetchAllUsers } from "@/app/actions";
 import {
   Table,
@@ -11,6 +10,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { UserCog } from "lucide-react";
+import { SuperAdminActions } from "@/components/SuperAdminActions";
+import { Separator } from "@/components/ui/separator";
 
 
 export default async function SuperAdminPage() {
@@ -67,6 +68,10 @@ export default async function SuperAdminPage() {
                     <p className="text-muted-foreground">No se pudieron cargar los usuarios. Asegúrate de que las variables de entorno del Admin SDK (GOOGLE_CLIENT_EMAIL, etc.) estén configuradas correctamente.</p>
                 </div>
             )}
+
+            <Separator className="my-8" />
+            
+            <SuperAdminActions />
         </div>
     );
 }

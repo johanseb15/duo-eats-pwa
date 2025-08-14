@@ -5,12 +5,13 @@ import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommen
 import { suggestCategoryIcon } from '@/ai/flows/suggest-category-icon';
 import { db } from '@/lib/firebase';
 import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone, DashboardAnalytics, ProductSale, OrderOverTime, CartItem, ProductOption } from '@/lib/types';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, limit, getDoc, runTransaction } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, limit, getDoc, runTransaction, writeBatch } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { getAuth } from 'firebase-admin/auth';
 import { adminApp } from '@/lib/firebase-admin';
 import { auth } from '@/lib/firebase';
 import { subDays, format } from 'date-fns';
+import testProducts from '@/lib/productos-test.json';
 
 
 export async function fetchAllUsers() {
@@ -452,5 +453,88 @@ export async function fetchDashboardAnalytics(): Promise<DashboardAnalytics> {
             productSales: [],
             ordersOverTime: []
         };
+    }
+}
+
+
+// Super Admin Actions
+async function batchWrite(collectionName: string, data: any[]) {
+    const collectionRef = collection(db, collectionName);
+    const batch = writeBatch(db);
+    
+    data.forEach(item => {
+        const docRef = doc(collectionRef, item.id);
+        batch.set(docRef, item);
+    });
+    
+    await batch.commit();
+}
+
+
+export async function importTestProducts() {
+    try {
+        await batchWrite('products', testProducts);
+        revalidatePath('/', 'layout');
+        return { success: true, message: `${testProducts.length} productos importados con éxito.` };
+    } catch (error) {
+        console.error("Error importing test products:", error);
+        return { success: false, message: 'Error al importar productos.' };
+    }
+}
+
+const testCategories: Omit<ProductCategoryData, 'id'>[] = [
+  { name: 'Hamburguesas', slug: 'hamburguesas', icon: 'Beef' },
+  { name: 'Pizzas', slug: 'pizzas', icon: 'Pizza' },
+  { name: 'Lomitos', slug: 'lomitos', icon: 'Sandwich' },
+  { name: 'Empanadas', slug: 'empanadas', icon: 'Wind' },
+  { name: 'Bebidas', slug: 'bebidas', icon: 'CupSoda' },
+];
+
+export async function importTestCategories() {
+    try {
+        const categoriesWithIds = testCategories.map((cat, i) => ({ ...cat, id: (i + 1).toString() }));
+        await batchWrite('categories', categoriesWithIds);
+        revalidatePath('/', 'layout');
+        return { success: true, message: `${categoriesWithIds.length} categorías importadas con éxito.` };
+    } catch (error) {
+        console.error("Error importing test categories:", error);
+        return { success: false, message: 'Error al importar categorías.' };
+    }
+}
+
+const testDeliveryZones: Omit<DeliveryZone, 'id'>[] = [
+  { neighborhoods: ['Palermo', 'Recoleta', 'Belgrano'], cost: 500.00 },
+  { neighborhoods: ['Villa Crespo', 'Almagro'], cost: 400.00 },
+  { neighborhoods: ['Nuñez', 'Saavedra'], cost: 600.00 },
+];
+
+export async function importTestDeliveryZones() {
+    try {
+        const zonesWithIds = testDeliveryZones.map((zone, i) => ({ ...zone, id: (i + 1).toString() }));
+        await batchWrite('deliveryZones', zonesWithIds);
+        revalidatePath('/', 'layout');
+        return { success: true, message: `${zonesWithIds.length} zonas de entrega importadas.` };
+    } catch (error) {
+        console.error("Error importing test delivery zones:", error);
+        return { success: false, message: 'Error al importar zonas de entrega.' };
+    }
+}
+
+export async function deleteAllOrders() {
+    try {
+        const ordersRef = collection(db, 'orders');
+        const querySnapshot = await getDocs(ordersRef);
+        
+        const batch = writeBatch(db);
+        querySnapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+        
+        await batch.commit();
+        revalidatePath('/', 'layout');
+        return { success: true, message: `Se borraron ${querySnapshot.size} pedidos.` };
+    } catch (error) {
+        console.error("Error deleting all orders:", error);
+        return { success: false, message: 'Error al borrar los pedidos.' };
     }
 }
