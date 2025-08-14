@@ -70,6 +70,22 @@ async function getProducts(): Promise<Product[]> {
   return productList;
 }
 
+async function getCategories(): Promise<ProductCategoryData[]> {
+    const categoriesCol = collection(db, 'categories');
+    const q = query(categoriesCol, orderBy('name'));
+    const categoriesSnapshot = await getDocs(q);
+    const categoryList = categoriesSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        name: data.name,
+        slug: data.slug,
+        icon: data.icon,
+      } as ProductCategoryData;
+    });
+    return categoryList;
+  }
+
 const currencySymbol = '$';
 const currentCurrency = 'ARS';
 
@@ -97,22 +113,6 @@ export default function AdminProductsPage() {
         setLoading(false);
     }
   };
-  
-  async function getCategories(): Promise<ProductCategoryData[]> {
-    const categoriesCol = collection(db, 'categories');
-    const q = query(categoriesCol, orderBy('name'));
-    const categoriesSnapshot = await getDocs(q);
-    const categoryList = categoriesSnapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        name: data.name,
-        slug: data.slug,
-        icon: data.icon,
-      } as ProductCategoryData;
-    });
-    return categoryList;
-  }
 
   useEffect(() => {
     loadData();
@@ -120,11 +120,11 @@ export default function AdminProductsPage() {
 
   const handleFormSubmit = async () => {
     setIsFormOpen(false);
-    setSelectedProduct(null);
     toast({
       title: selectedProduct ? "Producto actualizado" : "Producto añadido",
       description: `El producto se ha ${selectedProduct ? 'actualizado' : 'guardado'} correctamente.`,
     });
+    setSelectedProduct(null);
     await loadData();
   }
   
@@ -150,7 +150,7 @@ export default function AdminProductsPage() {
     } else {
        toast({
         title: "Error",
-        description: "No se pudo eliminar el producto.",
+        description: result.error || "No se pudo eliminar el producto.",
         variant: "destructive",
       });
     }
@@ -190,9 +190,16 @@ export default function AdminProductsPage() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
+        <div className="flex justify-between items-center mb-6 gap-4">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-10 w-40" />
+        </div>
+        <div className="rounded-2xl border">
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+        </div>
       </div>
     );
   }
@@ -310,5 +317,3 @@ export default function AdminProductsPage() {
     </div>
   );
 }
-
-    

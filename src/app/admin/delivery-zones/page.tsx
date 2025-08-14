@@ -86,11 +86,11 @@ export default function AdminDeliveryZonesPage() {
 
   const handleFormSubmit = async () => {
     setIsFormOpen(false);
-    setSelectedZone(null);
     toast({
       title: selectedZone ? "Zona de entrega actualizada" : "Zona de entrega añadida",
       description: `La zona se ha ${selectedZone ? 'actualizado' : 'guardado'} correctamente.`,
     });
+    setSelectedZone(null);
     await loadZones();
   }
   
@@ -116,7 +116,7 @@ export default function AdminDeliveryZonesPage() {
     } else {
        toast({
         title: "Error",
-        description: "No se pudo eliminar la zona.",
+        description: result.error || "No se pudo eliminar la zona.",
         variant: "destructive",
       });
     }
@@ -142,9 +142,15 @@ export default function AdminDeliveryZonesPage() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
+        <div className="flex justify-between items-center mb-6">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-10 w-36" />
+        </div>
+        <div className="rounded-2xl border">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+        </div>
       </div>
     );
   }
@@ -152,7 +158,7 @@ export default function AdminDeliveryZonesPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Zonas de Entrega</h2>
+        <h2 className="text-2xl font-bold">Zonas de Entrega ({zones.length})</h2>
          <Dialog open={isFormOpen} onOpenChange={handleDialogClose}>
           <DialogTrigger asChild>
             <Button onClick={() => setIsFormOpen(true)}><PlusCircle className="mr-2 h-4 w-4" /> Añadir Zona</Button>
@@ -214,6 +220,11 @@ export default function AdminDeliveryZonesPage() {
             ))}
           </TableBody>
         </Table>
+         {zones.length === 0 && (
+          <div className="text-center p-10">
+            <p className="text-muted-foreground">No hay zonas de entrega configuradas.</p>
+          </div>
+        )}
       </div>
       
        <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>

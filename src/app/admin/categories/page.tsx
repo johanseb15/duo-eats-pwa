@@ -127,7 +127,7 @@ export default function AdminCategoriesPage() {
     } else {
        toast({
         title: "Error",
-        description: "No se pudo eliminar la categoría.",
+        description: result.error || "No se pudo eliminar la categoría.",
         variant: "destructive",
       });
     }
@@ -158,9 +158,16 @@ export default function AdminCategoriesPage() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
+        <div className="flex justify-between items-center mb-6 gap-4">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-10 w-40" />
+        </div>
+        <div className="rounded-2xl border">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+        </div>
       </div>
     );
   }

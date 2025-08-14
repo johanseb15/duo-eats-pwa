@@ -121,7 +121,7 @@ export default function AdminPromotionsPage() {
     } else {
        toast({
         title: "Error",
-        description: "No se pudo eliminar la promoción.",
+        description: result.error || "No se pudo eliminar la promoción.",
         variant: "destructive",
       });
     }
@@ -153,9 +153,15 @@ export default function AdminPromotionsPage() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
+        <div className="flex justify-between items-center mb-6 gap-4">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-10 w-40" />
+        </div>
+        <div className="rounded-2xl border">
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+        </div>
       </div>
     );
   }
