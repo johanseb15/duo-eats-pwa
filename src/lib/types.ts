@@ -50,7 +50,7 @@ export interface Order {
   status: 'Pendiente' | 'En preparación' | 'En camino' | 'Entregado' | 'Cancelado';
   createdAt: string; // ISO 8601 date string
   deliveryDate?: string; // ISO 8601 date string for scheduled orders
-  neighborhood?: string; // Neighborhood of the delivery address
+  neighborhood?: string;
 }
 
 export interface Promotion {
@@ -86,5 +86,3 @@ export interface DashboardAnalytics {
     productSales: ProductSale[];
     ordersOverTime: OrderOverTime[];
 }
-
-    
