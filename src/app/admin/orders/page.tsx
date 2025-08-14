@@ -23,7 +23,9 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Calendar, Search } from 'lucide-react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 const currencySymbol = '$';
 const orderStatuses: Order['status'][] = [
@@ -163,6 +165,12 @@ export default function AdminOrdersPage() {
                         minute: '2-digit'
                       })}
                   </p>
+                   {order.deliveryDate && (
+                    <p className="text-sm text-primary font-bold flex items-center gap-2 mt-1">
+                      <Calendar className="h-4 w-4" />
+                      Programado: {format(new Date(order.deliveryDate), "d/MM/yy HH:mm", { locale: es })}hs
+                    </p>
+                  )}
                 </div>
                   <Badge className={`${getStatusVariant(order.status)} text-white`}>{order.status}</Badge>
               </CardHeader>

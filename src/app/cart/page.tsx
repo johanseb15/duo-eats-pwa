@@ -10,7 +10,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Minus, Plus, Trash2, ShoppingCart, Loader2 } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingCart, Loader2, CalendarIcon, Clock } from 'lucide-react';
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Currency, CartItem, DeliveryZone } from '@/lib/types';
@@ -21,6 +21,12 @@ import { createOrder } from '@/app/actions';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { Calendar } from '@/components/ui/calendar';
 
 const AddressAutocomplete = lazy(() => import('@/components/AddressAutocomplete'));
 
@@ -58,6 +64,11 @@ export default function CartPage() {
   // Guest info
   const [guestName, setGuestName] = useState('');
   const [guestAddress, setGuestAddress] = useState('');
+
+  // Scheduled Order
+  const [scheduleOption, setScheduleOption] = useState<'now' | 'later'>('now');
+  const [scheduledDate, setScheduledDate] = useState<Date | undefined>();
+  const [scheduledTime, setScheduledTime] = useState<string>('');
 
 
   useEffect(() => {
@@ -149,6 +160,15 @@ export default function CartPage() {
         });
         return;
     }
+    
+    if (scheduleOption === 'later' && (!scheduledDate || !scheduledTime)) {
+      toast({
+        title: 'Completa la programación',
+        description: 'Por favor, selecciona una fecha y hora para tu pedido programado.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     const userName = user?.displayName || guestName;
     if (!userName) {
@@ -161,6 +181,14 @@ export default function CartPage() {
     }
     
     setIsProcessing(true);
+    
+    let finalDeliveryDate: string | undefined;
+    if (scheduleOption === 'later' && scheduledDate && scheduledTime) {
+      const [hours, minutes] = scheduledTime.split(':').map(Number);
+      const deliveryDate = new Date(scheduledDate);
+      deliveryDate.setHours(hours, minutes);
+      finalDeliveryDate = deliveryDate.toISOString();
+    }
 
     const orderInput = {
       userId: user?.uid,
@@ -169,12 +197,13 @@ export default function CartPage() {
       total: total,
       subtotal: finalSubtotal,
       deliveryCost: deliveryCost,
+      deliveryDate: finalDeliveryDate,
     };
 
     const result = await createOrder(orderInput);
 
     if (result.success && result.orderId) {
-        sendWhatsApp(result.orderId, userName, guestAddress);
+        sendWhatsApp(result.orderId, userName, guestAddress, finalDeliveryDate);
         toast({
           title: '¡Pedido guardado!',
           description: 'Tu pedido ha sido guardado y serás redirigido para el seguimiento.',
@@ -193,7 +222,7 @@ export default function CartPage() {
   };
 
 
-  const sendWhatsApp = (orderId?: string, name?: string, address?: string) => {
+  const sendWhatsApp = (orderId?: string, name?: string, address?: string, deliveryDate?: string) => {
     const phone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '549111234567';
     let message = `¡Hola! Quisiera hacer el siguiente pedido:\n`;
     if (orderId) {
@@ -209,6 +238,11 @@ export default function CartPage() {
       message += `*Dirección de Entrega: ${address}*\n`;
     }
 
+    if (deliveryDate) {
+        message += `*Entrega Programada para: ${format(new Date(deliveryDate), "eeee d 'de' MMMM 'a las' HH:mm", { locale: es })}hs*\n`;
+    }
+
+
     message += `\n${items
         .map((i) => {
           const optionsString = i.selectedOptions && Object.values(i.selectedOptions).length > 0 ? ` (${Object.values(i.selectedOptions).join(', ')})` : '';
@@ -221,6 +255,8 @@ export default function CartPage() {
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
   };
+
+  const timeSlots = ['12:00', '12:30', '13:00', '13:30', '14:00', '20:00', '20:30', '21:00', '21:30', '22:00'];
 
   if (!isClient || authLoading || loadingZones) {
     return (
@@ -327,6 +363,59 @@ export default function CartPage() {
                         <Suspense fallback={<Skeleton className='h-10 w-full' />}>
                           <AddressAutocomplete onAddressSelect={handleAddressSelect} />
                         </Suspense>
+                      )}
+                      
+                       <Separator />
+
+                      <Label>¿Cuándo quieres tu pedido?</Label>
+                       <RadioGroup value={scheduleOption} onValueChange={(value: 'now' | 'later') => setScheduleOption(value)} className='grid grid-cols-2 gap-4'>
+                          <Label htmlFor='now' className='flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer'>
+                              <RadioGroupItem value="now" id="now" className='sr-only' />
+                              <Clock className="mb-3 h-6 w-6" />
+                              Lo antes posible
+                          </Label>
+                           <Label htmlFor='later' className='flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer'>
+                              <RadioGroupItem value="later" id="later" className='sr-only' />
+                              <CalendarIcon className="mb-3 h-6 w-6" />
+                              Programar
+                          </Label>
+                      </RadioGroup>
+
+                      {scheduleOption === 'later' && (
+                          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                                <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                        "w-full justify-start text-left font-normal",
+                                        !scheduledDate && "text-muted-foreground"
+                                    )}
+                                    >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {scheduledDate ? format(scheduledDate, 'PPP', {locale: es}) : <span>Elige una fecha</span>}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                    mode="single"
+                                    selected={scheduledDate}
+                                    onSelect={setScheduledDate}
+                                    initialFocus
+                                    />
+                                </PopoverContent>
+                                </Popover>
+                               <Select value={scheduledTime} onValueChange={setScheduledTime}>
+                                  <SelectTrigger>
+                                      <SelectValue placeholder="Elige una hora" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                      {timeSlots.map(time => (
+                                          <SelectItem key={time} value={time}>{time}</SelectItem>
+                                      ))}
+                                  </SelectContent>
+                              </Select>
+                          </div>
                       )}
                   </CardContent>
               </Card>

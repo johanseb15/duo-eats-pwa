@@ -49,6 +49,7 @@ export interface Order {
   deliveryCost: number;
   status: 'Pendiente' | 'En preparación' | 'En camino' | 'Entregado' | 'Cancelado';
   createdAt: string; // ISO 8601 date string
+  deliveryDate?: string; // ISO 8601 date string for scheduled orders
 }
 
 export interface Promotion {

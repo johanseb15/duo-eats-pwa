@@ -80,6 +80,7 @@ interface CreateOrderInput {
   total: number;
   deliveryCost: number;
   subtotal: number;
+  deliveryDate?: string; // Optional for scheduled orders
 }
 
 export async function createOrder(input: CreateOrderInput) {
@@ -89,20 +90,28 @@ export async function createOrder(input: CreateOrderInput) {
       userId: input.userId || null, // Store null if it's a guest
       status: 'Pendiente',
       createdAt: serverTimestamp(),
+      deliveryDate: input.deliveryDate || null,
     };
     const docRef = await addDoc(collection(db, 'orders'), orderData);
     
     // Decrement stock for each item in the order
     await runTransaction(db, async (transaction) => {
         for (const item of input.items) {
+            if (item.stock === undefined || item.stock === null) continue; // Skip stock update if not defined
+            
             const productRef = doc(db, 'products', item.id);
             const productDoc = await transaction.get(productRef);
+
             if (!productDoc.exists()) {
                 throw new Error(`Product with ID ${item.id} not found!`);
             }
-            const currentStock = productDoc.data().stock || 0;
-            const newStock = currentStock - item.quantity;
-            transaction.update(productRef, { stock: newStock });
+            
+            const currentStock = productDoc.data().stock;
+            // Only decrement if stock is a number
+            if (typeof currentStock === 'number') {
+                const newStock = currentStock - item.quantity;
+                transaction.update(productRef, { stock: newStock });
+            }
         }
     });
 
