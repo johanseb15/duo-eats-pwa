@@ -12,8 +12,8 @@ import Link from 'next/link';
 import type { Order } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import { fetchOrderById } from '../../actions';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { Progress } from '@/components/ui/progress';
 
 const currencySymbol = '$';
 
@@ -31,6 +31,24 @@ const getStatusVariant = (status: string) => {
       return 'bg-yellow-500';
   }
 };
+
+const getStatusProgress = (status: Order['status']): number => {
+    switch (status) {
+        case 'Pendiente':
+            return 10;
+        case 'En preparación':
+            return 40;
+        case 'En camino':
+            return 75;
+        case 'Entregado':
+            return 100;
+        case 'Cancelado':
+            return 0;
+        default:
+            return 0;
+    }
+}
+
 
 export default function OrderTrackingPage() {
   const router = useRouter();
@@ -104,6 +122,8 @@ export default function OrderTrackingPage() {
       </div>
     )
   }
+  
+  const progressValue = getStatusProgress(order.status);
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-28">
@@ -123,35 +143,55 @@ export default function OrderTrackingPage() {
         </div>
 
         <Card className="shadow-lg rounded-2xl bg-card/60 backdrop-blur-xl border-white/20 overflow-hidden">
-            <CardHeader className="flex flex-row justify-between items-center p-4">
-            <div>
-                <CardTitle className="text-lg font-bold">Pedido #{order.id.slice(0, 6)}</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                {new Date(order.createdAt).toLocaleString('es-ES', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                })}
-                </p>
-            </div>
-            <Badge className={`${getStatusVariant(order.status)} text-white`}>{order.status}</Badge>
+            <CardHeader className="flex flex-col gap-4 p-4">
+              <div className="flex flex-row justify-between items-center">
+                <div>
+                    <CardTitle className="text-lg font-bold">Pedido #{order.id.slice(0, 6)}</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                    {new Date(order.createdAt).toLocaleString('es-ES', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}
+                    </p>
+                </div>
+                <Badge className={`${getStatusVariant(order.status)} text-white`}>{order.status}</Badge>
+              </div>
+                {order.status !== 'Cancelado' && (
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <p className="text-sm font-medium text-muted-foreground">Progreso</p>
+                      <p className="text-sm font-bold text-primary">{progressValue}%</p>
+                    </div>
+                    <Progress value={progressValue} className="h-2" />
+                  </div>
+                )}
             </CardHeader>
             <CardContent className="p-4 border-t border-b">
-            <h4 className="font-semibold mb-2">Resumen del pedido:</h4>
-            <ul className="space-y-2">
-                  {order.items.map((item, index) => (
-                    <li key={`${item.id}-${index}`} className="flex justify-between text-sm p-2 rounded-lg bg-muted/30">
-                      <div>
-                          <span className='font-semibold'>{item.name}</span>
-                          <span className='text-muted-foreground'> x {item.quantity}</span>
-                          {item.selectedOptions && Object.values(item.selectedOptions).length > 0 && <p className='text-xs text-muted-foreground italic'>({Object.values(item.selectedOptions).join(', ')})</p>}
-                      </div>
-                      <span className='font-medium'>{currencySymbol}{(item.finalPrice * item.quantity).toFixed(2)}</span>
-                    </li>
-                  ))}
-            </ul>
+             {order.status === 'Cancelado' ? (
+                <div className="text-center py-4">
+                  <p className="font-semibold text-destructive">Este pedido fue cancelado.</p>
+                  {order.cancellationReason && <p className="text-sm text-muted-foreground mt-1">Motivo: {order.cancellationReason}</p>}
+                </div>
+              ) : (
+                <>
+                    <h4 className="font-semibold mb-2">Resumen del pedido:</h4>
+                    <ul className="space-y-2">
+                        {order.items.map((item, index) => (
+                            <li key={`${item.id}-${index}`} className="flex justify-between text-sm p-2 rounded-lg bg-muted/30">
+                            <div>
+                                <span className='font-semibold'>{item.name}</span>
+                                <span className='text-muted-foreground'> x {item.quantity}</span>
+                                {item.selectedOptions && Object.values(item.selectedOptions).length > 0 && <p className='text-xs text-muted-foreground italic'>({Object.values(item.selectedOptions).join(', ')})</p>}
+                            </div>
+                            <span className='font-medium'>{currencySymbol}{(item.finalPrice * item.quantity).toFixed(2)}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </>
+              )}
             </CardContent>
              <CardFooter className="flex-col items-start gap-2 p-4 bg-muted/20">
                 <div className="w-full flex justify-between text-sm">
@@ -173,3 +213,4 @@ export default function OrderTrackingPage() {
     </div>
   );
 }
+
