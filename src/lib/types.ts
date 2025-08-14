@@ -61,7 +61,7 @@ export interface Promotion {
 
 export interface DeliveryZone {
     id: string;
-    name: string;
+    neighborhoods: string[];
     cost: number;
 }
 

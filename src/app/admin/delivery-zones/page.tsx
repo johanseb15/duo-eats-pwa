@@ -42,6 +42,7 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { deleteDeliveryZone } from '@/app/actions';
+import { Badge } from '@/components/ui/badge';
 
 const DeliveryZoneForm = lazy(() => import('@/components/DeliveryZoneForm').then(module => ({ default: module.DeliveryZoneForm })));
 
@@ -85,11 +86,11 @@ export default function AdminDeliveryZonesPage() {
 
   const handleFormSubmit = async () => {
     setIsFormOpen(false);
+    setSelectedZone(null);
     toast({
       title: selectedZone ? "Zona de entrega actualizada" : "Zona de entrega añadida",
       description: `La zona se ha ${selectedZone ? 'actualizado' : 'guardado'} correctamente.`,
     });
-    setSelectedZone(null);
     await loadZones();
   }
   
@@ -160,7 +161,7 @@ export default function AdminDeliveryZonesPage() {
             <DialogHeader>
               <DialogTitle>{selectedZone ? 'Editar Zona de Entrega' : 'Añadir Nueva Zona'}</DialogTitle>
               <DialogDescription>
-                {selectedZone ? 'Modifica los detalles de la zona.' : 'Crea una nueva zona de entrega con su costo.'}
+                {selectedZone ? 'Modifica los detalles de la zona.' : 'Crea una nueva zona de entrega con su costo y barrios asociados.'}
               </DialogDescription>
             </DialogHeader>
             <Suspense fallback={<FormSkeleton />}>
@@ -176,7 +177,7 @@ export default function AdminDeliveryZonesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nombre</TableHead>
+              <TableHead>Barrios</TableHead>
               <TableHead>Costo de envío</TableHead>
               <TableHead className="text-right w-[100px]">Acciones</TableHead>
             </TableRow>
@@ -184,7 +185,11 @@ export default function AdminDeliveryZonesPage() {
           <TableBody>
             {zones.map((zone) => (
               <TableRow key={zone.id}>
-                <TableCell className="font-medium">{zone.name}</TableCell>
+                <TableCell className="font-medium">
+                  <div className='flex flex-wrap gap-2 max-w-md'>
+                    {zone.neighborhoods.map(n => <Badge key={n} variant="secondary">{n}</Badge>)}
+                  </div>
+                </TableCell>
                 <TableCell>{currencySymbol}{zone.cost.toFixed(2)}</TableCell>
                 <TableCell className="text-right">
                    <DropdownMenu>
@@ -217,7 +222,7 @@ export default function AdminDeliveryZonesPage() {
             <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
             <AlertDialogDescription>
               Esta acción no se puede deshacer. Esto eliminará permanentemente
-              la zona de entrega "{selectedZone?.name}".
+              la zona de entrega para los barrios: {selectedZone?.neighborhoods.join(', ')}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

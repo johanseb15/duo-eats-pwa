@@ -7,11 +7,11 @@ import { useCart } from '@/store/cart';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Minus, Plus, Trash2, ShoppingCart, Loader2 } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Currency, CartItem, DeliveryZone } from '@/lib/types';
 import { useAuth } from '@/hooks/useAuth';
@@ -22,6 +22,7 @@ import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 
+const AddressAutocomplete = lazy(() => import('@/components/AddressAutocomplete'));
 
 // TODO: Replace with a settings store
 const currentCurrency: Currency = 'ARS';
@@ -35,8 +36,8 @@ const getCartItemId = (item: CartItem) => {
 };
 
 const defaultDeliveryZones: DeliveryZone[] = [
-  { id: '1', name: 'Retiro en local', cost: 0.00 },
-  { id: '2', name: 'Zona 1 (Ejemplo)', cost: 500.00 },
+  { id: 'retiro', neighborhoods: ['Retiro en local'], cost: 0.00 },
+  { id: 'caba-1', neighborhoods: ['Palermo', 'Recoleta', 'Belgrano'], cost: 500.00 },
 ];
 
 
@@ -48,10 +49,11 @@ export default function CartPage() {
 
   const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
   const [deliveryCost, setDeliveryCost] = useState(0);
-  const [selectedZone, setSelectedZone] = useState('');
+  const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [loadingZones, setLoadingZones] = useState(true);
+  const [deliveryOption, setDeliveryOption] = useState<'delivery' | 'pickup'>('delivery');
   
   // Guest info
   const [guestName, setGuestName] = useState('');
@@ -82,6 +84,19 @@ export default function CartPage() {
     };
     fetchZones();
   }, []);
+
+  useEffect(() => {
+    if (deliveryOption === 'pickup') {
+      setDeliveryCost(0);
+      setSelectedZoneId('retiro');
+      setGuestAddress('Retiro en local');
+    } else {
+       // Reset when switching back to delivery
+       setDeliveryCost(0);
+       setSelectedZoneId(null);
+       setGuestAddress('');
+    }
+  }, [deliveryOption])
 
 
   const { subtotal, duoDinamicoDiscount, finalSubtotal } = useMemo(() => {
@@ -120,27 +135,47 @@ export default function CartPage() {
   
   const total = finalSubtotal + deliveryCost;
 
-  const handleZoneChange = (zoneId: string) => {
-    const zone = deliveryZones.find(z => z.id === zoneId);
-    if (zone) {
-        setDeliveryCost(zone.cost);
-        setSelectedZone(zone.id);
+  const handleAddressSelect = (address: string, neighborhood: string | null) => {
+    setGuestAddress(address);
+    if (deliveryOption === 'pickup') return;
+
+    if (neighborhood) {
+        const zone = deliveryZones.find(z => z.neighborhoods.some(n => neighborhood.includes(n)));
+        if (zone) {
+            setDeliveryCost(zone.cost);
+            setSelectedZoneId(zone.id);
+            toast({
+                title: "¡Zona encontrada!",
+                description: `Costo de envío para ${neighborhood}: ${currencySymbol}${zone.cost.toFixed(2)}`
+            });
+        } else {
+            setDeliveryCost(0);
+            setSelectedZoneId(null);
+            toast({
+                title: "Zona no encontrada",
+                description: "No cubrimos esa zona. Por favor, intenta con otra dirección o elige 'Retiro en local'.",
+                variant: 'destructive'
+            });
+        }
+    } else {
+       setDeliveryCost(0);
+       setSelectedZoneId(null);
     }
-  }
+  };
 
   const handleCheckout = async () => {
-    // For both guests and users, a delivery zone must be selected
-     if (!selectedZone) {
+     if (!selectedZoneId) {
         toast({
-            title: 'Selecciona una zona',
-            description: 'Por favor, elige una zona de entrega para continuar.',
+            title: 'Completa tu pedido',
+            description: deliveryOption === 'delivery'
+              ? 'Por favor, introduce una dirección válida para calcular el envío.'
+              : 'Selecciona una opción para continuar.',
             variant: 'destructive',
         });
         return;
     }
 
     if (user) {
-      // User is logged in, create order in DB
       setIsProcessing(true);
       const orderInput = {
         userId: user.uid,
@@ -152,7 +187,7 @@ export default function CartPage() {
       };
       const result = await createOrder(orderInput);
       if (result.success) {
-        sendWhatsApp(result.orderId, user.displayName || undefined, undefined);
+        sendWhatsApp(result.orderId, user.displayName || undefined, guestAddress);
         toast({
           title: '¡Pedido guardado!',
           description: 'Tu pedido ha sido guardado y será enviado a WhatsApp.',
@@ -184,8 +219,6 @@ export default function CartPage() {
         description: 'Tu pedido será enviado a WhatsApp.',
       });
       clearCart();
-      // Don't redirect for guests, let them stay on the page.
-      // They can close the whatsapp tab and come back.
       setIsProcessing(false);
     }
   };
@@ -200,13 +233,12 @@ export default function CartPage() {
     if (name) {
       message += `*Cliente: ${name}*\n`;
     }
-     if (address) {
-      message += `*Dirección: ${address}*\n`;
-    }
     
-    const deliveryZoneInfo = deliveryZones.find(z => z.id === selectedZone)?.name || 'No especificada';
-
-    message += `*Zona de Entrega: ${deliveryZoneInfo}*\n`
+    if (deliveryOption === 'pickup') {
+      message += `*Modalidad: Retiro en local*\n`;
+    } else if (address) {
+      message += `*Dirección de Entrega: ${address}*\n`;
+    }
 
     message += `\n${items
         .map((i) => {
@@ -226,14 +258,14 @@ export default function CartPage() {
     window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
   };
 
-  if (!isClient || authLoading) {
-    // Return a placeholder or skeleton loader
+  if (!isClient || authLoading || loadingZones) {
     return (
       <div className="flex flex-col min-h-screen bg-background pb-28">
         <Header />
         <main className="flex-grow container mx-auto px-4 py-6">
           <h1 className="text-3xl font-bold mb-6">Mi Carrito</h1>
-          {/* Skeleton loader for cart items */}
+          <Skeleton className="h-48 w-full" />
+           <Skeleton className="h-48 w-full mt-4" />
         </main>
         <BottomNav />
       </div>
@@ -303,44 +335,36 @@ export default function CartPage() {
                 )
               })}
 
-              {!user && (
-                 <Card className="shadow-xl rounded-2xl bg-card/60 backdrop-blur-xl border-white/20 p-4">
-                    <CardHeader className="p-2">
-                        <CardTitle>Tus Datos</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-2 space-y-4">
+              
+              <Card className="shadow-xl rounded-2xl bg-card/60 backdrop-blur-xl border-white/20 p-4">
+                  <CardHeader className="p-2">
+                      <CardTitle>Tus Datos y Entrega</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2 space-y-4">
+                      {!user && (
                         <div>
                             <Label htmlFor="guestName">Nombre</Label>
                             <Input id="guestName" value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Tu nombre completo" />
                         </div>
-                         <div>
-                            <Label htmlFor="guestAddress">Dirección</Label>
-                            <Input id="guestAddress" value={guestAddress} onChange={(e) => setGuestAddress(e.target.value)} placeholder="Calle, número, depto, etc." />
-                        </div>
-                    </CardContent>
-                 </Card>
-              )}
+                      )}
+                      
+                      <Label>Opciones de Entrega</Label>
+                       <Select onValueChange={(value: 'delivery' | 'pickup') => setDeliveryOption(value)} value={deliveryOption}>
+                          <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Selecciona una opción" />
+                          </SelectTrigger>
+                          <SelectContent>
+                              <SelectItem value="delivery">Enviar a domicilio</SelectItem>
+                              <SelectItem value="pickup">Retirar en el local</SelectItem>
+                          </SelectContent>
+                      </Select>
 
-              <Card className="shadow-xl rounded-2xl bg-card/60 backdrop-blur-xl border-white/20 p-4">
-                <CardHeader className="p-2">
-                  <CardTitle>Zona de Entrega</CardTitle>
-                </CardHeader>
-                <CardContent className="p-2">
-                   {loadingZones ? (
-                        <Skeleton className="h-10 w-full" />
-                   ) : (
-                    <Select onValueChange={handleZoneChange} value={selectedZone}>
-                        <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Selecciona tu zona" />
-                        </SelectTrigger>
-                        <SelectContent>
-                        {deliveryZones.map(zone => (
-                            <SelectItem key={zone.id} value={zone.id}>{zone.name} (+ {currencySymbol} {zone.cost.toFixed(2)})</SelectItem>
-                        ))}
-                        </SelectContent>
-                    </Select>
-                   )}
-                </CardContent>
+                      {deliveryOption === 'delivery' && (
+                        <Suspense fallback={<Skeleton className='h-10 w-full' />}>
+                          <AddressAutocomplete onAddressSelect={handleAddressSelect} />
+                        </Suspense>
+                      )}
+                  </CardContent>
               </Card>
 
               <Card className="shadow-xl rounded-2xl bg-card/60 backdrop-blur-xl border-white/20">
@@ -357,7 +381,7 @@ export default function CartPage() {
                   )}
                    <div className="flex justify-between text-muted-foreground">
                     <span>Envío</span>
-                    <span>{currencySymbol} {deliveryCost.toFixed(2)}</span>
+                    <span>{deliveryCost > 0 ? `${currencySymbol} ${deliveryCost.toFixed(2)}` : (selectedZoneId ? 'Gratis' : 'A calcular')}</span>
                   </div>
                    <div className="flex justify-between font-bold text-2xl">
                     <span>Total</span>
@@ -367,7 +391,7 @@ export default function CartPage() {
               </Card>
 
               <div className="md:mt-6 md:p-0 p-4 md:static md:bottom-auto md:left-auto md:right-auto fixed bottom-24 left-0 right-0">
-                 <Button onClick={handleCheckout} size="lg" className="w-full rounded-full text-lg py-7 bg-green-500 hover:bg-green-600 text-white" disabled={isProcessing}>
+                 <Button onClick={handleCheckout} size="lg" className="w-full rounded-full text-lg py-7 bg-green-500 hover:bg-green-600 text-white" disabled={isProcessing || !selectedZoneId}>
                     {isProcessing ? <Loader2 className="animate-spin" /> : 'Finalizar y Enviar por WhatsApp'}
                   </Button>
               </div>

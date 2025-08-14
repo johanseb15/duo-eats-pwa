@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -18,10 +19,11 @@ import { addDeliveryZone, updateDeliveryZone, type DeliveryZoneInput } from '@/a
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { DeliveryZone } from '@/lib/types';
+import { Textarea } from './ui/textarea';
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: 'El nombre debe tener al menos 2 caracteres.',
+  neighborhoods: z.string().min(2, {
+    message: 'Debes añadir al menos un barrio.',
   }),
   cost: z.coerce.number().min(0, {
     message: 'El costo no puede ser negativo.',
@@ -41,7 +43,7 @@ export function DeliveryZoneForm({ onFormSubmit, zone }: DeliveryZoneFormProps) 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
+      neighborhoods: '',
       cost: 0,
     },
   });
@@ -49,24 +51,30 @@ export function DeliveryZoneForm({ onFormSubmit, zone }: DeliveryZoneFormProps) 
   useEffect(() => {
     if (zone) {
       form.reset({
-        name: zone.name,
+        neighborhoods: zone.neighborhoods.join(', '),
         cost: zone.cost,
       });
     } else {
        form.reset({
-        name: '',
+        neighborhoods: '',
         cost: 0,
        });
     }
-  }, [zone, form.reset]);
+  }, [zone, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     
     const zoneData: DeliveryZoneInput = {
-      name: values.name,
+      neighborhoods: values.neighborhoods.split(',').map(n => n.trim()).filter(Boolean),
       cost: values.cost,
     };
+
+    if (zoneData.neighborhoods.length === 0) {
+        form.setError('neighborhoods', { message: 'Debes añadir al menos un barrio válido.' });
+        setIsSubmitting(false);
+        return;
+    }
 
     try {
         if (zone) {
@@ -87,13 +95,16 @@ export function DeliveryZoneForm({ onFormSubmit, zone }: DeliveryZoneFormProps) 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="name"
+          name="neighborhoods"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nombre de la Zona</FormLabel>
+              <FormLabel>Barrios</FormLabel>
               <FormControl>
-                <Input placeholder="Ej: Zona Céntrica" {...field} />
+                <Textarea placeholder="Ej: Palermo, Belgrano, Recoleta" {...field} />
               </FormControl>
+              <FormDescription>
+                Escribe los nombres de los barrios separados por comas.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
