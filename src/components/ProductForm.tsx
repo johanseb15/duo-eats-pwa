@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -18,13 +18,24 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { addProduct, updateProduct, type ProductInput } from '@/app/actions';
 import { useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, PlusCircle, Trash2 } from 'lucide-react';
 import type { Currency, Prices, Product, ProductCategoryData } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { Separator } from './ui/separator';
 
 const currentCurrency: Currency = 'ARS';
+
+const optionValueSchema = z.object({
+  name: z.string().min(1, 'El nombre del valor es requerido.'),
+  priceModifier: z.coerce.number().default(0),
+});
+
+const optionSchema = z.object({
+  name: z.string().min(1, 'El nombre de la opción es requerido.'),
+  values: z.array(optionValueSchema).min(1, 'Debe haber al menos un valor por opción.'),
+});
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -48,6 +59,7 @@ const formSchema = z.object({
    aiHint: z.string().max(25, {
     message: 'La pista de IA no debe superar los 25 caracteres.',
   }).optional(),
+  options: z.array(optionSchema).optional(),
 });
 
 interface ProductFormProps {
@@ -84,11 +96,25 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
       image: '',
       aiHint: '',
       category: '',
+      options: [],
     },
+  });
+  
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "options"
   });
 
   useEffect(() => {
     if (product) {
+      const productOptions = product.options?.map(opt => ({
+          name: opt.name,
+          values: opt.values.map(val => ({
+              name: val.name,
+              priceModifier: val.priceModifier[currentCurrency] || 0
+          }))
+      })) || [];
+
       form.reset({
         name: product.name,
         description: product.description,
@@ -97,6 +123,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
         image: product.image,
         aiHint: product.aiHint,
         category: product.category,
+        options: productOptions,
       });
     } else {
        form.reset({
@@ -107,6 +134,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
         image: '',
         aiHint: '',
         category: '',
+        options: [],
        });
     }
   }, [product, form]);
@@ -124,6 +152,21 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
       prices['ARS'] = values.price * 1000;
     }
 
+    const finalOptions = values.options?.map(opt => ({
+      name: opt.name,
+      values: opt.values.map(val => {
+        const valuePrices: Partial<Prices> = {};
+        valuePrices[currentCurrency] = val.priceModifier;
+        if (currentCurrency === 'ARS') {
+           valuePrices['USD'] = val.priceModifier / 1000;
+        } else {
+            valuePrices['ARS'] = val.priceModifier * 1000;
+        }
+        return { name: val.name, priceModifier: valuePrices as Prices };
+      })
+    })) || [];
+
+
     const productData: ProductInput = {
       name: values.name,
       description: values.description,
@@ -132,13 +175,14 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
       category: values.category,
       image: values.image || `https://placehold.co/400x225.png`,
       aiHint: values.aiHint || values.name.toLowerCase().split(' ').slice(0, 2).join(' '),
+      options: finalOptions,
     };
 
     try {
         if (product) {
-           await updateProduct(product.id, { ...productData, options: product.options || [] });
+           await updateProduct(product.id, productData);
         } else {
-           await addProduct({ ...productData, options: [] });
+           await addProduct(productData);
         }
         await onProductSubmit();
     } catch (error) {
@@ -222,10 +266,11 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
                   </FormControl>
                   <SelectContent>
                     {categories.map(cat => (
-                      <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                      <SelectItem key={cat.id} value={cat.slug}>{cat.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                 <FormDescription>La categoría debe ser un "slug", ej: "pizzas"</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -262,6 +307,29 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
             </FormItem>
           )}
         />
+        
+        <Separator />
+        
+        <div>
+            <h3 className="text-lg font-medium mb-2">Opciones del Producto</h3>
+            <div className="space-y-4">
+                {fields.map((field, index) => (
+                   <OptionField key={field.id} control={form.control} optionIndex={index} remove={remove} />
+                ))}
+            </div>
+             <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-4"
+                onClick={() => append({ name: '', values: [{ name: '', priceModifier: 0 }] })}
+                >
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Añadir Opción
+            </Button>
+        </div>
+
+
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isSubmitting ? 'Guardando...' : (product ? 'Guardar Cambios' : 'Añadir Producto')}
@@ -269,4 +337,86 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
       </form>
     </Form>
   );
+}
+
+
+interface OptionFieldProps {
+    control: any;
+    optionIndex: number;
+    remove: (index: number) => void;
+}
+
+function OptionField({ control, optionIndex, remove }: OptionFieldProps) {
+    const { fields, append, remove: removeValue } = useFieldArray({
+        control,
+        name: `options.${optionIndex}.values`
+    });
+
+    return (
+        <div className="p-4 border rounded-lg space-y-3 relative bg-muted/30">
+            <FormField
+                control={control}
+                name={`options.${optionIndex}.name`}
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Nombre de la Opción</FormLabel>
+                        <FormControl>
+                            <Input placeholder="Ej: Tamaño" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <h4 className="font-medium text-sm">Valores de la Opción:</h4>
+            <div className="space-y-2">
+                {fields.map((valueField, valueIndex) => (
+                    <div key={valueField.id} className="flex gap-2 items-end">
+                        <FormField
+                            control={control}
+                            name={`options.${optionIndex}.values.${valueIndex}.name`}
+                            render={({ field }) => (
+                                <FormItem className="flex-grow">
+                                    <FormLabel className="sr-only">Nombre del Valor</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Ej: Mediana" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                         <FormField
+                            control={control}
+                            name={`options.${optionIndex}.values.${valueIndex}.priceModifier`}
+                            render={({ field }) => (
+                                <FormItem>
+                                     <FormLabel className="sr-only">Modificador de Precio</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" step="0.01" placeholder="Ej: 800" {...field} />
+                                    </FormControl>
+                                     <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button type="button" variant="ghost" size="icon" onClick={() => removeValue(valueIndex)} className="text-destructive">
+                            <Trash2 className="h-4 w-4"/>
+                        </Button>
+                    </div>
+                ))}
+            </div>
+             <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => append({ name: '', priceModifier: 0 })}
+                className="mt-2"
+                >
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Añadir Valor
+            </Button>
+            <Button type="button" variant="destructive" size="sm" onClick={() => remove(optionIndex)} className="absolute top-2 right-2">
+                Eliminar Opción
+            </Button>
+        </div>
+    )
 }

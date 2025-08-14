@@ -28,9 +28,9 @@ export interface Product {
   price: Prices;
   image: string;
   aiHint: string;
-  category: string;
+  category: string; // This should be a category slug
   stock: number;
-  options?: ProductOption[];
+  options: ProductOption[];
 }
 
 export interface CartItem extends Product {

@@ -3,7 +3,7 @@
 
 import { useEffect, useState, Suspense, lazy } from 'react';
 import Image from 'next/image';
-import type { Product } from '@/lib/types';
+import type { Product, ProductCategoryData } from '@/lib/types';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
@@ -63,7 +63,7 @@ async function getProducts(): Promise<Product[]> {
       aiHint: data.aiHint,
       category: data.category,
       stock: data.stock,
-      options: data.options,
+      options: data.options || [],
     } as Product;
   });
   return productList;
@@ -75,27 +75,45 @@ const currentCurrency = 'ARS';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<ProductCategoryData[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { toast } = useToast();
 
-  const loadProducts = async () => {
+  const loadData = async () => {
     setLoading(true);
     try {
-        const allProducts = await getProducts();
+        const [allProducts, allCategories] = await Promise.all([getProducts(), getCategories()]);
         setProducts(allProducts);
+        setCategories(allCategories);
     } catch (error) {
-        console.error("Failed to load products:", error);
-        toast({ title: "Error", description: "No se pudieron cargar los productos.", variant: "destructive" });
+        console.error("Failed to load products or categories:", error);
+        toast({ title: "Error", description: "No se pudieron cargar los datos.", variant: "destructive" });
     } finally {
         setLoading(false);
     }
   };
+  
+  async function getCategories(): Promise<ProductCategoryData[]> {
+    const categoriesCol = collection(db, 'categories');
+    const q = query(categoriesCol, orderBy('name'));
+    const categoriesSnapshot = await getDocs(q);
+    const categoryList = categoriesSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        name: data.name,
+        slug: data.slug,
+        icon: data.icon,
+      } as ProductCategoryData;
+    });
+    return categoryList;
+  }
 
   useEffect(() => {
-    loadProducts();
+    loadData();
   }, []);
 
   const handleFormSubmit = async () => {
@@ -105,7 +123,7 @@ export default function AdminProductsPage() {
       description: `El producto se ha ${selectedProduct ? 'actualizado' : 'guardado'} correctamente.`,
     });
     setSelectedProduct(null);
-    await loadProducts();
+    await loadData();
   }
   
   const handleEditClick = (product: Product) => {
@@ -126,7 +144,7 @@ export default function AdminProductsPage() {
         title: "Producto eliminado",
         description: "El producto ha sido eliminado del catálogo.",
       });
-      await loadProducts();
+      await loadData();
     } else {
        toast({
         title: "Error",
@@ -144,6 +162,11 @@ export default function AdminProductsPage() {
     }
     setIsFormOpen(open);
   }
+  
+  const getCategoryName = (slug: string) => {
+    return categories.find(c => c.slug === slug)?.name || slug;
+  }
+
 
   const FormSkeleton = () => (
     <div className="space-y-4">
@@ -174,9 +197,9 @@ export default function AdminProductsPage() {
         <h2 className="text-2xl font-bold">Productos</h2>
          <Dialog open={isFormOpen} onOpenChange={handleDialogClose}>
           <DialogTrigger asChild>
-            <Button onClick={() => setIsFormOpen(true)}><PlusCircle className="mr-2 h-4 w-4" /> Añadir Producto</Button>
+            <Button onClick={() => { setSelectedProduct(null); setIsFormOpen(true); }}><PlusCircle className="mr-2 h-4 w-4" /> Añadir Producto</Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-xl">
+          <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle>{selectedProduct ? 'Editar Producto' : 'Añadir Nuevo Producto'}</DialogTitle>
               <DialogDescription>
@@ -218,7 +241,7 @@ export default function AdminProductsPage() {
                 </TableCell>
                 <TableCell className="font-medium">{product.name}</TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{product.category}</Badge>
+                  <Badge variant="secondary">{getCategoryName(product.category)}</Badge>
                 </TableCell>
                 <TableCell>{product.price[currentCurrency] ? `${currencySymbol}${product.price[currentCurrency].toFixed(2)}` : 'N/A'}</TableCell>
                 <TableCell>{product.stock}</TableCell>
@@ -267,5 +290,3 @@ export default function AdminProductsPage() {
     </div>
   );
 }
-
-    
