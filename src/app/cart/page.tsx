@@ -10,14 +10,14 @@ import { BottomNav } from '@/components/BottomNav';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Minus, Plus, Trash2, ShoppingCart, Loader2, CalendarIcon, Clock } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingCart, Loader2, CalendarIcon, Clock, Home, Briefcase, MapPin } from 'lucide-react';
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { Currency, CartItem } from '@/lib/types';
+import type { Currency, CartItem, UserAddress } from '@/lib/types';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { createOrder } from '@/app/actions';
+import { createOrder, fetchAddressesByUserId } from '@/app/actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -35,10 +35,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import type { DeliveryZone } from '@/lib/types';
 
 const AddressAutocomplete = lazy(() => import('@/components/AddressAutocomplete'));
 
-// TODO: Replace with a settings store
 const currentCurrency: Currency = 'ARS';
 const currencySymbol = '$';
 
@@ -49,6 +51,10 @@ const getCartItemId = (item: CartItem) => {
     return `${item.id}-${optionsIdentifier}`;
 };
 
+const defaultDeliveryZones: DeliveryZone[] = [
+  { id: 'retiro', neighborhoods: ['Retiro en local'], cost: 0.00 },
+  { id: 'caba-1', neighborhoods: ['Palermo', 'Recoleta', 'Belgrano'], cost: 500.00 },
+];
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, clearCart } = useCart();
@@ -62,10 +68,14 @@ export default function CartPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [deliveryOption, setDeliveryOption] = useState<'delivery' | 'pickup'>('delivery');
   
-  // Guest info
+  // Guest/User info
   const [guestName, setGuestName] = useState('');
-  const [guestAddress, setGuestAddress] = useState('');
-  const [guestNeighborhood, setGuestNeighborhood] = useState<string | null>(null);
+  const [addressSelection, setAddressSelection] = useState('new');
+  const [userAddresses, setUserAddresses] = useState<UserAddress[]>([]);
+  const [finalAddress, setFinalAddress] = useState('');
+  const [finalNeighborhood, setFinalNeighborhood] = useState<string | null>(null);
+  const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
+  const [loadingZones, setLoadingZones] = useState(true);
 
   // Scheduled Order
   const [scheduleOption, setScheduleOption] = useState<'now' | 'later'>('now');
@@ -76,26 +86,75 @@ export default function CartPage() {
   const [isSuccessAlertOpen, setIsSuccessAlertOpen] = useState(false);
   const [lastOrderId, setLastOrderId] = useState<string | null>(null);
 
-
   useEffect(() => {
     setIsClient(true);
+    const fetchZones = async () => {
+        setLoadingZones(true);
+        try {
+            const zonesCol = collection(db, 'deliveryZones');
+            const q = query(zonesCol, orderBy('cost'));
+            const snapshot = await getDocs(q);
+
+            if (snapshot.empty) {
+                setDeliveryZones(defaultDeliveryZones);
+            } else {
+                const zoneList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DeliveryZone));
+                setDeliveryZones(zoneList);
+            }
+        } catch (error) {
+            console.error("Error fetching delivery zones, using defaults:", error);
+            setDeliveryZones(defaultDeliveryZones);
+        } finally {
+            setLoadingZones(false);
+        }
+    };
+    fetchZones();
   }, []);
 
   useEffect(() => {
+    if (user) {
+      const getUserAddresses = async () => {
+        const addresses = await fetchAddressesByUserId(user.uid);
+        setUserAddresses(addresses);
+        if (addresses.length > 0) {
+          setAddressSelection(addresses[0].id);
+        }
+      };
+      getUserAddresses();
+    }
+  }, [user]);
+  
+   useEffect(() => {
     if (deliveryOption === 'pickup') {
       setDeliveryCost(0);
       setSelectedZoneId('retiro');
-      setGuestAddress('Retiro en local');
-      setGuestNeighborhood('Retiro en local');
+      setFinalAddress('Retiro en local');
+      setFinalNeighborhood('Retiro en local');
     } else {
-       // Reset when switching back to delivery
-       setDeliveryCost(0);
-       setSelectedZoneId(null);
-       setGuestAddress('');
-       setGuestNeighborhood(null);
+      // Logic for delivery
+      if (user && userAddresses.length > 0) {
+        if(addressSelection !== 'new') {
+            const selectedAddr = userAddresses.find(a => a.id === addressSelection);
+            if(selectedAddr) {
+                handleSavedAddressSelect(selectedAddr);
+            }
+        } else {
+            // "Nueva dirección" is selected, clear costs
+            setFinalAddress('');
+            setFinalNeighborhood(null);
+            setDeliveryCost(0);
+            setSelectedZoneId(null);
+        }
+      } else {
+         // Guest or user with no addresses, reset to default state for manual entry
+        setFinalAddress('');
+        setFinalNeighborhood(null);
+        setDeliveryCost(0);
+        setSelectedZoneId(null);
+      }
     }
-  }, [deliveryOption])
-
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deliveryOption, addressSelection, user, userAddresses, deliveryZones]);
 
   const { subtotal, finalSubtotal } = useMemo(() => {
     const rawSubtotal = items.reduce(
@@ -108,19 +167,37 @@ export default function CartPage() {
   
   const total = finalSubtotal + deliveryCost;
 
-  const handleAddressSelect = (address: string, neighborhood: string | null, cost: number, zoneId: string | null) => {
-    setGuestAddress(address);
-    setGuestNeighborhood(neighborhood);
+  const handleManualAddressSelect = (address: string, neighborhood: string | null, cost: number, zoneId: string | null) => {
+    setFinalAddress(address);
+    setFinalNeighborhood(neighborhood);
     setDeliveryCost(cost);
     setSelectedZoneId(zoneId);
   };
+  
+  const handleSavedAddressSelect = (address: UserAddress) => {
+      setFinalAddress(address.fullAddress);
+      setFinalNeighborhood(address.neighborhood);
+      const zone = deliveryZones.find(z => z.neighborhoods.some(n => address.neighborhood.includes(n)));
+      if (zone) {
+        setDeliveryCost(zone.cost);
+        setSelectedZoneId(zone.id);
+      } else {
+        setDeliveryCost(0);
+        setSelectedZoneId(null);
+        toast({
+            title: "Zona no cubierta",
+            description: `Actualmente no cubrimos la zona de "${address.neighborhood}".`,
+            variant: "destructive"
+        })
+      }
+  }
 
   const handleCheckout = async () => {
      if (!selectedZoneId) {
         toast({
             title: 'Completa tu pedido',
             description: deliveryOption === 'delivery'
-              ? 'Por favor, introduce una dirección válida para calcular el envío.'
+              ? 'Por favor, introduce o selecciona una dirección válida para calcular el envío.'
               : 'Selecciona una opción para continuar.',
             variant: 'destructive',
         });
@@ -164,13 +241,13 @@ export default function CartPage() {
       subtotal: finalSubtotal,
       deliveryCost: deliveryCost,
       deliveryDate: finalDeliveryDate,
-      neighborhood: guestNeighborhood || undefined,
+      neighborhood: finalNeighborhood || undefined,
     };
 
     const result = await createOrder(orderInput);
 
     if (result.success && result.orderId) {
-        sendWhatsApp(result.orderId, userName, guestAddress, finalDeliveryDate);
+        sendWhatsApp(result.orderId, userName, finalAddress, finalDeliveryDate);
         setLastOrderId(result.orderId);
         setIsSuccessAlertOpen(true);
         clearCart();
@@ -229,6 +306,13 @@ export default function CartPage() {
   };
 
   const timeSlots = ['12:00', '12:30', '13:00', '13:30', '14:00', '20:00', '20:30', '21:00', '21:30', '22:00'];
+  
+  const getAddressIcon = (name: string) => {
+    const lowerName = name.toLowerCase();
+    if (lowerName.includes('casa')) return <Home className="w-5 h-5" />;
+    if (lowerName.includes('trabajo')) return <Briefcase className="w-5 h-5" />;
+    return <MapPin className="w-5 h-5" />;
+  }
 
   if (!isClient || authLoading) {
     return (
@@ -330,12 +414,36 @@ export default function CartPage() {
                               <SelectItem value="pickup">Retirar en el local</SelectItem>
                           </SelectContent>
                       </Select>
-
                       
-                      <Suspense fallback={<Skeleton className='h-10 w-full' />}>
-                        <AddressAutocomplete onAddressSelect={handleAddressSelect} disabled={deliveryOption === 'pickup'} />
-                      </Suspense>
-                      
+                      {deliveryOption === 'delivery' && (
+                        <div className="space-y-4">
+                            {user && userAddresses.length > 0 && (
+                                <RadioGroup value={addressSelection} onValueChange={setAddressSelection} className="grid grid-cols-1 gap-2">
+                                    {userAddresses.map(addr => (
+                                        <Label key={addr.id} htmlFor={addr.id} className="flex items-center space-x-3 bg-muted/30 p-3 rounded-lg has-[:checked]:ring-2 has-[:checked]:ring-primary transition-all cursor-pointer">
+                                            <RadioGroupItem value={addr.id} id={addr.id} />
+                                            <div className="flex-grow flex items-center gap-3">
+                                              {getAddressIcon(addr.name)}
+                                              <div>
+                                                <p className="font-semibold">{addr.name}</p>
+                                                <p className="text-sm text-muted-foreground">{addr.fullAddress}</p>
+                                              </div>
+                                            </div>
+                                        </Label>
+                                    ))}
+                                    <Label htmlFor="new" className="flex items-center space-x-3 bg-muted/30 p-3 rounded-lg has-[:checked]:ring-2 has-[:checked]:ring-primary transition-all cursor-pointer">
+                                        <RadioGroupItem value="new" id="new" />
+                                        <span>Usar otra dirección</span>
+                                    </Label>
+                                </RadioGroup>
+                            )}
+                             <div className={cn((user && userAddresses.length > 0 && addressSelection !== 'new') && 'hidden')}>
+                                <Suspense fallback={<Skeleton className='h-10 w-full' />}>
+                                    <AddressAutocomplete onAddressSelect={handleManualAddressSelect} disabled={deliveryOption === 'pickup'} />
+                                </Suspense>
+                            </div>
+                        </div>
+                      )}
                       
                        <Separator />
 
@@ -436,3 +544,4 @@ export default function CartPage() {
     </div>
   );
 }
+
