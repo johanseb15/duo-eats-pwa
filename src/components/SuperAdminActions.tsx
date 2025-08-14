@@ -1,28 +1,76 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { deleteAllOrders, importTestCategories, importTestDeliveryZones, importTestProducts } from '@/app/actions';
+import {
+    importProductsFromFile,
+    importCategoriesFromFile,
+    importDeliveryZonesFromFile,
+    deleteAllOrders
+} from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, AlertTriangle, UploadCloud, Trash2 } from 'lucide-react';
+import { Input } from './ui/input';
+
+interface FileUploaderProps {
+    title: string;
+    onFileUpload: (file: File) => Promise<void>;
+}
+
+function FileUploaderAction({ title, onFileUpload }: FileUploaderProps) {
+    const [file, setFile] = useState<File | null>(null);
+    const [loading, setLoading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files && files.length > 0) {
+            setFile(files[0]);
+        }
+    };
+
+    const handleUpload = async () => {
+        if (!file) return;
+        setLoading(true);
+        await onFileUpload(file);
+        setLoading(false);
+        setFile(null);
+        // Clear the file input
+        if(fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
+
+    return (
+        <div className="flex flex-col gap-2 p-4 border rounded-lg bg-card/50">
+            <h4 className="font-semibold text-sm">{title}</h4>
+            <div className="flex gap-2">
+                 <Input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".json"
+                    onChange={handleFileChange}
+                    className="flex-grow file:mr-2 file:text-primary file:font-semibold file:border-0 file:bg-transparent"
+                />
+                <Button onClick={handleUpload} disabled={!file || loading}>
+                    {loading ? <Loader2 className="animate-spin" /> : <UploadCloud />}
+                </Button>
+            </div>
+        </div>
+    );
+}
 
 export function SuperAdminActions() {
-    const [loadingAction, setLoadingAction] = useState<string | null>(null);
     const { toast } = useToast();
 
-    const handleAction = async (actionName: string, actionFn: () => Promise<{ success: boolean; message: string }>) => {
-        const confirmationMessage = `¿Estás seguro de que quieres ${actionName.toLowerCase()}? Esta acción no se puede deshacer.`;
-        
-        if (actionName.includes("Borrar") && !window.confirm(confirmationMessage)) {
-            return;
-        }
-        
-        setLoadingAction(actionName);
+    const handleFileAction = async (actionFn: (data: any) => Promise<{ success: boolean; message: string }>, file: File) => {
         try {
-            const result = await actionFn();
-            if (result.success) {
+            const text = await file.text();
+            const data = JSON.parse(text);
+            const result = await actionFn(data);
+             if (result.success) {
                 toast({
                     title: '¡Éxito!',
                     description: result.message,
@@ -31,23 +79,43 @@ export function SuperAdminActions() {
                 throw new Error(result.message);
             }
         } catch (error: any) {
-            console.error(`Error durante la acción "${actionName}":`, error);
+            console.error(`Error durante la acción de carga:`, error);
             toast({
-                title: 'Error',
-                description: error.message || `No se pudo completar la acción: ${actionName}.`,
+                title: 'Error de carga',
+                description: error.message || `No se pudo procesar el archivo.`,
                 variant: 'destructive',
             });
-        } finally {
-            setLoadingAction(null);
         }
     };
     
-    const actions = [
-        { name: "Importar Productos de Prueba", icon: UploadCloud, fn: importTestProducts, variant: 'outline' as const },
-        { name: "Importar Categorías de Prueba", icon: UploadCloud, fn: importTestCategories, variant: 'outline' as const },
-        { name: "Importar Zonas de Entrega de Prueba", icon: UploadCloud, fn: importTestDeliveryZones, variant: 'outline' as const },
-        { name: "Borrar TODOS los Pedidos", icon: Trash2, fn: deleteAllOrders, variant: 'destructive' as const },
-    ];
+    const handleDeleteAllOrders = async () => {
+         if (!window.confirm("¿Estás seguro de que quieres borrar TODOS los pedidos? Esta acción no se puede deshacer.")) {
+            return;
+        }
+        await handleAction(deleteAllOrders);
+    }
+    
+    const handleAction = async (actionFn: () => Promise<{ success: boolean; message: string }>) => {
+        try {
+            const result = await actionFn();
+             if (result.success) {
+                toast({
+                    title: '¡Éxito!',
+                    description: result.message,
+                });
+            } else {
+                throw new Error(result.message);
+            }
+        } catch(error: any) {
+             console.error(`Error durante la acción:`, error);
+            toast({
+                title: 'Error',
+                description: error.message || `No se pudo completar la acción.`,
+                variant: 'destructive',
+            });
+        }
+    }
+
 
     return (
         <Card className="border-destructive/50">
@@ -62,23 +130,29 @@ export function SuperAdminActions() {
                     </div>
                 </div>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {actions.map(({ name, icon: Icon, fn, variant }) => (
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <FileUploaderAction
+                    title="Importar Productos (.json)"
+                    onFileUpload={(file) => handleFileAction(importProductsFromFile, file)}
+                />
+                 <FileUploaderAction
+                    title="Importar Categorías (.json)"
+                    onFileUpload={(file) => handleFileAction(importCategoriesFromFile, file)}
+                />
+                 <FileUploaderAction
+                    title="Importar Zonas de Entrega (.json)"
+                    onFileUpload={(file) => handleFileAction(importDeliveryZonesFromFile, file)}
+                />
+                <div className="p-4 border rounded-lg bg-card/50 flex flex-col justify-center">
                      <Button 
-                        key={name}
-                        variant={variant} 
-                        onClick={() => handleAction(name, fn)} 
-                        disabled={!!loadingAction}
+                        variant='destructive'
+                        onClick={handleDeleteAllOrders}
                         className="w-full"
                     >
-                        {loadingAction === name ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                            <Icon className="mr-2 h-4 w-4" />
-                        )}
-                        {loadingAction === name ? 'Procesando...' : name}
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Borrar TODOS los Pedidos
                     </Button>
-                ))}
+                </div>
             </CardContent>
         </Card>
     )

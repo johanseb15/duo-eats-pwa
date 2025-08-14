@@ -11,7 +11,6 @@ import { getAuth } from 'firebase-admin/auth';
 import { adminApp } from '@/lib/firebase-admin';
 import { auth } from '@/lib/firebase';
 import { subDays, format } from 'date-fns';
-import testProducts from '@/lib/productos-test.json';
 
 
 export async function fetchAllUsers() {
@@ -459,64 +458,48 @@ export async function fetchDashboardAnalytics(): Promise<DashboardAnalytics> {
 
 // Super Admin Actions
 async function batchWrite(collectionName: string, data: any[]) {
-    const collectionRef = collection(db, collectionName);
-    const batch = writeBatch(db);
-    
-    data.forEach(item => {
-        const docRef = doc(collectionRef, item.id);
-        batch.set(docRef, item);
-    });
-    
-    await batch.commit();
+  const collectionRef = collection(db, collectionName);
+  const batch = writeBatch(db);
+
+  data.forEach((item) => {
+    // Firestore can autogenerate an ID if one isn't provided.
+    const docRef = item.id
+      ? doc(collectionRef, item.id)
+      : doc(collectionRef);
+    batch.set(docRef, item);
+  });
+
+  await batch.commit();
 }
 
 
-export async function importTestProducts() {
+export async function importProductsFromFile(products: Product[]) {
     try {
-        await batchWrite('products', testProducts);
+        await batchWrite('products', products);
         revalidatePath('/', 'layout');
-        return { success: true, message: `${testProducts.length} productos importados con éxito.` };
+        return { success: true, message: `${products.length} productos importados con éxito.` };
     } catch (error) {
         console.error("Error importing test products:", error);
         return { success: false, message: 'Error al importar productos.' };
     }
 }
 
-const testCategories: Omit<ProductCategoryData, 'id'>[] = [
-  { name: 'Hamburguesas', slug: 'hamburguesas', icon: 'Beef' },
-  { name: 'Pizzas', slug: 'pizzas', icon: 'Pizza' },
-  { name: 'Lomitos', slug: 'lomitos', icon: 'Sandwich' },
-  { name: 'Empanadas', slug: 'empanadas', icon: 'Wind' },
-  { name: 'Pastas', slug: 'pastas', icon: 'Pasta' },
-  { name: 'Ensaladas', slug: 'ensaladas', icon: 'Salad' },
-  { name: 'Postres', slug: 'postres', icon: 'Cake' },
-  { name: 'Bebidas', slug: 'bebidas', icon: 'CupSoda' },
-];
-
-export async function importTestCategories() {
+export async function importCategoriesFromFile(categories: ProductCategoryData[]) {
     try {
-        const categoriesWithIds = testCategories.map((cat, i) => ({ ...cat, id: (i + 1).toString() }));
-        await batchWrite('categories', categoriesWithIds);
+        await batchWrite('categories', categories);
         revalidatePath('/', 'layout');
-        return { success: true, message: `${categoriesWithIds.length} categorías importadas con éxito.` };
+        return { success: true, message: `${categories.length} categorías importadas con éxito.` };
     } catch (error) {
         console.error("Error importing test categories:", error);
         return { success: false, message: 'Error al importar categorías.' };
     }
 }
 
-const testDeliveryZones: Omit<DeliveryZone, 'id'>[] = [
-  { neighborhoods: ['Palermo', 'Recoleta', 'Belgrano'], cost: 500.00 },
-  { neighborhoods: ['Villa Crespo', 'Almagro'], cost: 400.00 },
-  { neighborhoods: ['Nuñez', 'Saavedra'], cost: 600.00 },
-];
-
-export async function importTestDeliveryZones() {
+export async function importDeliveryZonesFromFile(zones: DeliveryZone[]) {
     try {
-        const zonesWithIds = testDeliveryZones.map((zone, i) => ({ ...zone, id: (i + 1).toString() }));
-        await batchWrite('deliveryZones', zonesWithIds);
+        await batchWrite('deliveryZones', zones);
         revalidatePath('/', 'layout');
-        return { success: true, message: `${zonesWithIds.length} zonas de entrega importadas.` };
+        return { success: true, message: `${zones.length} zonas de entrega importadas.` };
     } catch (error) {
         console.error("Error importing test delivery zones:", error);
         return { success: false, message: 'Error al importar zonas de entrega.' };

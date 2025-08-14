@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 export default async function SuperAdminPage() {
     const users = await fetchAllUsers();
     const adminUids = (process.env.NEXT_PUBLIC_ADMIN_UIDS || "").split(',');
+    const superAdminUids = (process.env.NEXT_PUBLIC_SUPERADMIN_UIDS || "").split(',');
 
     return (
         <div>
@@ -25,7 +26,7 @@ export default async function SuperAdminPage() {
                 <h1 className="text-3xl font-bold">Panel de Superadmin</h1>
             </div>
             <p className="text-muted-foreground mb-4">
-                Aquí puedes ver todos los usuarios registrados en la aplicación. Para convertir a un usuario en administrador, copia su UID y agrégalo a la variable de entorno <code className="bg-muted px-2 py-1 rounded-md text-sm">NEXT_PUBLIC_ADMIN_UIDS</code> en tu archivo <code className="bg-muted px-2 py-1 rounded-md text-sm">.env</code>, separado por comas.
+                Aquí puedes ver todos los usuarios registrados en la aplicación. Para convertir a un usuario en administrador o superadministrador, copia su UID y agrégalo a la variable de entorno correspondiente (<code className="bg-muted px-2 py-1 rounded-md text-sm">NEXT_PUBLIC_ADMIN_UIDS</code> o <code className="bg-muted px-2 py-1 rounded-md text-sm">NEXT_PUBLIC_SUPERADMIN_UIDS</code>) en tu archivo <code className="bg-muted px-2 py-1 rounded-md text-sm">.env</code>, separado por comas.
             </p>
             <div className="rounded-2xl border bg-card/60 backdrop-blur-xl overflow-hidden">
                 <Table>
@@ -54,9 +55,11 @@ export default async function SuperAdminPage() {
                                     <code className="text-sm bg-muted p-2 rounded-lg">{user.uid}</code>
                                 </TableCell>
                                 <TableCell>
-                                    {adminUids.includes(user.uid) && (
+                                     {superAdminUids.includes(user.uid) ? (
+                                        <Badge variant="secondary" className="bg-purple-500/20 text-purple-300">Super Admin</Badge>
+                                     ) : adminUids.includes(user.uid) ? (
                                         <Badge variant="secondary" className="bg-blue-500/20 text-blue-300">Admin</Badge>
-                                    )}
+                                    ) : null}
                                 </TableCell>
                             </TableRow>
                         ))}
