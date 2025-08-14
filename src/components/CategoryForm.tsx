@@ -65,7 +65,7 @@ export function CategoryForm({ onSubmitSuccess, category }: CategoryFormProps) {
         icon: 'Package',
        });
     }
-  }, [category, form.reset]);
+  }, [category, form]);
 
   const handleSuggestIcon = () => {
     const categoryName = form.getValues('name');
