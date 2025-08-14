@@ -1,4 +1,4 @@
-
+'use client';
 
 import { fetchDashboardAnalytics } from "@/app/actions";
 import { Badge } from "@/components/ui/badge";
@@ -8,22 +8,63 @@ import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, XAx
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import { getStatusVariant } from "./orders/page";
 import { DollarSign, Package, ShoppingCart, TrendingUp } from "lucide-react";
+import { useEffect, useState } from "react";
+import type { DashboardAnalytics } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const currencySymbol = '$';
 
-export default async function AdminDashboardPage() {
-    const analytics = await fetchDashboardAnalytics();
+const chartConfig = {
+    orders: {
+        label: "Pedidos",
+        color: "hsl(var(--primary))",
+    },
+    total: {
+        label: "Ventas",
+        color: "hsl(var(--primary))",
+    },
+};
 
-    const chartConfig = {
-        orders: {
-            label: "Pedidos",
-            color: "hsl(var(--primary))",
-        },
-        total: {
-            label: "Ventas",
-            color: "hsl(var(--primary))",
-        },
-    };
+const initialAnalytics: DashboardAnalytics = {
+    totalRevenue: 0,
+    totalOrders: 0,
+    averageOrderValue: 0,
+    recentOrders: [],
+    productSales: [],
+    ordersOverTime: []
+};
+
+export default function AdminDashboardPage() {
+    const [analytics, setAnalytics] = useState<DashboardAnalytics>(initialAnalytics);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const getAnalytics = async () => {
+            setLoading(true);
+            const data = await fetchDashboardAnalytics();
+            setAnalytics(data);
+            setLoading(false);
+        }
+        getAnalytics();
+    }, []);
+    
+    if (loading) {
+        return (
+             <div className="space-y-6">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    <Skeleton className="h-28 rounded-2xl" />
+                    <Skeleton className="h-28 rounded-2xl" />
+                    <Skeleton className="h-28 rounded-2xl" />
+                </div>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                    <Skeleton className="col-span-4 h-72 rounded-2xl" />
+                    <Skeleton className="col-span-4 lg:col-span-3 h-72 rounded-2xl" />
+                </div>
+                <Skeleton className="h-64 w-full rounded-2xl" />
+            </div>
+        )
+    }
+
 
     return (
         <div className="space-y-6">
