@@ -199,4 +199,5 @@ export default async function Home() {
   return <HomeClient products={products} promotions={promotions} categories={categories} />;
 }
 
+export const revalidate = 60; // Revalidate every 60 seconds
     
