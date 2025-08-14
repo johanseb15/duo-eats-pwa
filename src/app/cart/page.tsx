@@ -26,6 +26,15 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
 import { Separator } from '@/components/ui/separator';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const AddressAutocomplete = lazy(() => import('@/components/AddressAutocomplete'));
 
@@ -62,6 +71,10 @@ export default function CartPage() {
   const [scheduleOption, setScheduleOption] = useState<'now' | 'later'>('now');
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>();
   const [scheduledTime, setScheduledTime] = useState<string>('');
+
+  // Success Dialog
+  const [isSuccessAlertOpen, setIsSuccessAlertOpen] = useState(false);
+  const [lastOrderId, setLastOrderId] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -158,12 +171,9 @@ export default function CartPage() {
 
     if (result.success && result.orderId) {
         sendWhatsApp(result.orderId, userName, guestAddress, finalDeliveryDate);
-        toast({
-          title: '¡Pedido guardado!',
-          description: 'Tu pedido ha sido guardado y serás redirigido para el seguimiento.',
-        });
+        setLastOrderId(result.orderId);
+        setIsSuccessAlertOpen(true);
         clearCart();
-        router.push(`/order/${result.orderId}`);
     } else {
         toast({
           title: 'Error al crear el pedido',
@@ -208,6 +218,14 @@ export default function CartPage() {
     
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
+  };
+
+  const handleSuccessAlertClose = () => {
+    if (lastOrderId) {
+        router.push(`/order/${lastOrderId}`);
+    }
+    setIsSuccessAlertOpen(false);
+    setLastOrderId(null);
   };
 
   const timeSlots = ['12:00', '12:30', '13:00', '13:30', '14:00', '20:00', '20:30', '21:00', '21:30', '22:00'];
@@ -400,6 +418,21 @@ export default function CartPage() {
         )}
       </main>
       <BottomNav />
+      <AlertDialog open={isSuccessAlertOpen} onOpenChange={setIsSuccessAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¡Pedido Realizado con Éxito!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tu pedido ha sido guardado correctamente. Se abrirá WhatsApp para que puedas enviarlo. Luego serás redirigido a la página de seguimiento.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={handleSuccessAlertClose}>
+              Aceptar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
