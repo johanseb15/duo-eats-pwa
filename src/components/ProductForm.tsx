@@ -420,7 +420,3 @@ function OptionField({ control, optionIndex, remove }: OptionFieldProps) {
         </div>
     )
 }
-
-    
-
-    
