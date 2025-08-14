@@ -96,16 +96,23 @@ const testProducts: Product[] = [
     },
 ];
 
-async function getProductsByCategory(categoryName: string): Promise<Product[]> {
+const testCategories: ProductCategoryData[] = [
+  { id: '1', name: 'Hamburguesas', slug: 'hamburguesas', icon: 'Beef' },
+  { id: '2', name: 'Pizzas', slug: 'pizzas', icon: 'Pizza' },
+  { id: '3', name: 'Lomitos', slug: 'lomitos', icon: 'Sandwich' },
+  { id: '4', name: 'Empanadas', slug: 'empanadas', icon: 'Wind' },
+  { id: '5', name: 'Bebidas', slug: 'bebidas', icon: 'CupSoda' },
+];
+
+async function getProductsByCategorySlug(categorySlug: string): Promise<Product[]> {
   try {
     const productsCol = collection(db, 'products');
-    const q = query(productsCol, where('category', '==', categoryName));
+    // We assume the category field in a product document stores the slug.
+    const q = query(productsCol, where('category', '==', categorySlug));
     const productsSnapshot = await getDocs(q);
     
     if (productsSnapshot.empty) {
-        // Normalize category name from slug before filtering
-        const normalizedCategoryName = categoryName.toLowerCase();
-        return testProducts.filter(p => p.category.toLowerCase() === normalizedCategoryName);
+        return testProducts.filter(p => p.category === categorySlug);
     }
     
     const productList = productsSnapshot.docs.map(doc => {
@@ -124,21 +131,12 @@ async function getProductsByCategory(categoryName: string): Promise<Product[]> {
     });
     return productList;
   } catch (error) {
-    console.error(`Error fetching products for category ${categoryName}, falling back to test data:`, error);
-    const normalizedCategoryName = categoryName.toLowerCase();
-    return testProducts.filter(p => p.category.toLowerCase() === normalizedCategoryName);
+    console.error(`Error fetching products for category slug ${categorySlug}, falling back to test data:`, error);
+    return testProducts.filter(p => p.category === categorySlug);
   }
 }
 
 async function getCategoryBySlug(slug: string): Promise<ProductCategoryData | null> {
-    const testCategories: ProductCategoryData[] = [
-      { id: '1', name: 'Hamburguesas', slug: 'hamburguesas', icon: 'Beef' },
-      { id: '2', name: 'Pizzas', slug: 'pizzas', icon: 'Pizza' },
-      { id: '3', name: 'Lomitos', slug: 'lomitos', icon: 'Sandwich' },
-      { id: '4', name: 'Empanadas', slug: 'empanadas', icon: 'Wind' },
-      { id: '5', name: 'Bebidas', slug: 'bebidas', icon: 'CupSoda' },
-    ];
-    
     try {
         const categoriesCol = collection(db, 'categories');
         const q = query(categoriesCol, where('slug', '==', slug));
@@ -149,9 +147,10 @@ async function getCategoryBySlug(slug: string): Promise<ProductCategoryData | nu
            return { id: doc.id, ...doc.data() } as ProductCategoryData;
         }
 
+        // Fallback to test data if Firestore is empty
         return testCategories.find(c => c.slug === slug) || null;
-
     } catch (error) {
+        // Fallback to test data on any Firestore error
         console.error(`Error fetching category for slug '${slug}', falling back to test data:`, error);
         return testCategories.find(c => c.slug === slug) || null;
     }
@@ -166,8 +165,8 @@ export default async function CategoryPage({ params }: { params: { slug: string 
     notFound();
   }
 
-  // Use category.name for filtering, as test data uses full names
-  const products = await getProductsByCategory(category.name);
+  // Use category.slug for filtering, which is more reliable.
+  const products = await getProductsByCategorySlug(category.slug);
 
   return (
     <CategoryClientPage products={products} category={category} />
