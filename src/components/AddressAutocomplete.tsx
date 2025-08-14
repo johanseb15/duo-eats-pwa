@@ -2,7 +2,7 @@
 'use client';
 
 import React, {useRef, useEffect, useState} from 'react';
-import {APIProvider, useAutocomplete, useMapsLibrary} from '@vis.gl/react-google-maps';
+import {APIProvider, useMapsLibrary} from '@vis.gl/react-google-maps';
 import {Input} from './ui/input';
 
 interface AddressAutocompleteProps {
@@ -32,31 +32,38 @@ function AutocompleteComponent({onAddressSelect}: AddressAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, setInputValue] = useState('');
   const places = useMapsLibrary('places');
+  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
 
-  const onPlaceChanged = (place: google.maps.places.PlaceResult | null) => {
-    if (place) {
-      const formattedAddress = place.formatted_address || '';
-      const neighborhood =
-        place.address_components?.find(c => c.types.includes('locality'))
-          ?.long_name || null;
-      onAddressSelect(formattedAddress, neighborhood);
-      setInputValue(formattedAddress);
-    }
-    // clear suggestions
-    if (autocomplete) {
-        autocomplete.set('types', []);
-    }
-  };
+  useEffect(() => {
+    if (!places || !inputRef.current) return;
 
-  const autocomplete = useAutocomplete({
-    inputField: inputRef && inputRef.current,
-    onPlaceChanged,
-    options: {
+    const autocompleteInstance = new places.Autocomplete(inputRef.current, {
         componentRestrictions: { country: 'ar' },
         fields: ["address_components", "formatted_address"],
         types: ["address"],
+    });
+    setAutocomplete(autocompleteInstance);
+  }, [places]);
+
+  useEffect(() => {
+    if (!autocomplete) return;
+
+    const listener = autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (place) {
+          const formattedAddress = place.formatted_address || '';
+          const neighborhood =
+            place.address_components?.find(c => c.types.includes('locality'))
+              ?.long_name || null;
+          onAddressSelect(formattedAddress, neighborhood);
+          setInputValue(formattedAddress);
+        }
+    });
+
+    return () => {
+        google.maps.event.removeListener(listener);
     }
-  });
+  }, [autocomplete, onAddressSelect]);
 
 
   return (
