@@ -182,5 +182,3 @@ export default async function CategoryPage({ params }: { params: { slug: string 
 }
 
 export const revalidate = 60;
-
-    
