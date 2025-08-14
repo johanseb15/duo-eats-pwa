@@ -36,6 +36,17 @@ const nextConfig = {
       },
     ],
   },
+   webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Exclude server-only packages from client-side bundle
+      config.externals.push(
+        '@opentelemetry/exporter-jaeger',
+        '@opentelemetry/exporter-zipkin',
+        '@genkit-ai/firebase'
+      );
+    }
+    return config;
+  },
 };
 
 module.exports = withPWA(nextConfig);
