@@ -1,0 +1,96 @@
+
+[
+    {
+        "id": "1",
+        "name": "Hamburguesa Doble Queso",
+        "description": "Doble carne de res, queso cheddar, cebolla caramelizada y salsa especial.",
+        "price": { "ARS": 3200, "USD": 3.2 },
+        "image": "https://images.unsplash.com/photo-1550547660-d9450f859349?w=800",
+        "aiHint": "double cheeseburger",
+        "category": "hamburguesas",
+        "stock": 15,
+        "options": []
+    },
+    {
+        "id": "2",
+        "name": "Pizza de Muzzarella",
+        "description": "Masa fina, salsa de tomate, y la mejor muzzarella.",
+        "price": { "ARS": 2800, "USD": 2.8 },
+        "image": "https://images.unsplash.com/photo-1601924582971-c8b3b4fa6a8a?w=800",
+        "aiHint": "neapolitan pizza",
+        "category": "pizzas",
+        "stock": 10,
+        "options": [
+            {
+                "name": "Tamaño",
+                "values": [
+                    { "name": "Individual", "priceModifier": { "ARS": 0, "USD": 0 } },
+                    { "name": "Mediana", "priceModifier": { "ARS": 800, "USD": 0.8 } },
+                    { "name": "Grande", "priceModifier": { "ARS": 1500, "USD": 1.5 } }
+                ]
+            },
+            {
+                "name": "Masa",
+                "values": [
+                    { "name": "A la Piedra", "priceModifier": { "ARS": 0, "USD": 0 } },
+                    { "name": "Media Masa", "priceModifier": { "ARS": 200, "USD": 0.2 } }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "3",
+        "name": "Lomito Completo",
+        "description": "Pan casero, carne vacuna, lechuga, tomate, jamón, queso, huevo y mayonesa.",
+        "price": { "ARS": 2500, "USD": 2.5 },
+        "image": "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=800",
+        "aiHint": "lomito sandwich",
+        "category": "lomitos",
+        "stock": 20,
+        "options": []
+    },
+    {
+        "id": "4",
+        "name": "Empanadas de Carne",
+        "description": "Empanadas al horno rellenas de carne, cebolla y especias.",
+        "price": { "ARS": 350, "USD": 0.35 },
+        "image": "https://images.unsplash.com/photo-1604908177522-4327d4d1d2d2?w=800",
+        "aiHint": "meat empanadas",
+        "category": "empanadas",
+        "stock": 50,
+        "options": []
+    },
+    {
+        "id": "5",
+        "name": "Coca-Cola 500ml",
+        "description": "Bebida gaseosa sabor cola en botella de 500ml.",
+        "price": { "ARS": 500, "USD": 0.5 },
+        "image": "https://images.unsplash.com/photo-1583947215259-38e31be8752b?w=800",
+        "aiHint": "coca-cola bottle",
+        "category": "bebidas",
+        "stock": 100,
+        "options": []
+    },
+     {
+        "id": "6",
+        "name": "Pizza Pepperoni",
+        "description": "Masa crujiente, salsa de tomate, mozzarella y pepperoni.",
+        "price": { "ARS": 3000, "USD": 3.0 },
+        "image": "https://images.unsplash.com/photo-1601924994987-69c3b35b4f69?w=800",
+        "aiHint": "pepperoni pizza",
+        "category": "pizzas",
+        "stock": 8,
+        "options": []
+    },
+     {
+        "id": "7",
+        "name": "Pizza Cuatro Quesos",
+        "description": "Mozzarella, gorgonzola, parmesano y provolone.",
+        "price": { "ARS": 3200, "USD": 3.2 },
+        "image": "https://images.unsplash.com/photo-1603079849119-65e8adba6b60?w=800",
+        "aiHint": "four cheese pizza",
+        "category": "pizzas",
+        "stock": 6,
+        "options": []
+    }
+]
