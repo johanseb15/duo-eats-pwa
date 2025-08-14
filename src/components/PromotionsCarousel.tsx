@@ -11,12 +11,18 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
+import Autoplay from "embla-carousel-autoplay";
+import { useRef } from 'react';
 
 interface PromotionsCarouselProps {
   promotions: Promotion[];
 }
 
 export function PromotionsCarousel({ promotions }: PromotionsCarouselProps) {
+    const plugin = useRef(
+      Autoplay({ delay: 5000, stopOnInteraction: false, stopOnMouseEnter: true })
+    )
+
     if (!promotions || promotions.length === 0) {
         return null;
     }
@@ -27,6 +33,7 @@ export function PromotionsCarousel({ promotions }: PromotionsCarouselProps) {
         align: 'start',
         loop: true,
       }}
+      plugins={[plugin.current]}
       className="w-full"
     >
       <CarouselContent>
