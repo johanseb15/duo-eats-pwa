@@ -87,3 +87,13 @@ export interface DashboardAnalytics {
     productSales: ProductSale[];
     ordersOverTime: OrderOverTime[];
 }
+
+
+export interface UserAddress {
+  id: string;
+  userId: string;
+  name: string; // e.g., 'Casa', 'Trabajo'
+  fullAddress: string;
+  neighborhood: string;
+  details?: string; // e.g., 'Apto 5B'
+}

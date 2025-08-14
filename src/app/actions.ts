@@ -4,7 +4,7 @@
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommendations';
 import { suggestCategoryIcon } from '@/ai/flows/suggest-category-icon';
 import { db } from '@/lib/firebase';
-import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone, DashboardAnalytics, ProductSale, OrderOverTime, CartItem, ProductOption } from '@/lib/types';
+import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone, DashboardAnalytics, ProductSale, OrderOverTime, CartItem, ProductOption, UserAddress } from '@/lib/types';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, limit, getDoc, runTransaction, writeBatch } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { getAuth } from 'firebase-admin/auth';
@@ -393,6 +393,67 @@ export async function deleteDeliveryZone(zoneId: string) {
     }
 }
 
+// User Address Actions
+export type AddressInput = Omit<UserAddress, 'id' | 'userId'>;
+
+export async function addAddress(userId: string, addressData: AddressInput) {
+    try {
+        const docRef = await addDoc(collection(db, 'addresses'), { ...addressData, userId });
+        revalidatePath('/profile');
+        revalidatePath('/cart');
+        return { success: true, addressId: docRef.id };
+    } catch (error) {
+        console.error('Error adding address:', error);
+        return { success: false, error: 'Failed to add address' };
+    }
+}
+
+export async function updateAddress(addressId: string, addressData: AddressInput) {
+    try {
+        const addressRef = doc(db, 'addresses', addressId);
+        await updateDoc(addressRef, addressData);
+        revalidatePath('/profile');
+        revalidatePath('/cart');
+        return { success: true };
+    } catch (error) {
+        console.error('Error updating address:', error);
+        return { success: false, error: 'Failed to update address' };
+    }
+}
+
+export async function deleteAddress(addressId: string) {
+    try {
+        const addressRef = doc(db, 'addresses', addressId);
+        await deleteDoc(addressRef);
+        revalidatePath('/profile');
+        revalidatePath('/cart');
+        return { success: true };
+    } catch (error) {
+        console.error('Error deleting address:', error);
+        return { success: false, error: 'Failed to delete address' };
+    }
+}
+
+export async function fetchAddressesByUserId(userId: string): Promise<UserAddress[]> {
+    if (!userId) {
+        return [];
+    }
+    try {
+        const addressesCol = collection(db, 'addresses');
+        const q = query(addressesCol, where('userId', '==', userId));
+        const snapshot = await getDocs(q);
+        const addressList = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as UserAddress));
+        return addressList;
+    } catch (error) {
+        console.error("Error fetching addresses: ", error);
+        return [];
+    }
+}
+
+
 // Analytics Actions
 export async function fetchDashboardAnalytics(): Promise<DashboardAnalytics> {
     try {
@@ -524,5 +585,3 @@ export async function deleteAllOrders() {
         return { success: false, message: 'Error al borrar los pedidos.' };
     }
 }
-
-    
