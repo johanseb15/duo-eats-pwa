@@ -120,11 +120,11 @@ export default function AdminProductsPage() {
 
   const handleFormSubmit = async () => {
     setIsFormOpen(false);
+    setSelectedProduct(null);
     toast({
       title: selectedProduct ? "Producto actualizado" : "Producto añadido",
       description: `El producto se ha ${selectedProduct ? 'actualizado' : 'guardado'} correctamente.`,
     });
-    setSelectedProduct(null);
     await loadData();
   }
   
@@ -310,3 +310,5 @@ export default function AdminProductsPage() {
     </div>
   );
 }
+
+    

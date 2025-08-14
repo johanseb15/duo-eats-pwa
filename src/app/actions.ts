@@ -49,7 +49,7 @@ export async function fetchRecommendations() {
     }
 
     if (userOrderHistory.length === 0) {
-      return ['Pizza de Muzzarella', 'Empanadas de Carne', 'Flan con Dulce de Leche'];
+      return ['Pizza Muzzarella', 'Empanada de Carne', 'Flan Casero'];
     }
 
     const result = await getPersonalizedRecommendations({
@@ -59,7 +59,7 @@ export async function fetchRecommendations() {
     return result.recommendations;
   } catch (error) {
     console.error('Error fetching recommendations:', error);
-    return ['Pizza de Muzzarella', 'Empanadas de Carne', 'Flan con Dulce de Leche'];
+    return ['Pizza Muzzarella', 'Empanada de Carne', 'Flan Casero'];
   }
 }
 
@@ -487,6 +487,9 @@ const testCategories: Omit<ProductCategoryData, 'id'>[] = [
   { name: 'Pizzas', slug: 'pizzas', icon: 'Pizza' },
   { name: 'Lomitos', slug: 'lomitos', icon: 'Sandwich' },
   { name: 'Empanadas', slug: 'empanadas', icon: 'Wind' },
+  { name: 'Pastas', slug: 'pastas', icon: 'Pasta' },
+  { name: 'Ensaladas', slug: 'ensaladas', icon: 'Salad' },
+  { name: 'Postres', slug: 'postres', icon: 'Cake' },
   { name: 'Bebidas', slug: 'bebidas', icon: 'CupSoda' },
 ];
 
@@ -538,3 +541,5 @@ export async function deleteAllOrders() {
         return { success: false, message: 'Error al borrar los pedidos.' };
     }
 }
+
+    

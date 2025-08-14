@@ -8,97 +8,114 @@ import CategoryClientPage from './page.client';
 
 const testProducts: Product[] = [
     {
-        id: '1',
-        name: 'Hamburguesa Doble Queso',
-        description: 'Doble carne de res, queso cheddar, cebolla caramelizada y salsa especial.',
-        price: { ARS: 3200, USD: 3.2 },
-        image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800',
-        aiHint: 'double cheeseburger',
-        category: 'hamburguesas',
-        stock: 15,
-        options: []
+        "id": "p1",
+        "name": "Hamburguesa Doble Clásica",
+        "description": "Hamburguesa doble carne, queso cheddar, lechuga, tomate y salsa especial en pan artesanal.",
+        "price": { "ARS": 1050, "USD": 1.05 },
+        "image": "https://images.unsplash.com/photo-1606755962773-0e7c4eecf9b2",
+        "aiHint": "classic burger",
+        "category": "hamburguesas",
+        "stock": 20,
+        "options": []
     },
     {
-        id: '2',
-        name: 'Pizza de Muzzarella',
-        description: 'Masa fina, salsa de tomate, y la mejor muzzarella.',
-        price: { ARS: 2800, USD: 2.8 },
-        image: 'https://images.unsplash.com/photo-1601924582971-c8b3b4fa6a8a?w=800',
-        aiHint: 'neapolitan pizza',
-        category: 'pizzas',
-        stock: 10,
-        options: [
-            {
-                name: 'Tamaño',
-                values: [
-                    { name: 'Individual', priceModifier: { ARS: 0, USD: 0 } },
-                    { name: 'Mediana', priceModifier: { ARS: 800, USD: 0.8 } },
-                    { name: 'Grande', priceModifier: { ARS: 1500, USD: 1.5 } },
-                ],
-            },
-            {
-                name: 'Masa',
-                values: [
-                    { name: 'A la Piedra', priceModifier: { ARS: 0, USD: 0 } },
-                    { name: 'Media Masa', priceModifier: { ARS: 200, USD: 0.2 } },
-                ],
-            },
-        ]
+        "id": "p2",
+        "name": "Hamburguesa BBQ Bacon",
+        "description": "Hamburguesa con queso cheddar, panceta crocante, cebolla caramelizada y salsa BBQ.",
+        "price": { "ARS": 1100, "USD": 1.10 },
+        "image": "https://images.unsplash.com/photo-1550547660-d9450f859349",
+        "aiHint": "bacon burger",
+        "category": "hamburguesas",
+        "stock": 15,
+        "options": []
     },
     {
-        id: '3',
-        name: 'Lomito Completo',
-        description: 'Pan casero, carne vacuna, lechuga, tomate, jamón, queso, huevo y mayonesa.',
-        price: { ARS: 2500, USD: 2.5 },
-        image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=800',
-        aiHint: 'lomito sandwich',
-        category: 'lomitos',
-        stock: 20,
-        options: []
+        "id": "p3",
+        "name": "Hamburguesa Veggie",
+        "description": "Hamburguesa de lentejas y garbanzos, lechuga, tomate, palta y mayonesa vegana.",
+        "price": { "ARS": 1150, "USD": 1.15 },
+        "image": "https://images.unsplash.com/photo-1586190848861-99aa4a171e90",
+        "aiHint": "veggie burger",
+        "category": "hamburguesas",
+        "stock": 10,
+        "options": []
     },
     {
-        id: '4',
-        name: 'Empanadas de Carne',
-        description: 'Empanadas al horno rellenas de carne, cebolla y especias.',
-        price: { ARS: 350, USD: 0.35 },
-        image: 'https://images.unsplash.com/photo-1604908177522-4327d4d1d2d2?w=800',
-        aiHint: 'meat empanadas',
-        category: 'empanadas',
-        stock: 50,
-        options: []
+        "id": "p4",
+        "name": "Hamburguesa Triple Queso",
+        "description": "Carne de res, mezcla de quesos cheddar, mozzarella y provolone, con salsa especial.",
+        "price": { "ARS": 1200, "USD": 1.20 },
+        "image": "https://images.unsplash.com/photo-1599021308365-54c1c2045a8f",
+        "aiHint": "triple cheeseburger",
+        "category": "hamburguesas",
+        "stock": 12,
+        "options": []
     },
     {
-        id: '5',
-        name: 'Coca-Cola 500ml',
-        description: 'Bebida gaseosa sabor cola en botella de 500ml.',
-        price: { ARS: 500, USD: 0.5 },
-        image: 'https://images.unsplash.com/photo-1583947215259-38e31be8752b?w=800',
-        aiHint: 'coca-cola bottle',
-        category: 'bebidas',
-        stock: 100,
-        options: []
+        "id": "p5",
+        "name": "Hamburguesa Spicy Jalapeño",
+        "description": "Carne de res, queso cheddar, jalapeños, salsa picante y cebolla morada.",
+        "price": { "ARS": 1250, "USD": 1.25 },
+        "image": "https://images.unsplash.com/photo-1607013408762-27e03a4d1f3d",
+        "aiHint": "spicy burger",
+        "category": "hamburguesas",
+        "stock": 8,
+        "options": []
     },
-     {
-        id: '6',
-        name: 'Pizza Pepperoni',
-        description: 'Masa crujiente, salsa de tomate, mozzarella y pepperoni.',
-        price: { ARS: 3000, USD: 3.0 },
-        image: 'https://images.unsplash.com/photo-1601924994987-69c3b35b4f69?w=800',
-        aiHint: 'pepperoni pizza',
-        category: 'pizzas',
-        stock: 8,
-        options: []
+    {
+        "id": "p6",
+        "name": "Hamburguesa Criolla",
+        "description": "Carne de res, huevo frito, jamón, queso, lechuga, tomate y mayonesa.",
+        "price": { "ARS": 1300, "USD": 1.30 },
+        "image": "https://images.unsplash.com/photo-1617196039897-1e1dbe1db8ba",
+        "aiHint": "creole burger",
+        "category": "hamburguesas",
+        "stock": 18,
+        "options": []
     },
-     {
-        id: '7',
-        name: 'Pizza Cuatro Quesos',
-        description: 'Mozzarella, gorgonzola, parmesano y provolone.',
-        price: { ARS: 3200, USD: 3.2 },
-        image: 'https://images.unsplash.com/photo-1603079849119-65e8adba6b60?w=800',
-        aiHint: 'four cheese pizza',
-        category: 'pizzas',
-        stock: 6,
-        options: []
+    {
+        "id": "p7",
+        "name": "Hamburguesa Capresse",
+        "description": "Carne de res, mozzarella fresca, tomate, albahaca y pesto.",
+        "price": { "ARS": 1350, "USD": 1.35 },
+        "image": "https://images.unsplash.com/photo-1594007654729-407eedc4be65",
+        "aiHint": "caprese burger",
+        "category": "hamburguesas",
+        "stock": 14,
+        "options": []
+    },
+    {
+        "id": "p8",
+        "name": "Hamburguesa Tex-Mex",
+        "description": "Carne de res, queso cheddar, guacamole, nachos triturados y salsa mexicana.",
+        "price": { "ARS": 1400, "USD": 1.40 },
+        "image": "https://images.unsplash.com/photo-1617191519400-bf4ec9079f94",
+        "aiHint": "tex-mex burger",
+        "category": "hamburguesas",
+        "stock": 10,
+        "options": []
+    },
+    {
+        "id": "p9",
+        "name": "Pizza Napolitana",
+        "description": "Pizza tradicional con salsa de tomate, mozzarella fresca, albahaca y aceite de oliva.",
+        "price": { "ARS": 1450, "USD": 1.45 },
+        "image": "https://images.unsplash.com/photo-1601924582971-df5f0c77b6c1",
+        "aiHint": "neapolitan pizza",
+        "category": "pizzas",
+        "stock": 25,
+        "options": []
+    },
+    {
+        "id": "p10",
+        "name": "Pizza Muzzarella",
+        "description": "Clásica pizza con abundante mozzarella y salsa de tomate artesanal.",
+        "price": { "ARS": 1500, "USD": 1.50 },
+        "image": "https://images.unsplash.com/photo-1542281286-9e0a16bb7366",
+        "aiHint": "mozzarella pizza",
+        "category": "pizzas",
+        "stock": 30,
+        "options": []
     },
 ];
 
@@ -108,6 +125,9 @@ const testCategories: ProductCategoryData[] = [
   { id: '3', name: 'Lomitos', slug: 'lomitos', icon: 'Sandwich' },
   { id: '4', name: 'Empanadas', slug: 'empanadas', icon: 'Wind' },
   { id: '5', name: 'Bebidas', slug: 'bebidas', icon: 'CupSoda' },
+  { id: '6', name: 'Pastas', slug: 'pastas', icon: 'Pasta' },
+  { id: '7', name: 'Ensaladas', slug: 'ensaladas', icon: 'Salad' },
+  { id: '8', name: 'Postres', slug: 'postres', icon: 'Cake' },
 ];
 
 async function getProductsByCategorySlug(categorySlug: string): Promise<Product[]> {
@@ -182,3 +202,5 @@ export default async function CategoryPage({ params }: { params: { slug: string 
 }
 
 export const revalidate = 60;
+
+    

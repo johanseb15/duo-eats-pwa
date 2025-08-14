@@ -5,77 +5,556 @@ import type { Product, Promotion, ProductCategoryData } from '@/lib/types';
 import HomeClient from '@/components/HomeClient';
 
 const testProducts: Product[] = [
-    {
-        id: '1',
-        name: 'Hamburguesa Doble Queso',
-        description: 'Doble carne de res, queso cheddar, cebolla caramelizada y salsa especial.',
-        price: { ARS: 3200, USD: 3.2 },
-        image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800',
-        aiHint: 'double cheeseburger',
-        category: 'hamburguesas',
-        stock: 15,
-        options: []
-    },
-    {
-        id: '2',
-        name: 'Pizza de Muzzarella',
-        description: 'Masa fina, salsa de tomate, y la mejor muzzarella.',
-        price: { ARS: 2800, USD: 2.8 },
-        image: 'https://images.unsplash.com/photo-1601924582971-c8b3b4fa6a8a?w=800',
-        aiHint: 'neapolitan pizza',
-        category: 'pizzas',
-        stock: 10,
-        options: [
-            {
-                name: 'Tamaño',
-                values: [
-                    { name: 'Individual', priceModifier: { ARS: 0, USD: 0 } },
-                    { name: 'Mediana', priceModifier: { ARS: 800, USD: 0.8 } },
-                    { name: 'Grande', priceModifier: { ARS: 1500, USD: 1.5 } },
-                ],
-            },
-            {
-                name: 'Masa',
-                values: [
-                    { name: 'A la Piedra', priceModifier: { ARS: 0, USD: 0 } },
-                    { name: 'Media Masa', priceModifier: { ARS: 200, USD: 0.2 } },
-                ],
-            },
-        ]
-    },
-    {
-        id: '3',
-        name: 'Lomito Completo',
-        description: 'Pan casero, carne vacuna, lechuga, tomate, jamón, queso, huevo y mayonesa.',
-        price: { ARS: 2500, USD: 2.5 },
-        image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=800',
-        aiHint: 'lomito sandwich',
-        category: 'lomitos',
-        stock: 20,
-        options: []
-    },
-    {
-        id: '4',
-        name: 'Empanadas de Carne',
-        description: 'Empanadas al horno rellenas de carne, cebolla y especias.',
-        price: { ARS: 350, USD: 0.35 },
-        image: 'https://images.unsplash.com/photo-1604908177522-4327d4d1d2d2?w=800',
-        aiHint: 'meat empanadas',
-        category: 'empanadas',
-        stock: 50,
-        options: []
-    },
-    {
-        id: '5',
-        name: 'Coca-Cola 500ml',
-        description: 'Bebida gaseosa sabor cola en botella de 500ml.',
-        price: { ARS: 500, USD: 0.5 },
-        image: 'https://images.unsplash.com/photo-1583947215259-38e31be8752b?w=800',
-        aiHint: 'coca-cola bottle',
-        category: 'bebidas',
-        stock: 100,
-        options: []
-    },
+  {
+    "id": "p1",
+    "name": "Hamburguesa Doble Clásica",
+    "description": "Hamburguesa doble carne, queso cheddar, lechuga, tomate y salsa especial en pan artesanal.",
+    "price": { "ARS": 1050, "USD": 1.05 },
+    "image": "https://images.unsplash.com/photo-1606755962773-0e7c4eecf9b2",
+    "aiHint": "classic burger",
+    "category": "hamburguesas",
+    "stock": 20,
+    "options": []
+  },
+  {
+    "id": "p2",
+    "name": "Hamburguesa BBQ Bacon",
+    "description": "Hamburguesa con queso cheddar, panceta crocante, cebolla caramelizada y salsa BBQ.",
+    "price": { "ARS": 1100, "USD": 1.10 },
+    "image": "https://images.unsplash.com/photo-1550547660-d9450f859349",
+    "aiHint": "bacon burger",
+    "category": "hamburguesas",
+    "stock": 15,
+    "options": []
+  },
+  {
+    "id": "p3",
+    "name": "Hamburguesa Veggie",
+    "description": "Hamburguesa de lentejas y garbanzos, lechuga, tomate, palta y mayonesa vegana.",
+    "price": { "ARS": 1150, "USD": 1.15 },
+    "image": "https://images.unsplash.com/photo-1586190848861-99aa4a171e90",
+    "aiHint": "veggie burger",
+    "category": "hamburguesas",
+    "stock": 10,
+    "options": []
+  },
+  {
+    "id": "p4",
+    "name": "Hamburguesa Triple Queso",
+    "description": "Carne de res, mezcla de quesos cheddar, mozzarella y provolone, con salsa especial.",
+    "price": { "ARS": 1200, "USD": 1.20 },
+    "image": "https://images.unsplash.com/photo-1599021308365-54c1c2045a8f",
+    "aiHint": "triple cheeseburger",
+    "category": "hamburguesas",
+    "stock": 12,
+    "options": []
+  },
+  {
+    "id": "p5",
+    "name": "Hamburguesa Spicy Jalapeño",
+    "description": "Carne de res, queso cheddar, jalapeños, salsa picante y cebolla morada.",
+    "price": { "ARS": 1250, "USD": 1.25 },
+    "image": "https://images.unsplash.com/photo-1607013408762-27e03a4d1f3d",
+    "aiHint": "spicy burger",
+    "category": "hamburguesas",
+    "stock": 8,
+    "options": []
+  },
+  {
+    "id": "p6",
+    "name": "Hamburguesa Criolla",
+    "description": "Carne de res, huevo frito, jamón, queso, lechuga, tomate y mayonesa.",
+    "price": { "ARS": 1300, "USD": 1.30 },
+    "image": "https://images.unsplash.com/photo-1617196039897-1e1dbe1db8ba",
+    "aiHint": "creole burger",
+    "category": "hamburguesas",
+    "stock": 18,
+    "options": []
+  },
+  {
+    "id": "p7",
+    "name": "Hamburguesa Capresse",
+    "description": "Carne de res, mozzarella fresca, tomate, albahaca y pesto.",
+    "price": { "ARS": 1350, "USD": 1.35 },
+    "image": "https://images.unsplash.com/photo-1594007654729-407eedc4be65",
+    "aiHint": "caprese burger",
+    "category": "hamburguesas",
+    "stock": 14,
+    "options": []
+  },
+  {
+    "id": "p8",
+    "name": "Hamburguesa Tex-Mex",
+    "description": "Carne de res, queso cheddar, guacamole, nachos triturados y salsa mexicana.",
+    "price": { "ARS": 1400, "USD": 1.40 },
+    "image": "https://images.unsplash.com/photo-1617191519400-bf4ec9079f94",
+    "aiHint": "tex-mex burger",
+    "category": "hamburguesas",
+    "stock": 10,
+    "options": []
+  },
+  {
+    "id": "p9",
+    "name": "Pizza Napolitana",
+    "description": "Pizza tradicional con salsa de tomate, mozzarella fresca, albahaca y aceite de oliva.",
+    "price": { "ARS": 1450, "USD": 1.45 },
+    "image": "https://images.unsplash.com/photo-1601924582971-df5f0c77b6c1",
+    "aiHint": "neapolitan pizza",
+    "category": "pizzas",
+    "stock": 25,
+    "options": []
+  },
+  {
+    "id": "p10",
+    "name": "Pizza Muzzarella",
+    "description": "Clásica pizza con abundante mozzarella y salsa de tomate artesanal.",
+    "price": { "ARS": 1500, "USD": 1.50 },
+    "image": "https://images.unsplash.com/photo-1542281286-9e0a16bb7366",
+    "aiHint": "mozzarella pizza",
+    "category": "pizzas",
+    "stock": 30,
+    "options": []
+  },
+  {
+    "id": "p11",
+    "name": "Pizza Fugazzeta",
+    "description": "Pizza rellena de queso mozzarella y cubierta con cebolla caramelizada.",
+    "price": { "ARS": 1550, "USD": 1.55 },
+    "image": "https://images.unsplash.com/photo-1604152135912-04a378763530",
+    "aiHint": "onion pizza",
+    "category": "pizzas",
+    "stock": 15,
+    "options": []
+  },
+  {
+    "id": "p12",
+    "name": "Pizza Calabresa",
+    "description": "Pizza con longaniza calabresa, mozzarella y salsa de tomate.",
+    "price": { "ARS": 1600, "USD": 1.60 },
+    "image": "https://images.unsplash.com/photo-1603079846326-b99e6f1e9c17",
+    "aiHint": "pepperoni pizza",
+    "category": "pizzas",
+    "stock": 18,
+    "options": []
+  },
+  {
+    "id": "p13",
+    "name": "Pizza Cuatro Quesos",
+    "description": "Mozzarella, gorgonzola, provolone y parmesano sobre salsa de tomate.",
+    "price": { "ARS": 1650, "USD": 1.65 },
+    "image": "https://images.unsplash.com/photo-1594007654946-7951a3f8f6f6",
+    "aiHint": "four cheese pizza",
+    "category": "pizzas",
+    "stock": 12,
+    "options": []
+  },
+  {
+    "id": "p14",
+    "name": "Pizza Hawaiana",
+    "description": "Mozzarella, jamón, ananá y salsa de tomate.",
+    "price": { "ARS": 1700, "USD": 1.70 },
+    "image": "https://images.unsplash.com/photo-1601924928376-3ccf6b0f38b2",
+    "aiHint": "hawaiian pizza",
+    "category": "pizzas",
+    "stock": 5,
+    "options": []
+  },
+  {
+    "id": "p15",
+    "name": "Pizza Rúcula y Crudo",
+    "description": "Mozzarella, rúcula fresca, jamón crudo y aceite de oliva.",
+    "price": { "ARS": 1750, "USD": 1.75 },
+    "image": "https://images.unsplash.com/photo-1625940315123-35bb8fcb79b5",
+    "aiHint": "prosciutto pizza",
+    "category": "pizzas",
+    "stock": 10,
+    "options": []
+  },
+  {
+    "id": "p16",
+    "name": "Pizza Pepperoni",
+    "description": "Mozzarella, rodajas de pepperoni y salsa de tomate.",
+    "price": { "ARS": 1800, "USD": 1.80 },
+    "image": "https://images.unsplash.com/photo-1618213837798-fd8d1be9f2f0",
+    "aiHint": "pepperoni pizza",
+    "category": "pizzas",
+    "stock": 20,
+    "options": []
+  },
+  {
+    "id": "p17",
+    "name": "Lomito Completo",
+    "description": "Lomito de ternera con jamón, queso, huevo frito, lechuga, tomate y mayonesa.",
+    "price": { "ARS": 1850, "USD": 1.85 },
+    "image": "https://images.unsplash.com/photo-1550547660-d9450f859349",
+    "aiHint": "complete sandwich",
+    "category": "lomitos",
+    "stock": 22,
+    "options": []
+  },
+  {
+    "id": "p18",
+    "name": "Lomito Vegetariano",
+    "description": "Lomito con berenjena grillada, queso, lechuga, tomate y mayonesa casera.",
+    "price": { "ARS": 1900, "USD": 1.90 },
+    "image": "https://images.unsplash.com/photo-1617191519400-bf4ec9079f94",
+    "aiHint": "vegetarian sandwich",
+    "category": "lomitos",
+    "stock": 8,
+    "options": []
+  },
+  {
+    "id": "p19",
+    "name": "Lomito BBQ",
+    "description": "Lomito de res con panceta, cheddar y salsa BBQ.",
+    "price": { "ARS": 1950, "USD": 1.95 },
+    "image": "https://images.unsplash.com/photo-1606755962773-0e7c4eecf9b2",
+    "aiHint": "bbq sandwich",
+    "category": "lomitos",
+    "stock": 14,
+    "options": []
+  },
+  {
+    "id": "p20",
+    "name": "Lomito Pollo",
+    "description": "Pechuga de pollo grillada, lechuga, tomate y mayonesa.",
+    "price": { "ARS": 2000, "USD": 2.00 },
+    "image": "https://images.unsplash.com/photo-1607013408762-27e03a4d1f3d",
+    "aiHint": "chicken sandwich",
+    "category": "lomitos",
+    "stock": 16,
+    "options": []
+  },
+  {
+    "id": "p21",
+    "name": "Lomito Criollo",
+    "description": "Lomito de ternera con chimichurri, cebolla y morrón asado.",
+    "price": { "ARS": 2050, "USD": 2.05 },
+    "image": "https://images.unsplash.com/photo-1586190848861-99aa4a171e90",
+    "aiHint": "creole sandwich",
+    "category": "lomitos",
+    "stock": 11,
+    "options": []
+  },
+  {
+    "id": "p22",
+    "name": "Empanada de Carne",
+    "description": "Empanadas jugosas de carne cortada a cuchillo, cebolla, huevo duro y especias.",
+    "price": { "ARS": 210, "USD": 0.21 },
+    "image": "https://images.unsplash.com/photo-1603066273190-9d63b1f92c79",
+    "aiHint": "meat empanada",
+    "category": "empanadas",
+    "stock": 50,
+    "options": []
+  },
+  {
+    "id": "p23",
+    "name": "Empanada de Pollo",
+    "description": "Empanadas rellenas de pollo desmenuzado, cebolla y condimentos.",
+    "price": { "ARS": 215, "USD": 0.215 },
+    "image": "https://images.unsplash.com/photo-1625940315123-35bb8fcb79b5",
+    "aiHint": "chicken empanada",
+    "category": "empanadas",
+    "stock": 45,
+    "options": []
+  },
+  {
+    "id": "p24",
+    "name": "Empanada Capresse",
+    "description": "Empanada de mozzarella, tomate y albahaca fresca.",
+    "price": { "ARS": 220, "USD": 0.22 },
+    "image": "https://images.unsplash.com/photo-1604152135912-04a378763530",
+    "aiHint": "caprese empanada",
+    "category": "empanadas",
+    "stock": 30,
+    "options": []
+  },
+  {
+    "id": "p25",
+    "name": "Empanada Humita",
+    "description": "Empanada de maíz cremoso, cebolla y queso.",
+    "price": { "ARS": 225, "USD": 0.225 },
+    "image": "https://images.unsplash.com/photo-1599021308365-54c1c2045a8f",
+    "aiHint": "corn empanada",
+    "category": "empanadas",
+    "stock": 35,
+    "options": []
+  },
+  {
+    "id": "p26",
+    "name": "Empanada de Jamón y Queso",
+    "description": "Empanada rellena con jamón cocido y mozzarella.",
+    "price": { "ARS": 230, "USD": 0.23 },
+    "image": "https://images.unsplash.com/photo-1617196039897-1e1dbe1db8ba",
+    "aiHint": "ham cheese empanada",
+    "category": "empanadas",
+    "stock": 60,
+    "options": []
+  },
+  {
+    "id": "p27",
+    "name": "Ravioles de Ricotta",
+    "description": "Ravioles rellenos de ricotta y espinaca con salsa fileto.",
+    "price": { "ARS": 2350, "USD": 2.35 },
+    "image": "https://images.unsplash.com/photo-1617191519400-bf4ec9079f94",
+    "aiHint": "ricotta ravioli",
+    "category": "pastas",
+    "stock": 20,
+    "options": []
+  },
+  {
+    "id": "p28",
+    "name": "Sorrentinos de Jamón y Queso",
+    "description": "Sorrentinos rellenos de jamón y mozzarella con salsa mixta.",
+    "price": { "ARS": 2400, "USD": 2.40 },
+    "image": "https://images.unsplash.com/photo-1586190848861-99aa4a171e90",
+    "aiHint": "ham cheese sorrentinos",
+    "category": "pastas",
+    "stock": 18,
+    "options": []
+  },
+  {
+    "id": "p29",
+    "name": "Fideos Spaghetti Bolognesa",
+    "description": "Pasta con salsa bolognesa de carne y tomate.",
+    "price": { "ARS": 2450, "USD": 2.45 },
+    "image": "https://images.unsplash.com/photo-1606755962773-0e7c4eecf9b2",
+    "aiHint": "spaghetti bolognese",
+    "category": "pastas",
+    "stock": 25,
+    "options": []
+  },
+  {
+    "id": "p30",
+    "name": "Ñoquis de Papa",
+    "description": "Ñoquis de papa con salsa de tomate y queso rallado.",
+    "price": { "ARS": 2500, "USD": 2.50 },
+    "image": "https://images.unsplash.com/photo-1607013408762-27e03a4d1f3d",
+    "aiHint": "potato gnocchi",
+    "category": "pastas",
+    "stock": 30,
+    "options": []
+  },
+  {
+    "id": "p31",
+    "name": "Lasagna de Carne",
+    "description": "Capas de pasta, carne, salsa bechamel y queso gratinado.",
+    "price": { "ARS": 2550, "USD": 2.55 },
+    "image": "https://images.unsplash.com/photo-1594007654946-7951a3f8f6f6",
+    "aiHint": "meat lasagna",
+    "category": "pastas",
+    "stock": 15,
+    "options": []
+  },
+  {
+    "id": "p32",
+    "name": "Ensalada César",
+    "description": "Lechuga romana, pollo grillado, crutones, queso parmesano y aderezo césar.",
+    "price": { "ARS": 2600, "USD": 2.60 },
+    "image": "https://images.unsplash.com/photo-1604908812741-03d4e9a6e3d5",
+    "aiHint": "caesar salad",
+    "category": "ensaladas",
+    "stock": 20,
+    "options": []
+  },
+  {
+    "id": "p33",
+    "name": "Ensalada Mediterránea",
+    "description": "Tomate, pepino, aceitunas, cebolla morada, queso feta y orégano.",
+    "price": { "ARS": 2650, "USD": 2.65 },
+    "image": "https://images.unsplash.com/photo-1625940315123-35bb8fcb79b5",
+    "aiHint": "mediterranean salad",
+    "category": "ensaladas",
+    "stock": 15,
+    "options": []
+  },
+  {
+    "id": "p34",
+    "name": "Ensalada de Quinoa",
+    "description": "Quinoa, tomate cherry, palta, pepino y vinagreta de limón.",
+    "price": { "ARS": 2700, "USD": 2.70 },
+    "image": "https://images.unsplash.com/photo-1601924928376-3ccf6b0f38b2",
+    "aiHint": "quinoa salad",
+    "category": "ensaladas",
+    "stock": 12,
+    "options": []
+  },
+  {
+    "id": "p35",
+    "name": "Ensalada Capresse",
+    "description": "Mozzarella fresca, tomate y albahaca con aceite de oliva.",
+    "price": { "ARS": 2750, "USD": 2.75 },
+    "image": "https://images.unsplash.com/photo-1604152135912-04a378763530",
+    "aiHint": "caprese salad",
+    "category": "ensaladas",
+    "stock": 18,
+    "options": []
+  },
+  {
+    "id": "p36",
+    "name": "Ensalada de Pollo",
+    "description": "Pollo grillado, lechuga, zanahoria rallada y maíz.",
+    "price": { "ARS": 2800, "USD": 2.80 },
+    "image": "https://images.unsplash.com/photo-1606755962773-0e7c4eecf9b2",
+    "aiHint": "chicken salad",
+    "category": "ensaladas",
+    "stock": 22,
+    "options": []
+  },
+  {
+    "id": "p37",
+    "name": "Flan Casero",
+    "description": "Flan de huevo con caramelo y crema.",
+    "price": { "ARS": 2850, "USD": 2.85 },
+    "image": "https://images.unsplash.com/photo-1601924582971-df5f0c77b6c1",
+    "aiHint": "homemade flan",
+    "category": "postres",
+    "stock": 40,
+    "options": []
+  },
+  {
+    "id": "p38",
+    "name": "Brownie con Helado",
+    "description": "Brownie de chocolate con bocha de helado de vainilla y salsa de chocolate.",
+    "price": { "ARS": 2900, "USD": 2.90 },
+    "image": "https://images.unsplash.com/photo-1586190848861-99aa4a171e90",
+    "aiHint": "brownie ice cream",
+    "category": "postres",
+    "stock": 25,
+    "options": []
+  },
+  {
+    "id": "p39",
+    "name": "Tiramisú",
+    "description": "Postre italiano con café, mascarpone y cacao.",
+    "price": { "ARS": 2950, "USD": 2.95 },
+    "image": "https://images.unsplash.com/photo-1604152135912-04a378763530",
+    "aiHint": "tiramisu dessert",
+    "category": "postres",
+    "stock": 20,
+    "options": []
+  },
+  {
+    "id": "p40",
+    "name": "Helado 2 Sabores",
+    "description": "Helado artesanal de dos sabores a elección.",
+    "price": { "ARS": 3000, "USD": 3.00 },
+    "image": "https://images.unsplash.com/photo-1617191519400-bf4ec9079f94",
+    "aiHint": "two scoops ice cream",
+    "category": "postres",
+    "stock": 100,
+    "options": []
+  },
+  {
+    "id": "p41",
+    "name": "Cheesecake de Frutilla",
+    "description": "Tarta de queso con cobertura de frutilla.",
+    "price": { "ARS": 3050, "USD": 3.05 },
+    "image": "https://images.unsplash.com/photo-1599021308365-54c1c2045a8f",
+    "aiHint": "strawberry cheesecake",
+    "category": "postres",
+    "stock": 15,
+    "options": []
+  },
+  {
+    "id": "p42",
+    "name": "Panqueque con Dulce de Leche",
+    "description": "Panqueque relleno de dulce de leche y azúcar impalpable.",
+    "price": { "ARS": 3100, "USD": 3.10 },
+    "image": "https://images.unsplash.com/photo-1607013408762-27e03a4d1f3d",
+    "aiHint": "pancake dulce de leche",
+    "category": "postres",
+    "stock": 30,
+    "options": []
+  },
+  {
+    "id": "p43",
+    "name": "Coca-Cola 500ml",
+    "description": "Bebida gaseosa sabor cola en botella de 500ml.",
+    "price": { "ARS": 315, "USD": 0.315 },
+    "image": "https://images.unsplash.com/photo-1625940315123-35bb8fcb79b5",
+    "aiHint": "coca cola",
+    "category": "bebidas",
+    "stock": 100,
+    "options": []
+  },
+  {
+    "id": "p44",
+    "name": "Sprite 500ml",
+    "description": "Bebida gaseosa sabor lima-limón en botella de 500ml.",
+    "price": { "ARS": 320, "USD": 0.32 },
+    "image": "https://images.unsplash.com/photo-1604152135912-04a378763530",
+    "aiHint": "sprite drink",
+    "category": "bebidas",
+    "stock": 100,
+    "options": []
+  },
+  {
+    "id": "p45",
+    "name": "Agua Mineral 500ml",
+    "description": "Agua mineral natural en botella de 500ml.",
+    "price": { "ARS": 325, "USD": 0.325 },
+    "image": "https://images.unsplash.com/photo-1601924928376-3ccf6b0f38b2",
+    "aiHint": "water bottle",
+    "category": "bebidas",
+    "stock": 100,
+    "options": []
+  },
+  {
+    "id": "p46",
+    "name": "Cerveza Rubia 1L",
+    "description": "Cerveza artesanal rubia en botella de litro.",
+    "price": { "ARS": 3300, "USD": 3.30 },
+    "image": "https://images.unsplash.com/photo-1599021308365-54c1c2045a8f",
+    "aiHint": "blonde beer",
+    "category": "bebidas",
+    "stock": 40,
+    "options": []
+  },
+  {
+    "id": "p47",
+    "name": "Cerveza Negra 1L",
+    "description": "Cerveza artesanal negra en botella de litro.",
+    "price": { "ARS": 3350, "USD": 3.35 },
+    "image": "https://images.unsplash.com/photo-1586190848861-99aa4a171e90",
+    "aiHint": "dark beer",
+    "category": "bebidas",
+    "stock": 35,
+    "options": []
+  },
+  {
+    "id": "p48",
+    "name": "Vino Tinto Malbec",
+    "description": "Vino tinto Malbec argentino botella 750ml.",
+    "price": { "ARS": 3400, "USD": 3.40 },
+    "image": "https://images.unsplash.com/photo-1606755962773-0e7c4eecf9b2",
+    "aiHint": "red wine",
+    "category": "bebidas",
+    "stock": 25,
+    "options": []
+  },
+  {
+    "id": "p49",
+    "name": "Vino Blanco Torrontés",
+    "description": "Vino blanco Torrontés argentino botella 750ml.",
+    "price": { "ARS": 3450, "USD": 3.45 },
+    "image": "https://images.unsplash.com/photo-1607013408762-27e03a4d1f3d",
+    "aiHint": "white wine",
+    "category": "bebidas",
+    "stock": 25,
+    "options": []
+  },
+  {
+    "id": "p50",
+    "name": "Jugo Natural de Naranja",
+    "description": "Jugo exprimido de naranja natural sin azúcar.",
+    "price": { "ARS": 3500, "USD": 3.50 },
+    "image": "https://images.unsplash.com/photo-1594007654946-7951a3f8f6f6",
+    "aiHint": "orange juice",
+    "category": "bebidas",
+    "stock": 50,
+    "options": []
+  }
 ];
 
 const testCategories: ProductCategoryData[] = [
@@ -84,6 +563,9 @@ const testCategories: ProductCategoryData[] = [
   { id: '3', name: 'Lomitos', slug: 'lomitos', icon: 'Sandwich' },
   { id: '4', name: 'Empanadas', slug: 'empanadas', icon: 'Wind' },
   { id: '5', name: 'Bebidas', slug: 'bebidas', icon: 'CupSoda' },
+  { id: '6', name: 'Pastas', slug: 'pastas', icon: 'Pasta' },
+  { id: '7', name: 'Ensaladas', slug: 'ensaladas', icon: 'Salad' },
+  { id: '8', name: 'Postres', slug: 'postres', icon: 'Cake' },
 ];
 
 const testPromotions: Promotion[] = [
@@ -97,9 +579,9 @@ const testPromotions: Promotion[] = [
    {
     id: '2',
     title: '¡Promo Pizza!',
-    description: 'Llevando 2 Pizzas Napolitanas, la segunda tiene 50% OFF.',
-    image: 'https://images.unsplash.com/photo-1601924582971-c8b3b4fa6a8a?w=800',
-    aiHint: 'pizza offer',
+    "description": 'Llevando 2 Pizzas Napolitanas, la segunda tiene 50% OFF.',
+    "image": 'https://images.unsplash.com/photo-1601924582971-c8b3b4fa6a8a?w=800',
+    "aiHint": 'pizza offer',
   },
 ];
 
@@ -200,4 +682,5 @@ export default async function Home() {
 }
 
 export const revalidate = 60; // Revalidate every 60 seconds
+    
     
