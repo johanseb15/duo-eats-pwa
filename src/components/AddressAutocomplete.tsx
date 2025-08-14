@@ -4,13 +4,24 @@
 import React, {useRef, useEffect, useState} from 'react';
 import {APIProvider, useMapsLibrary} from '@vis.gl/react-google-maps';
 import {Input} from './ui/input';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import type { DeliveryZone } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 interface AddressAutocompleteProps {
-  onAddressSelect: (address: string, neighborhood: string | null) => void;
+  onAddressSelect: (address: string, neighborhood: string | null, cost: number, zoneId: string | null) => void;
+  disabled?: boolean;
 }
 
-const AddressAutocomplete = ({onAddressSelect}: AddressAutocompleteProps) => {
+const defaultDeliveryZones: DeliveryZone[] = [
+  { id: 'retiro', neighborhoods: ['Retiro en local'], cost: 0.00 },
+  { id: 'caba-1', neighborhoods: ['Palermo', 'Recoleta', 'Belgrano'], cost: 500.00 },
+];
+
+const AddressAutocomplete = ({onAddressSelect, disabled}: AddressAutocompleteProps) => {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  
 
   if (!apiKey) {
     return (
@@ -23,16 +34,39 @@ const AddressAutocomplete = ({onAddressSelect}: AddressAutocompleteProps) => {
 
   return (
     <APIProvider apiKey={apiKey}>
-      <AutocompleteComponent onAddressSelect={onAddressSelect} />
+      <AutocompleteComponent onAddressSelect={onAddressSelect} disabled={disabled} />
     </APIProvider>
   );
 };
 
-function AutocompleteComponent({onAddressSelect}: AddressAutocompleteProps) {
+function AutocompleteComponent({onAddressSelect, disabled}: AddressAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, setInputValue] = useState('');
   const places = useMapsLibrary('places');
   const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
+  const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchZones = async () => {
+        try {
+            const zonesCol = collection(db, 'deliveryZones');
+            const q = query(zonesCol, orderBy('cost'));
+            const snapshot = await getDocs(q);
+
+            if (snapshot.empty) {
+                setDeliveryZones(defaultDeliveryZones);
+            } else {
+                const zoneList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DeliveryZone));
+                setDeliveryZones(zoneList);
+            }
+        } catch (error) {
+            console.error("Error fetching delivery zones, using defaults:", error);
+            setDeliveryZones(defaultDeliveryZones);
+        }
+    };
+    fetchZones();
+  }, []);
 
   useEffect(() => {
     if (!places || !inputRef.current) return;
@@ -55,7 +89,26 @@ function AutocompleteComponent({onAddressSelect}: AddressAutocompleteProps) {
           const neighborhood =
             place.address_components?.find(c => c.types.includes('locality'))
               ?.long_name || null;
-          onAddressSelect(formattedAddress, neighborhood);
+          
+          if (neighborhood) {
+            const zone = deliveryZones.find(z => z.neighborhoods.some(n => neighborhood.includes(n)));
+            if (zone) {
+                onAddressSelect(formattedAddress, neighborhood, zone.cost, zone.id);
+                toast({
+                    title: "¡Zona encontrada!",
+                    description: `Costo de envío para ${neighborhood}: $${zone.cost.toFixed(2)}`
+                });
+            } else {
+                onAddressSelect(formattedAddress, neighborhood, 0, null);
+                 toast({
+                    title: "Zona no encontrada",
+                    description: "No cubrimos esa zona. Por favor, intenta con otra dirección o elige 'Retiro en local'.",
+                    variant: 'destructive'
+                });
+            }
+          } else {
+             onAddressSelect(formattedAddress, null, 0, null);
+          }
           setInputValue(formattedAddress);
         }
     });
@@ -63,7 +116,7 @@ function AutocompleteComponent({onAddressSelect}: AddressAutocompleteProps) {
     return () => {
         google.maps.event.removeListener(listener);
     }
-  }, [autocomplete, onAddressSelect]);
+  }, [autocomplete, onAddressSelect, deliveryZones, toast]);
 
 
   return (
@@ -77,6 +130,7 @@ function AutocompleteComponent({onAddressSelect}: AddressAutocompleteProps) {
         value={inputValue}
         onChange={e => setInputValue(e.target.value)}
         placeholder="Escribe tu calle y número..."
+        disabled={disabled}
       />
     </div>
   );

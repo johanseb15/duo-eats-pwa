@@ -13,13 +13,11 @@ import { Label } from '@/components/ui/label';
 import { Minus, Plus, Trash2, ShoppingCart, Loader2, CalendarIcon, Clock } from 'lucide-react';
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { Currency, CartItem, DeliveryZone } from '@/lib/types';
+import type { Currency, CartItem } from '@/lib/types';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { createOrder } from '@/app/actions';
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -42,11 +40,6 @@ const getCartItemId = (item: CartItem) => {
     return `${item.id}-${optionsIdentifier}`;
 };
 
-const defaultDeliveryZones: DeliveryZone[] = [
-  { id: 'retiro', neighborhoods: ['Retiro en local'], cost: 0.00 },
-  { id: 'caba-1', neighborhoods: ['Palermo', 'Recoleta', 'Belgrano'], cost: 500.00 },
-];
-
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, clearCart } = useCart();
@@ -54,17 +47,16 @@ export default function CartPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
   const [deliveryCost, setDeliveryCost] = useState(0);
   const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [loadingZones, setLoadingZones] = useState(true);
   const [deliveryOption, setDeliveryOption] = useState<'delivery' | 'pickup'>('delivery');
   
   // Guest info
   const [guestName, setGuestName] = useState('');
   const [guestAddress, setGuestAddress] = useState('');
+  const [guestNeighborhood, setGuestNeighborhood] = useState<string | null>(null);
 
   // Scheduled Order
   const [scheduleOption, setScheduleOption] = useState<'now' | 'later'>('now');
@@ -74,27 +66,6 @@ export default function CartPage() {
 
   useEffect(() => {
     setIsClient(true);
-    const fetchZones = async () => {
-        setLoadingZones(true);
-        try {
-            const zonesCol = collection(db, 'deliveryZones');
-            const q = query(zonesCol, orderBy('cost'));
-            const snapshot = await getDocs(q);
-
-            if (snapshot.empty) {
-                setDeliveryZones(defaultDeliveryZones);
-            } else {
-                const zoneList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DeliveryZone));
-                setDeliveryZones(zoneList);
-            }
-        } catch (error) {
-            console.error("Error fetching delivery zones, using defaults:", error);
-            setDeliveryZones(defaultDeliveryZones);
-        } finally {
-            setLoadingZones(false);
-        }
-    };
-    fetchZones();
   }, []);
 
   useEffect(() => {
@@ -102,11 +73,13 @@ export default function CartPage() {
       setDeliveryCost(0);
       setSelectedZoneId('retiro');
       setGuestAddress('Retiro en local');
+      setGuestNeighborhood('Retiro en local');
     } else {
        // Reset when switching back to delivery
        setDeliveryCost(0);
        setSelectedZoneId(null);
        setGuestAddress('');
+       setGuestNeighborhood(null);
     }
   }, [deliveryOption])
 
@@ -122,32 +95,11 @@ export default function CartPage() {
   
   const total = finalSubtotal + deliveryCost;
 
-  const handleAddressSelect = (address: string, neighborhood: string | null) => {
+  const handleAddressSelect = (address: string, neighborhood: string | null, cost: number, zoneId: string | null) => {
     setGuestAddress(address);
-    if (deliveryOption === 'pickup') return;
-
-    if (neighborhood) {
-        const zone = deliveryZones.find(z => z.neighborhoods.some(n => neighborhood.includes(n)));
-        if (zone) {
-            setDeliveryCost(zone.cost);
-            setSelectedZoneId(zone.id);
-            toast({
-                title: "¡Zona encontrada!",
-                description: `Costo de envío para ${neighborhood}: ${currencySymbol}${zone.cost.toFixed(2)}`
-            });
-        } else {
-            setDeliveryCost(0);
-            setSelectedZoneId(null);
-            toast({
-                title: "Zona no encontrada",
-                description: "No cubrimos esa zona. Por favor, intenta con otra dirección o elige 'Retiro en local'.",
-                variant: 'destructive'
-            });
-        }
-    } else {
-       setDeliveryCost(0);
-       setSelectedZoneId(null);
-    }
+    setGuestNeighborhood(neighborhood);
+    setDeliveryCost(cost);
+    setSelectedZoneId(zoneId);
   };
 
   const handleCheckout = async () => {
@@ -199,6 +151,7 @@ export default function CartPage() {
       subtotal: finalSubtotal,
       deliveryCost: deliveryCost,
       deliveryDate: finalDeliveryDate,
+      neighborhood: guestNeighborhood || undefined,
     };
 
     const result = await createOrder(orderInput);
@@ -259,7 +212,7 @@ export default function CartPage() {
 
   const timeSlots = ['12:00', '12:30', '13:00', '13:30', '14:00', '20:00', '20:30', '21:00', '21:30', '22:00'];
 
-  if (!isClient || authLoading || loadingZones) {
+  if (!isClient || authLoading) {
     return (
       <div className="flex flex-col min-h-screen bg-background pb-28">
         <Header />
@@ -360,11 +313,11 @@ export default function CartPage() {
                           </SelectContent>
                       </Select>
 
-                      {deliveryOption === 'delivery' && (
-                        <Suspense fallback={<Skeleton className='h-10 w-full' />}>
-                          <AddressAutocomplete onAddressSelect={handleAddressSelect} />
-                        </Suspense>
-                      )}
+                      
+                      <Suspense fallback={<Skeleton className='h-10 w-full' />}>
+                        <AddressAutocomplete onAddressSelect={handleAddressSelect} disabled={deliveryOption === 'pickup'} />
+                      </Suspense>
+                      
                       
                        <Separator />
 
@@ -450,5 +403,3 @@ export default function CartPage() {
     </div>
   );
 }
-
-    

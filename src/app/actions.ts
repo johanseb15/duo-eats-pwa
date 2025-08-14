@@ -81,6 +81,7 @@ interface CreateOrderInput {
   deliveryCost: number;
   subtotal: number;
   deliveryDate?: string; // Optional for scheduled orders
+  neighborhood?: string;
 }
 
 export async function createOrder(input: CreateOrderInput) {
@@ -91,6 +92,7 @@ export async function createOrder(input: CreateOrderInput) {
       status: 'Pendiente',
       createdAt: serverTimestamp(),
       deliveryDate: input.deliveryDate || null,
+      neighborhood: input.neighborhood || null,
     };
     const docRef = await addDoc(collection(db, 'orders'), orderData);
     
