@@ -220,7 +220,7 @@ export default function AdminProductsPage() {
                 <TableCell>
                   <Badge variant="secondary">{product.category}</Badge>
                 </TableCell>
-                <TableCell>{currencySymbol}{product.price[currentCurrency].toFixed(2)}</TableCell>
+                <TableCell>{product.price[currentCurrency] ? `${currencySymbol}${product.price[currentCurrency].toFixed(2)}` : 'N/A'}</TableCell>
                 <TableCell>{product.stock}</TableCell>
                 <TableCell className="text-right">
                    <DropdownMenu>
@@ -267,3 +267,5 @@ export default function AdminProductsPage() {
     </div>
   );
 }
+
+    

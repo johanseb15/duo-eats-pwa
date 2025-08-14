@@ -14,11 +14,12 @@ const testProducts: Product[] = [
         aiHint: 'double cheeseburger',
         category: 'hamburguesas',
         stock: 15,
+        options: []
     },
     {
         id: '2',
-        name: 'Pizza Napolitana',
-        description: 'Masa fina, salsa de tomate, mozzarella, rodajas de tomate y orégano.',
+        name: 'Pizza de Muzzarella',
+        description: 'Masa fina, salsa de tomate, y la mejor muzzarella.',
         price: { ARS: 2800, USD: 2.8 },
         image: 'https://images.unsplash.com/photo-1601924582971-c8b3b4fa6a8a?w=800',
         aiHint: 'neapolitan pizza',
@@ -51,6 +52,7 @@ const testProducts: Product[] = [
         aiHint: 'lomito sandwich',
         category: 'lomitos',
         stock: 20,
+        options: []
     },
     {
         id: '4',
@@ -61,6 +63,7 @@ const testProducts: Product[] = [
         aiHint: 'meat empanadas',
         category: 'empanadas',
         stock: 50,
+        options: []
     },
     {
         id: '5',
@@ -71,6 +74,7 @@ const testProducts: Product[] = [
         aiHint: 'coca-cola bottle',
         category: 'bebidas',
         stock: 100,
+        options: []
     },
 ];
 
@@ -107,6 +111,7 @@ async function getProducts(): Promise<Product[]> {
     const productsSnapshot = await getDocs(q);
     
     if (productsSnapshot.empty) {
+        console.log("No products found in Firestore, using test data.");
         return testProducts;
     }
     
@@ -120,7 +125,7 @@ async function getProducts(): Promise<Product[]> {
         image: data.image,
         aiHint: data.aiHint,
         category: data.category,
-        options: data.options,
+        options: data.options || [],
         stock: data.stock || 0,
       } as Product;
     });
@@ -137,6 +142,7 @@ async function getPromotions(): Promise<Promotion[]> {
       const promotionsSnapshot = await getDocs(promotionsCol);
       
       if (promotionsSnapshot.empty) {
+        console.log("No promotions found in Firestore, using test data.");
         return testPromotions;
       }
 
@@ -164,6 +170,7 @@ async function getCategories(): Promise<ProductCategoryData[]> {
       const categoriesSnapshot = await getDocs(q);
 
       if (categoriesSnapshot.empty) {
+        console.log("No categories found in Firestore, using test data.");
         return testCategories;
       }
 
@@ -191,3 +198,5 @@ export default async function Home() {
   
   return <HomeClient products={products} promotions={promotions} categories={categories} />;
 }
+
+    

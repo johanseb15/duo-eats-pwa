@@ -16,11 +16,12 @@ const testProducts: Product[] = [
         aiHint: 'double cheeseburger',
         category: 'hamburguesas',
         stock: 15,
+        options: []
     },
     {
         id: '2',
-        name: 'Pizza Napolitana',
-        description: 'Masa fina, salsa de tomate, mozzarella, rodajas de tomate y orégano.',
+        name: 'Pizza de Muzzarella',
+        description: 'Masa fina, salsa de tomate, y la mejor muzzarella.',
         price: { ARS: 2800, USD: 2.8 },
         image: 'https://images.unsplash.com/photo-1601924582971-c8b3b4fa6a8a?w=800',
         aiHint: 'neapolitan pizza',
@@ -53,6 +54,7 @@ const testProducts: Product[] = [
         aiHint: 'lomito sandwich',
         category: 'lomitos',
         stock: 20,
+        options: []
     },
     {
         id: '4',
@@ -63,6 +65,7 @@ const testProducts: Product[] = [
         aiHint: 'meat empanadas',
         category: 'empanadas',
         stock: 50,
+        options: []
     },
     {
         id: '5',
@@ -73,6 +76,7 @@ const testProducts: Product[] = [
         aiHint: 'coca-cola bottle',
         category: 'bebidas',
         stock: 100,
+        options: []
     },
      {
         id: '6',
@@ -83,6 +87,7 @@ const testProducts: Product[] = [
         aiHint: 'pepperoni pizza',
         category: 'pizzas',
         stock: 8,
+        options: []
     },
      {
         id: '7',
@@ -93,6 +98,7 @@ const testProducts: Product[] = [
         aiHint: 'four cheese pizza',
         category: 'pizzas',
         stock: 6,
+        options: []
     },
 ];
 
@@ -112,6 +118,7 @@ async function getProductsByCategorySlug(categorySlug: string): Promise<Product[
     const productsSnapshot = await getDocs(q);
     
     if (productsSnapshot.empty) {
+        console.log(`No products found in Firestore for category ${categorySlug}, using test data.`);
         return testProducts.filter(p => p.category === categorySlug);
     }
     
@@ -125,7 +132,7 @@ async function getProductsByCategorySlug(categorySlug: string): Promise<Product[
         image: data.image,
         aiHint: data.aiHint,
         category: data.category,
-        options: data.options,
+        options: data.options || [],
         stock: data.stock || 0,
       } as Product;
     });
@@ -148,6 +155,7 @@ async function getCategoryBySlug(slug: string): Promise<ProductCategoryData | nu
         }
 
         // Fallback to test data if Firestore is empty
+        console.log(`No category found in Firestore for slug ${slug}, using test data.`);
         return testCategories.find(c => c.slug === slug) || null;
     } catch (error) {
         // Fallback to test data on any Firestore error
@@ -174,3 +182,5 @@ export default async function CategoryPage({ params }: { params: { slug: string 
 }
 
 export const revalidate = 60;
+
+    
