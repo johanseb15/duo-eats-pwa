@@ -81,7 +81,7 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
           )}
         </section>
 
-        <Recommendations products={products} />
+        <Recommendations />
 
         <section>
           <h2 className="text-xl font-bold mb-4 text-left">
