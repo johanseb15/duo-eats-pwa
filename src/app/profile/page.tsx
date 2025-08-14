@@ -56,7 +56,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 
 const AddressForm = lazy(() => import('@/components/AddressForm').then(module => ({ default: module.AddressForm })));
@@ -100,6 +99,7 @@ export default function ProfilePage() {
     if (user) {
       loadAddresses();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const handleSignOut = async () => {
@@ -126,7 +126,7 @@ export default function ProfilePage() {
     const result = await deleteAddress(selectedAddress.id);
     if (result.success) {
       toast({ title: 'Dirección eliminada' });
-      loadAddresses();
+      await loadAddresses();
     } else {
       toast({ title: 'Error al eliminar la dirección', variant: 'destructive' });
     }
@@ -134,11 +134,11 @@ export default function ProfilePage() {
     setSelectedAddress(null);
   };
 
-  const handleFormSuccess = () => {
+  const handleFormSuccess = async () => {
     setIsAddressFormOpen(false);
-    setSelectedAddress(null);
     toast({ title: selectedAddress ? 'Dirección actualizada' : 'Dirección añadida' });
-    loadAddresses();
+    await loadAddresses();
+    setSelectedAddress(null);
   };
 
 
@@ -249,7 +249,7 @@ export default function ProfilePage() {
                     <CardTitle>Mis Direcciones</CardTitle>
                      <Dialog open={isAddressFormOpen} onOpenChange={(open) => { setIsAddressFormOpen(open); if (!open) setSelectedAddress(null); }}>
                       <DialogTrigger asChild>
-                         <Button size="sm"><PlusCircle className='mr-2' />Añadir</Button>
+                         <Button size="sm" onClick={() => setSelectedAddress(null)}><PlusCircle className='mr-2' />Añadir</Button>
                       </DialogTrigger>
                       <DialogContent>
                           <DialogHeader>

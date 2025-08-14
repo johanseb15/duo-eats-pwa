@@ -4,7 +4,7 @@
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommendations';
 import { suggestCategoryIcon } from '@/ai/flows/suggest-category-icon';
 import { db } from '@/lib/firebase';
-import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone, DashboardAnalytics, ProductSale, OrderOverTime, CartItem, ProductOption, UserAddress } from '@/lib/types';
+import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone, DashboardAnalytics, ProductSale, OrderOverTime, CartItem, UserAddress, RestaurantSettings } from '@/lib/types';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, limit, getDoc, runTransaction, writeBatch } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { getAuth } from 'firebase-admin/auth';
@@ -82,6 +82,8 @@ interface CreateOrderInput {
   subtotal: number;
   deliveryDate?: string; // Optional for scheduled orders
   neighborhood?: string;
+  address?: string;
+  addressDetails?: string;
 }
 
 export async function createOrder(input: CreateOrderInput) {
@@ -93,6 +95,8 @@ export async function createOrder(input: CreateOrderInput) {
       createdAt: serverTimestamp(),
       deliveryDate: input.deliveryDate || null,
       neighborhood: input.neighborhood || null,
+      address: input.address || null,
+      addressDetails: input.addressDetails || null,
     };
     const docRef = await addDoc(collection(db, 'orders'), orderData);
     
@@ -285,7 +289,7 @@ export async function addPromotion(promotionData: PromotionInput) {
   }
 }
 
-export async function updatePromotion(promotionId: string, promotionData: PromotionInput) {
+export async function updatePromotion(promotionId: string, promotionData: Partial<PromotionInput>) {
   try {
     const promotionRef = doc(db, 'promotions', promotionId);
     await updateDoc(promotionRef, promotionData);
@@ -325,7 +329,7 @@ export async function addCategory(categoryData: CategoryInput) {
   }
 }
 
-export async function updateCategory(categoryId: string, categoryData: CategoryInput) {
+export async function updateCategory(categoryId: string, categoryData: Partial<CategoryInput>) {
   try {
     const categoryRef = doc(db, 'categories', categoryId);
     await updateDoc(categoryRef, categoryData);
@@ -367,7 +371,7 @@ export async function addDeliveryZone(zoneData: DeliveryZoneInput) {
     }
 }
 
-export async function updateDeliveryZone(zoneId: string, zoneData: DeliveryZoneInput) {
+export async function updateDeliveryZone(zoneId: string, zoneData: Partial<DeliveryZoneInput>) {
     try {
         const zoneRef = doc(db, 'deliveryZones', zoneId);
         await updateDoc(zoneRef, zoneData);
@@ -408,7 +412,7 @@ export async function addAddress(userId: string, addressData: AddressInput) {
     }
 }
 
-export async function updateAddress(addressId: string, addressData: AddressInput) {
+export async function updateAddress(addressId: string, addressData: Partial<AddressInput>) {
     try {
         const addressRef = doc(db, 'addresses', addressId);
         await updateDoc(addressRef, addressData);
@@ -540,8 +544,9 @@ export async function importProductsFromFile(products: Product[]) {
         revalidatePath('/', 'layout');
         return { success: true, message: `${products.length} productos importados con éxito.` };
     } catch (error) {
-        console.error("Error importing test products:", error);
-        return { success: false, message: 'Error al importar productos.' };
+        const errorMessage = error instanceof Error ? error.message : 'Error al importar productos.';
+        console.error("Error importing products:", error);
+        return { success: false, message: errorMessage };
     }
 }
 
@@ -551,8 +556,9 @@ export async function importCategoriesFromFile(categories: ProductCategoryData[]
         revalidatePath('/', 'layout');
         return { success: true, message: `${categories.length} categorías importadas con éxito.` };
     } catch (error) {
-        console.error("Error importing test categories:", error);
-        return { success: false, message: 'Error al importar categorías.' };
+        const errorMessage = error instanceof Error ? error.message : 'Error al importar categorías.';
+        console.error("Error importing categories:", error);
+        return { success: false, message: errorMessage };
     }
 }
 
@@ -562,8 +568,9 @@ export async function importDeliveryZonesFromFile(zones: DeliveryZone[]) {
         revalidatePath('/', 'layout');
         return { success: true, message: `${zones.length} zonas de entrega importadas.` };
     } catch (error) {
-        console.error("Error importing test delivery zones:", error);
-        return { success: false, message: 'Error al importar zonas de entrega.' };
+         const errorMessage = error instanceof Error ? error.message : 'Error al importar zonas de entrega.';
+        console.error("Error importing delivery zones:", error);
+        return { success: false, message: errorMessage };
     }
 }
 
@@ -581,7 +588,40 @@ export async function deleteAllOrders() {
         revalidatePath('/', 'layout');
         return { success: true, message: `Se borraron ${querySnapshot.size} pedidos.` };
     } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error al borrar los pedidos.';
         console.error("Error deleting all orders:", error);
-        return { success: false, message: 'Error al borrar los pedidos.' };
+        return { success: false, message: errorMessage };
+    }
+}
+
+// Restaurant Settings
+const SETTINGS_DOC_ID = "main_settings";
+
+export async function fetchRestaurantSettings(): Promise<RestaurantSettings | null> {
+    try {
+        const settingsRef = doc(db, 'settings', SETTINGS_DOC_ID);
+        const settingsSnap = await getDoc(settingsRef);
+
+        if (settingsSnap.exists()) {
+            return settingsSnap.data() as RestaurantSettings;
+        }
+        return null; // Return null if no settings are found
+    } catch (error) {
+        console.error("Error fetching restaurant settings:", error);
+        return null;
+    }
+}
+
+export async function updateRestaurantSettings(settingsData: RestaurantSettings) {
+    try {
+        const settingsRef = doc(db, 'settings', SETTINGS_DOC_ID);
+        // Use set with merge: true to create the document if it doesn't exist,
+        // or update it if it does.
+        await updateDoc(settingsRef, settingsData);
+        revalidatePath('/admin/settings');
+        return { success: true };
+    } catch (error) {
+        console.error('Error updating restaurant settings:', error);
+        return { success: false, error: 'Failed to update settings' };
     }
 }

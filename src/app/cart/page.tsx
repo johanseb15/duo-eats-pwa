@@ -11,9 +11,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Minus, Plus, Trash2, ShoppingCart, Loader2, CalendarIcon, Clock, Home, Briefcase, MapPin } from 'lucide-react';
-import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense, useCallback } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { Currency, CartItem, UserAddress } from '@/lib/types';
+import type { Currency, CartItem, UserAddress, DeliveryZone } from '@/lib/types';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -37,7 +37,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { DeliveryZone } from '@/lib/types';
+
 
 const AddressAutocomplete = lazy(() => import('@/components/AddressAutocomplete'));
 
@@ -53,7 +53,6 @@ const getCartItemId = (item: CartItem) => {
 
 const defaultDeliveryZones: DeliveryZone[] = [
   { id: 'retiro', neighborhoods: ['Retiro en local'], cost: 0.00 },
-  { id: 'caba-1', neighborhoods: ['Palermo', 'Recoleta', 'Belgrano'], cost: 500.00 },
 ];
 
 export default function CartPage() {
@@ -72,8 +71,9 @@ export default function CartPage() {
   const [guestName, setGuestName] = useState('');
   const [addressSelection, setAddressSelection] = useState('new');
   const [userAddresses, setUserAddresses] = useState<UserAddress[]>([]);
-  const [finalAddress, setFinalAddress] = useState('');
-  const [finalNeighborhood, setFinalNeighborhood] = useState<string | null>(null);
+  const [finalAddress, setFinalAddress] = useState<UserAddress | null>(null);
+  const [manualAddress, setManualAddress] = useState({ address: '', neighborhood: '' });
+  
   const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
   const [loadingZones, setLoadingZones] = useState(true);
 
@@ -96,6 +96,7 @@ export default function CartPage() {
             const snapshot = await getDocs(q);
 
             if (snapshot.empty) {
+                console.log("No delivery zones found, using defaults.")
                 setDeliveryZones(defaultDeliveryZones);
             } else {
                 const zoneList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DeliveryZone));
@@ -118,43 +119,62 @@ export default function CartPage() {
         setUserAddresses(addresses);
         if (addresses.length > 0) {
           setAddressSelection(addresses[0].id);
+        } else {
+          setAddressSelection('new');
         }
       };
       getUserAddresses();
+    } else {
+      setUserAddresses([]);
+      setAddressSelection('new');
     }
   }, [user]);
   
-   useEffect(() => {
+  const updateDeliveryDetails = useCallback((neighborhood: string | null) => {
+    if (!neighborhood) {
+        setDeliveryCost(0);
+        setSelectedZoneId(null);
+        return;
+    }
+    const zone = deliveryZones.find(z => z.neighborhoods.some(n => neighborhood.includes(n)));
+    if (zone) {
+        setDeliveryCost(zone.cost);
+        setSelectedZoneId(zone.id);
+        if (zone.cost === 0 && deliveryOption === 'delivery') {
+             toast({
+                title: "Envío Gratis",
+                description: `¡El envío para ${neighborhood} es gratis!`
+            });
+        }
+    } else {
+        setDeliveryCost(0);
+        setSelectedZoneId(null);
+        toast({
+            title: "Zona no cubierta",
+            description: `Actualmente no cubrimos la zona de "${neighborhood}".`,
+            variant: "destructive"
+        });
+    }
+  }, [deliveryZones, toast, deliveryOption]);
+
+  useEffect(() => {
+    if (loadingZones) return;
+
     if (deliveryOption === 'pickup') {
       setDeliveryCost(0);
       setSelectedZoneId('retiro');
-      setFinalAddress('Retiro en local');
-      setFinalNeighborhood('Retiro en local');
+      setFinalAddress(null);
     } else {
-      // Logic for delivery
-      if (user && userAddresses.length > 0) {
-        if(addressSelection !== 'new') {
-            const selectedAddr = userAddresses.find(a => a.id === addressSelection);
-            if(selectedAddr) {
-                handleSavedAddressSelect(selectedAddr);
-            }
-        } else {
-            // "Nueva dirección" is selected, clear costs
-            setFinalAddress('');
-            setFinalNeighborhood(null);
-            setDeliveryCost(0);
-            setSelectedZoneId(null);
-        }
+      if (user && userAddresses.length > 0 && addressSelection !== 'new') {
+        const selectedAddr = userAddresses.find(a => a.id === addressSelection);
+        setFinalAddress(selectedAddr || null);
+        updateDeliveryDetails(selectedAddr?.neighborhood || null);
       } else {
-         // Guest or user with no addresses, reset to default state for manual entry
-        setFinalAddress('');
-        setFinalNeighborhood(null);
-        setDeliveryCost(0);
-        setSelectedZoneId(null);
+        setFinalAddress(null);
+        updateDeliveryDetails(manualAddress.neighborhood || null);
       }
     }
-   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deliveryOption, addressSelection, user, userAddresses, deliveryZones]);
+  }, [deliveryOption, addressSelection, user, userAddresses, loadingZones, updateDeliveryDetails, manualAddress]);
 
   const { subtotal, finalSubtotal } = useMemo(() => {
     const rawSubtotal = items.reduce(
@@ -167,30 +187,9 @@ export default function CartPage() {
   
   const total = finalSubtotal + deliveryCost;
 
-  const handleManualAddressSelect = (address: string, neighborhood: string | null, cost: number, zoneId: string | null) => {
-    setFinalAddress(address);
-    setFinalNeighborhood(neighborhood);
-    setDeliveryCost(cost);
-    setSelectedZoneId(zoneId);
+  const handleManualAddressSelect = (address: string, neighborhood: string | null) => {
+    setManualAddress({ address, neighborhood: neighborhood || '' });
   };
-  
-  const handleSavedAddressSelect = (address: UserAddress) => {
-      setFinalAddress(address.fullAddress);
-      setFinalNeighborhood(address.neighborhood);
-      const zone = deliveryZones.find(z => z.neighborhoods.some(n => address.neighborhood.includes(n)));
-      if (zone) {
-        setDeliveryCost(zone.cost);
-        setSelectedZoneId(zone.id);
-      } else {
-        setDeliveryCost(0);
-        setSelectedZoneId(null);
-        toast({
-            title: "Zona no cubierta",
-            description: `Actualmente no cubrimos la zona de "${address.neighborhood}".`,
-            variant: "destructive"
-        })
-      }
-  }
 
   const handleCheckout = async () => {
      if (!selectedZoneId) {
@@ -241,20 +240,22 @@ export default function CartPage() {
       subtotal: finalSubtotal,
       deliveryCost: deliveryCost,
       deliveryDate: finalDeliveryDate,
-      neighborhood: finalNeighborhood || undefined,
+      neighborhood: finalAddress?.neighborhood || manualAddress.neighborhood || undefined,
+      address: finalAddress?.fullAddress || manualAddress.address || (deliveryOption === 'pickup' ? 'Retiro en local' : undefined),
+      addressDetails: finalAddress?.details || undefined,
     };
 
     const result = await createOrder(orderInput);
 
     if (result.success && result.orderId) {
-        sendWhatsApp(result.orderId, userName, finalAddress, finalDeliveryDate);
+        sendWhatsApp(result.orderId, userName, orderInput.address, finalDeliveryDate, orderInput.addressDetails);
         setLastOrderId(result.orderId);
         setIsSuccessAlertOpen(true);
         clearCart();
     } else {
         toast({
           title: 'Error al crear el pedido',
-          description: 'Hubo un problema al guardar tu pedido. Por favor, intenta de nuevo.',
+          description: result.error || 'Hubo un problema al guardar tu pedido. Por favor, intenta de nuevo.',
           variant: 'destructive',
         });
     }
@@ -263,7 +264,7 @@ export default function CartPage() {
   };
 
 
-  const sendWhatsApp = (orderId?: string, name?: string, address?: string, deliveryDate?: string) => {
+  const sendWhatsApp = (orderId?: string, name?: string, address?: string, deliveryDate?: string, addressDetails?: string) => {
     const phone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '549111234567';
     let message = `¡Hola! Quisiera hacer el siguiente pedido:\n`;
     if (orderId) {
@@ -277,6 +278,10 @@ export default function CartPage() {
       message += `*Modalidad: Retiro en local*\n`;
     } else if (address) {
       message += `*Dirección de Entrega: ${address}*\n`;
+    }
+
+    if (addressDetails) {
+        message += `*Detalles: ${addressDetails}*\n`;
     }
 
     if (deliveryDate) {
@@ -544,4 +549,3 @@ export default function CartPage() {
     </div>
   );
 }
-

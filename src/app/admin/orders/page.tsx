@@ -34,7 +34,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar, Search, Loader2 } from 'lucide-react';
+import { Calendar, Search, Loader2, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -110,7 +110,7 @@ export default function AdminOrdersPage() {
   }, [orders, searchTerm, statusFilter]);
 
 
-  const handleStatusChange = async (orderId: string, newStatus: Order['status']) => {
+  const handleStatusChange = (orderId: string, newStatus: Order['status']) => {
     startUpdateTransition(async () => {
       const result = await updateOrderStatus(orderId, newStatus);
       if (result.success) {
@@ -257,6 +257,20 @@ export default function AdminOrdersPage() {
                     </li>
                   ))}
                 </ul>
+                
+                {order.address && order.address !== 'Retiro en local' && (
+                    <div className="mt-4 p-3 bg-muted/30 rounded-lg">
+                        <div className="flex items-start gap-3">
+                            <MapPin className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                            <div>
+                                <p className="font-semibold">{order.address}</p>
+                                {order.addressDetails && <p className="text-sm text-muted-foreground italic">{order.addressDetails}</p>}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+
                 {order.cancellationReason && (
                     <div className="mt-4 p-3 bg-destructive/10 rounded-lg">
                         <p className="text-sm font-bold text-destructive">Motivo de cancelación:</p>

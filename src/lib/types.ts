@@ -51,6 +51,8 @@ export interface Order {
   createdAt: string; // ISO 8601 date string
   deliveryDate?: string; // ISO 8601 date string for scheduled orders
   neighborhood?: string;
+  address?: string;
+  addressDetails?: string;
   cancellationReason?: string;
 }
 
@@ -96,4 +98,13 @@ export interface UserAddress {
   fullAddress: string;
   neighborhood: string;
   details?: string; // e.g., 'Apto 5B'
+}
+
+export type Day = "lunes" | "martes" | "miércoles" | "jueves" | "viernes" | "sábado" | "domingo";
+
+export interface RestaurantSettings {
+    whatsappNumber: string;
+    openingTime: string;
+    closingTime: string;
+    openDays: Day[];
 }
