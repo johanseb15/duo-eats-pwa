@@ -32,7 +32,7 @@ const AddressAutocomplete = ({onAddressSelect, disabled}: AddressAutocompletePro
   }
 
   return (
-    <APIProvider apiKey={apiKey}>
+    <APIProvider apiKey={apiKey} libraries={['places']}>
       <AutocompleteComponent onAddressSelect={onAddressSelect} disabled={disabled} />
     </APIProvider>
   );
@@ -136,5 +136,3 @@ function AutocompleteComponent({onAddressSelect, disabled}: AddressAutocompleteP
 }
 
 export default AddressAutocomplete;
-
-    
