@@ -26,15 +26,9 @@ import { auth } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
-const superAdminUids = (process.env.NEXT_PUBLIC_SUPERADMIN_UIDS || "").split(',');
-const adminUids = (process.env.NEXT_PUBLIC_ADMIN_UIDS || "").split(',');
-
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, loading } = useAuth();
-  
-  const isAdmin = user ? adminUids.includes(user.uid) : false;
-  const isSuperAdmin = user ? superAdminUids.includes(user.uid) : false;
+  const { user, isAdmin, isSuperAdmin, loading } = useAuth();
 
   useEffect(() => {
     if (!loading && !user) {
