@@ -1,4 +1,3 @@
-
 // cypress/e2e/guest-checkout.cy.ts
 
 describe('Flujo de Checkout como Invitado', () => {
@@ -33,13 +32,16 @@ describe('Flujo de Checkout como Invitado', () => {
     // Rellenar nombre del invitado
     cy.get('input#guestName').type('Cliente de Prueba');
 
+    // Interceptar la llamada a la API de Google Maps
+    cy.intercept('https://maps.googleapis.com/**').as('googleMapsApi');
+
     // Seleccionar la opción de envío a domicilio (ya está por defecto)
     // Escribir una dirección en el autocompletado de Google
     cy.get('input#address-input').type('Av. Corrientes 1234, Buenos Aires');
     
-    // Esperamos a que Google Maps responda y aparezca el costo de envío
-    // Este `wait` puede ser necesario si la API es lenta. Ajustar si es necesario.
-    cy.wait(2000); 
+    // Esperamos a que Google Maps responda
+    cy.wait('@googleMapsApi');
+
     cy.contains('span', 'A calcular').should('not.exist');
     cy.contains('span', /^\$\d+\.\d{2}$/).should('be.visible'); // Verificar que el costo de envío aparece
 
