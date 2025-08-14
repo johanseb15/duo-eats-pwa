@@ -12,6 +12,9 @@ import { Button } from './ui/button';
 import { SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from './ui/sheet';
 import { ScrollArea } from './ui/scroll-area';
 import { Badge } from './ui/badge';
+import { useFavorites } from '@/store/favorites';
+import { cn } from '@/lib/utils';
+import { Heart } from 'lucide-react';
 
 interface ProductSheetProps {
     product: Product;
@@ -23,13 +26,17 @@ const currencySymbol = '$';
 
 export function ProductSheet({ product }: ProductSheetProps) {
     const { addToCart } = useCart();
+    const { toggleFavorite, isFavorite } = useFavorites();
     const { toast } = useToast();
+    const isFav = isFavorite(product.id);
 
     const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: string }>(() => {
         const defaults: { [key: string]: string } = {};
         if (product.options) {
             product.options.forEach(option => {
-              defaults[option.name] = option.values[0].name;
+              if (option.values && option.values.length > 0) {
+                defaults[option.name] = option.values[0].name;
+              }
             });
         }
         return defaults;
@@ -56,6 +63,7 @@ export function ProductSheet({ product }: ProductSheetProps) {
     };
     
     const handleAddToCart = () => {
+        if (isOutOfStock) return;
         const cartItem = {
           ...product,
           selectedOptions: selectedOptions,
@@ -65,6 +73,14 @@ export function ProductSheet({ product }: ProductSheetProps) {
         toast({
           title: '¡Añadido al carrito!',
           description: `${product.name} está ahora en tu carrito.`,
+        });
+    };
+
+     const handleFavoriteClick = () => {
+        toggleFavorite(product);
+        toast({
+            title: isFav ? 'Eliminado de favoritos' : 'Añadido a favoritos',
+            description: `${product.name} ${isFav ? 'ya no está' : 'está ahora'} en tus favoritos.`,
         });
     };
     
@@ -90,7 +106,12 @@ export function ProductSheet({ product }: ProductSheetProps) {
                     </div>
                 </SheetClose>
                 <SheetHeader className="p-6 -mt-16 relative bg-background rounded-t-3xl text-left">
-                    <SheetTitle className="text-3xl font-bold text-foreground">{product.name}</SheetTitle>
+                    <div className="flex justify-between items-start">
+                        <SheetTitle className="text-3xl font-bold text-foreground max-w-[calc(100%-4rem)]">{product.name}</SheetTitle>
+                         <Button variant="ghost" size="icon" className="rounded-full text-primary flex-shrink-0" onClick={handleFavoriteClick}>
+                            <Heart className={cn("h-7 w-7", isFav && "fill-current")} />
+                        </Button>
+                    </div>
                     <SheetDescription className="text-muted-foreground mt-2">{product.description}</SheetDescription>
                 </SheetHeader>
                 <div className="p-6 bg-background">
@@ -126,7 +147,7 @@ export function ProductSheet({ product }: ProductSheetProps) {
                         {currencySymbol}{finalPrice.toFixed(2)}
                     </p>
                     <SheetClose asChild>
-                      <Button onClick={handleAddToCart} size="lg" className="rounded-full flex-grow">
+                      <Button onClick={handleAddToCart} size="lg" className="rounded-full flex-grow" disabled={isOutOfStock}>
                           {isOutOfStock ? 'Sin Stock' : 'Agregar al carrito'}
                       </Button>
                     </SheetClose>

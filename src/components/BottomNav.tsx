@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { ShoppingCart, User, ClipboardList } from 'lucide-react';
+import { ShoppingCart, User, ClipboardList, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/store/cart';
 import { useEffect, useState } from 'react';
@@ -24,6 +24,7 @@ export function BottomNav() {
 
   const navItems = [
     { href: '/', icon: 'logo', label: 'Home' },
+    { href: '/favorites', icon: Heart, label: 'Favorites' },
     { href: '/orders', icon: ClipboardList, label: 'Orders' },
     { href: '/cart', icon: ShoppingCart, label: 'Cart', badge: itemCount },
     { href: user ? '/profile' : '/auth/signin', icon: User, label: 'Profile' },
@@ -31,7 +32,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 h-20 bg-background/80 backdrop-blur-xl border-t-2 border-white/20 md:hidden z-50 rounded-t-3xl">
-      <div className="flex h-full justify-around items-center max-w-md mx-auto">
+      <div className="flex h-full justify-around items-center max-w-lg mx-auto">
         {navItems.map(({ href, icon: Icon, label, badge }) => {
           const isActive = (href === '/' && pathname === href) || (href !== '/' && pathname.startsWith(href));
           return (

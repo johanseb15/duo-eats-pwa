@@ -4,7 +4,7 @@
 import Image from 'next/image';
 import type { Product } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Heart } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -17,6 +17,9 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { ProductSheet } from './ProductSheet';
+import { useFavorites } from '@/store/favorites';
+import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProductCardProps {
   product: Product;
@@ -26,6 +29,19 @@ const currentCurrency = 'ARS';
 const currencySymbol = '$';
 
 export function ProductCard({ product }: ProductCardProps) {
+  const { toggleFavorite, isFavorite } = useFavorites();
+  const { toast } = useToast();
+  const isFav = isFavorite(product.id);
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Evita que se abra el sheet
+    toggleFavorite(product);
+    toast({
+        title: isFav ? 'Eliminado de favoritos' : 'Añadido a favoritos',
+        description: `${product.name} ${isFav ? 'ya no está' : 'está ahora'} en tus favoritos.`,
+    })
+  };
+
   return (
     <Sheet>
         <div className="w-full overflow-hidden transition-all duration-300 rounded-2xl group bg-card/80 backdrop-blur-xl border-white/20 shadow-md hover:shadow-xl hover:-translate-y-1">
@@ -49,11 +65,16 @@ export function ProductCard({ product }: ProductCardProps) {
                 </CardDescription>
                 <div className='flex justify-between items-center mt-2'>
                     <p className="text-lg font-bold text-foreground">{currencySymbol}{product.price[currentCurrency].toFixed(2)}</p>
-                    <SheetTrigger asChild>
-                        <Button size='icon' className='rounded-full h-9 w-9' aria-label="Añadir al carrito">
-                            <Plus/>
+                    <div className="flex items-center gap-1">
+                         <Button variant="ghost" size="icon" className="rounded-full text-primary" onClick={handleFavoriteClick}>
+                            <Heart className={cn("h-5 w-5", isFav && "fill-current")} />
                         </Button>
-                    </SheetTrigger>
+                        <SheetTrigger asChild>
+                            <Button size='icon' className='rounded-full h-9 w-9' aria-label="Añadir al carrito">
+                                <Plus/>
+                            </Button>
+                        </SheetTrigger>
+                    </div>
                 </div>
               </div>
             </CardContent>
