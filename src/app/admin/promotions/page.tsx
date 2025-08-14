@@ -3,8 +3,8 @@
 
 import { useEffect, useState, Suspense, lazy, useMemo } from 'react';
 import Image from 'next/image';
-import type { Promotion } from '@/lib/types';
-import { collection, getDocs } from 'firebase/firestore';
+import type { Promotion, Product } from '@/lib/types';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,7 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MoreHorizontal, PlusCircle, Trash2, Edit, Search } from 'lucide-react';
+import { MoreHorizontal, PlusCircle, Trash2, Edit, Search, Link as LinkIcon } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,6 +44,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { deletePromotion } from '@/app/actions';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 
 const PromotionForm = lazy(() => import('@/components/PromotionForm').then(module => ({ default: module.PromotionForm })));
 
@@ -58,13 +59,22 @@ async function getPromotions(): Promise<Promotion[]> {
       description: data.description,
       image: data.image,
       aiHint: data.aiHint,
+      productId: data.productId,
     } as Promotion;
   });
   return promotionList;
 }
 
+async function getProducts(): Promise<Product[]> {
+  const productsCol = collection(db, 'products');
+  const productsSnapshot = await getDocs(q);
+  const productList = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+  return productList;
+}
+
 export default function AdminPromotionsPage() {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
@@ -72,21 +82,22 @@ export default function AdminPromotionsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
-  const loadPromotions = async () => {
+  const loadData = async () => {
     setLoading(true);
     try {
-        const allPromotions = await getPromotions();
+        const [allPromotions, allProducts] = await Promise.all([getPromotions(), getProducts()]);
         setPromotions(allPromotions);
+        setProducts(allProducts);
     } catch (error) {
-        console.error("Failed to load promotions:", error);
-        toast({ title: "Error", description: "No se pudieron cargar las promociones.", variant: "destructive" });
+        console.error("Failed to load data:", error);
+        toast({ title: "Error", description: "No se pudieron cargar los datos.", variant: "destructive" });
     } finally {
         setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadPromotions();
+    loadData();
   }, []);
 
   const handleFormSubmit = async () => {
@@ -96,7 +107,7 @@ export default function AdminPromotionsPage() {
       description: `La promoción se ha ${selectedPromotion ? 'actualizado' : 'guardado'} correctamente.`,
     });
     setSelectedPromotion(null);
-    await loadPromotions();
+    await loadData();
   }
   
   const handleEditClick = (promotion: Promotion) => {
@@ -117,7 +128,7 @@ export default function AdminPromotionsPage() {
         title: "Promoción eliminada",
         description: "La promoción ha sido eliminada.",
       });
-      await loadPromotions();
+      await loadData();
     } else {
        toast({
         title: "Error",
@@ -134,6 +145,10 @@ export default function AdminPromotionsPage() {
       setSelectedPromotion(null);
     }
     setIsFormOpen(open);
+  }
+  
+  const getProductName = (productId: string) => {
+    return products.find(p => p.id === productId)?.name || 'Producto no encontrado';
   }
 
   const filteredPromotions = useMemo(() => {
@@ -205,7 +220,7 @@ export default function AdminPromotionsPage() {
             <TableRow>
               <TableHead className="w-[80px]">Imagen</TableHead>
               <TableHead>Título</TableHead>
-              <TableHead>Descripción</TableHead>
+              <TableHead>Producto Asociado</TableHead>
               <TableHead className="text-right w-[100px]">Acciones</TableHead>
             </TableRow>
           </TableHeader>
@@ -223,7 +238,14 @@ export default function AdminPromotionsPage() {
                 </TableCell>
                 <TableCell className="font-medium">{promotion.title}</TableCell>
                 <TableCell>
-                  {promotion.description}
+                  {promotion.productId ? (
+                    <Badge variant="secondary">
+                        <LinkIcon className='mr-2 h-3 w-3'/>
+                        {getProductName(promotion.productId)}
+                    </Badge>
+                  ) : (
+                    <span className="text-muted-foreground text-xs">Ninguno</span>
+                  )}
                 </TableCell>
                 <TableCell className="text-right">
                    <DropdownMenu>

@@ -62,6 +62,7 @@ export interface Promotion {
   description: string;
   image: string;
   aiHint: string;
+  productId?: string;
 }
 
 export interface DeliveryZone {

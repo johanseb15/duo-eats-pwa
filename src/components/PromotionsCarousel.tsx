@@ -2,7 +2,7 @@
 'use client';
 
 import Image from 'next/image';
-import type { Promotion } from '@/lib/types';
+import type { Product, Promotion } from '@/lib/types';
 import {
   Carousel,
   CarouselContent,
@@ -12,13 +12,18 @@ import {
 } from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
 import Autoplay from "embla-carousel-autoplay";
-import { useRef } from 'react';
+import React, { useRef } from 'react';
+import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
+import { ProductSheet } from './ProductSheet';
+import { Button } from './ui/button';
+import { ArrowRight } from 'lucide-react';
 
 interface PromotionsCarouselProps {
   promotions: Promotion[];
+  products: Product[];
 }
 
-export default function PromotionsCarousel({ promotions }: PromotionsCarouselProps) {
+export default function PromotionsCarousel({ promotions, products }: PromotionsCarouselProps) {
     const plugin = useRef(
       Autoplay({ delay: 5000, stopOnInteraction: false, stopOnMouseEnter: true })
     )
@@ -37,27 +42,43 @@ export default function PromotionsCarousel({ promotions }: PromotionsCarouselPro
       className="w-full"
     >
       <CarouselContent>
-        {promotions.map((promo) => (
-          <CarouselItem key={promo.id}>
-            <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-r from-primary to-accent">
-                <CardContent className="relative flex items-center justify-between p-6">
-                    <div className="text-white z-10">
-                        <h2 className="text-2xl font-bold">{promo.title}</h2>
-                        <p className="text-sm">{promo.description}</p>
-                    </div>
-                     <div className="relative w-24 h-24 flex-shrink-0">
-                        <Image
-                            src={promo.image}
-                            alt={promo.title}
-                            fill
-                            className="rounded-full object-cover"
-                            data-ai-hint={promo.aiHint}
-                        />
-                     </div>
-                </CardContent>
-            </Card>
-          </CarouselItem>
-        ))}
+        {promotions.map((promo) => {
+          const product = products.find(p => p.id === promo.productId);
+          return (
+            <CarouselItem key={promo.id}>
+              <Sheet>
+                <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-r from-primary to-accent">
+                    <CardContent className="relative flex flex-col md:flex-row items-center justify-between p-6 gap-4">
+                        <div className="text-white z-10 flex-grow">
+                            <h2 className="text-2xl font-bold">{promo.title}</h2>
+                            <p className="text-sm mt-1">{promo.description}</p>
+                             {product && (
+                              <SheetTrigger asChild>
+                                  <Button variant="secondary" className="mt-4 rounded-full">
+                                    Ver oferta <ArrowRight className="ml-2 h-4 w-4" />
+                                  </Button>
+                              </SheetTrigger>
+                            )}
+                        </div>
+                        <div className="relative w-24 h-24 flex-shrink-0">
+                            <Image
+                                src={promo.image}
+                                alt={promo.title}
+                                fill
+                                className="rounded-full object-cover"
+                                data-ai-hint={promo.aiHint}
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+                {product && (
+                  <SheetContent className="w-full max-w-lg p-0">
+                    <ProductSheet product={product} />
+                  </SheetContent>
+                )}
+              </Sheet>
+            </CarouselItem>
+        )})}
       </CarouselContent>
       <CarouselPrevious className="hidden sm:flex" />
       <CarouselNext className="hidden sm:flex" />

@@ -37,6 +37,7 @@ const formSchema = z.object({
    aiHint: z.string().max(25, {
     message: 'La pista de IA no debe superar los 25 caracteres.',
   }).optional(),
+  productId: z.string().optional(),
 });
 
 interface PromotionFormProps {
@@ -70,6 +71,7 @@ export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormPro
       description: '',
       image: '',
       aiHint: '',
+      productId: '',
     },
   });
 
@@ -80,6 +82,7 @@ export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormPro
         description: promotion.description,
         image: promotion.image,
         aiHint: promotion.aiHint,
+        productId: promotion.productId,
       })
     } else {
        form.reset({
@@ -87,15 +90,17 @@ export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormPro
         description: '',
         image: '',
         aiHint: '',
+        productId: '',
        });
     }
-  }, [promotion, form.reset]);
+  }, [promotion, form]);
 
   const handleProductSelect = (productId: string) => {
     const selectedProduct = products.find(p => p.id === productId);
     if (selectedProduct) {
         form.setValue('image', selectedProduct.image);
         form.setValue('aiHint', selectedProduct.aiHint);
+        form.setValue('productId', selectedProduct.id);
     }
   }
 
@@ -106,6 +111,7 @@ export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormPro
         description: values.description,
         image: values.image || `https://placehold.co/300x150.png`,
         aiHint: values.aiHint || values.title.toLowerCase().split(' ').slice(0, 2).join(' '),
+        productId: values.productId,
       };
 
       if (promotion) {
@@ -149,25 +155,32 @@ export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormPro
             </FormItem>
           )}
         />
-         <FormItem>
-            <FormLabel>Imagen del Producto</FormLabel>
-             <Select onValueChange={handleProductSelect} disabled={products.length === 0}>
-                <FormControl>
-                <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar un producto para usar su imagen" />
-                </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                {products.map(p => (
-                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                ))}
-                </SelectContent>
-            </Select>
-            <FormDescription>
-                O introduce una URL manualmente a continuación.
-            </FormDescription>
-        </FormItem>
-
+         <FormField
+            control={form.control}
+            name="productId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Producto Asociado</FormLabel>
+                <Select onValueChange={handleProductSelect} value={field.value} disabled={products.length === 0}>
+                    <FormControl>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar un producto para la promoción" />
+                    </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                    {products.map(p => (
+                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                    </SelectContent>
+                </Select>
+                <FormDescription>
+                    Al seleccionar un producto, se usará su imagen y se podrá agregar al carrito desde el banner.
+                </FormDescription>
+                 <FormMessage />
+              </FormItem>
+            )}
+        />
+        
         <FormField
           control={form.control}
           name="image"
@@ -177,6 +190,9 @@ export function PromotionForm({ onPromotionSubmit, promotion }: PromotionFormPro
               <FormControl>
                 <Input placeholder="https://ejemplo.com/imagen.png" {...field} />
               </FormControl>
+               <FormDescription>
+                Se autocompleta al elegir un producto.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

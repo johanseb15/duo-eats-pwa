@@ -54,7 +54,7 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
 
         <section className="mb-12">
           <Suspense fallback={<Skeleton className="h-[120px] w-full rounded-2xl" />}>
-            <PromotionsCarousel promotions={promotions} />
+            <PromotionsCarousel promotions={promotions} products={products} />
           </Suspense>
          </section>
         
