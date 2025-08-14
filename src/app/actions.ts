@@ -4,7 +4,7 @@
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommendations';
 import { suggestCategoryIcon } from '@/ai/flows/suggest-category-icon';
 import { db } from '@/lib/firebase';
-import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone, DashboardAnalytics, ProductSale, OrderOverTime, CartItem } from '@/lib/types';
+import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone, DashboardAnalytics, ProductSale, OrderOverTime, CartItem, ProductOption } from '@/lib/types';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, limit, getDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { getAuth } from 'firebase-admin/auth';
@@ -177,6 +177,7 @@ export async function updateOrderStatus(orderId: string, status: Order['status']
     revalidatePath('/admin/orders');
     revalidatePath('/orders');
     revalidatePath('/admin');
+    revalidatePath(`/order/${orderId}`);
     return { success: true };
   } catch (error) {
     console.error('Error updating order status:', error);
@@ -184,7 +185,7 @@ export async function updateOrderStatus(orderId: string, status: Order['status']
   }
 }
 
-export type ProductInput = Omit<Product, 'id' | 'options'>; 
+export type ProductInput = Omit<Product, 'id'>; 
 
 export async function addProduct(productData: ProductInput) {
   try {

@@ -35,7 +35,6 @@ export function ProductSheet({ product }: ProductSheetProps) {
     });
 
     const finalPrice = useMemo(() => {
-        if (!product) return 0;
         let basePrice = product.price[currentCurrency];
 
         if (!product.options || Object.keys(selectedOptions).length === 0) {
@@ -56,7 +55,6 @@ export function ProductSheet({ product }: ProductSheetProps) {
     };
     
     const handleAddToCart = () => {
-        if (!product) return;
         const cartItem = {
           ...product,
           selectedOptions: selectedOptions,
@@ -92,22 +90,23 @@ export function ProductSheet({ product }: ProductSheetProps) {
                 </SheetHeader>
                 <div className="p-6 bg-background">
                     {product.options && product.options.length > 0 && (
-                    <div className="mt-6">
+                    <div className="space-y-6">
                         {product.options.map((option) => (
-                        <div key={option.name} className="mb-4">
+                        <div key={option.name}>
                             <h3 className="font-semibold text-lg mb-2">{option.name}</h3>
                             <RadioGroup 
                             value={selectedOptions[option.name]}
                             onValueChange={(value) => handleOptionChange(option.name, value)}
+                            className="space-y-2"
                             >
                             {option.values.map((value) => (
-                                <div key={value.name} className="flex items-center space-x-2 bg-card/60 backdrop-blur-xl p-3 rounded-xl">
-                                <RadioGroupItem value={value.name} id={`${option.name}-${value.name}`} />
-                                <Label htmlFor={`${option.name}-${value.name}`} className="flex justify-between w-full">
-                                    <span>{value.name}</span>
-                                    {value.priceModifier?.[currentCurrency] > 0 && <span>+ {currencySymbol} {value.priceModifier[currentCurrency].toFixed(2)}</span>}
+                                <Label key={value.name} htmlFor={`${option.name}-${value.name}`} className="flex items-center space-x-3 bg-card/60 backdrop-blur-xl p-4 rounded-xl has-[:checked]:ring-2 has-[:checked]:ring-primary transition-all">
+                                    <RadioGroupItem value={value.name} id={`${option.name}-${value.name}`} />
+                                    <span className="flex justify-between w-full font-medium">
+                                        <span>{value.name}</span>
+                                        {value.priceModifier?.[currentCurrency] > 0 && <span>+ {currencySymbol}{value.priceModifier[currentCurrency].toFixed(2)}</span>}
+                                    </span>
                                 </Label>
-                                </div>
                             ))}
                             </RadioGroup>
                         </div>
@@ -119,7 +118,7 @@ export function ProductSheet({ product }: ProductSheetProps) {
              <SheetFooter className="p-6 bg-background/80 backdrop-blur-xl border-t sticky bottom-0">
                 <div className="flex justify-between items-center w-full gap-4">
                      <p className="text-2xl font-extrabold text-foreground">
-                        {currencySymbol} {finalPrice.toFixed(2)}
+                        {currencySymbol}{finalPrice.toFixed(2)}
                     </p>
                     <Button onClick={handleAddToCart} size="lg" className="rounded-full flex-grow">
                         Agregar al carrito

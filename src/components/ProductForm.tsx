@@ -109,7 +109,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
         category: '',
        });
     }
-  }, [product, form.reset]);
+  }, [product, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
@@ -136,9 +136,9 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
 
     try {
         if (product) {
-           await updateProduct(product.id, productData);
+           await updateProduct(product.id, { ...productData, options: product.options || [] });
         } else {
-           await addProduct(productData);
+           await addProduct({ ...productData, options: [] });
         }
         await onProductSubmit();
     } catch (error) {
@@ -186,7 +186,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Precio ({currentCurrency})</FormLabel>
+                <FormLabel>Precio Base ({currentCurrency})</FormLabel>
                 <FormControl>
                   <Input type="number" step="0.01" {...field} />
                 </FormControl>

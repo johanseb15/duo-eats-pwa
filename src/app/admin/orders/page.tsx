@@ -146,7 +146,7 @@ export default function AdminOrdersPage() {
                       <div>
                           <span className='font-semibold'>{item.name}</span>
                           <span className='text-muted-foreground'> x {item.quantity}</span>
-                          {item.selectedOptions && Object.values(item.selectedOptions).length > 0 && <p className='text-xs text-muted-foreground italic'>({Object.values(item.selectedOptions).join(', ')})</p>}
+                          {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && <p className='text-xs text-muted-foreground italic'>({Object.values(item.selectedOptions).join(', ')})</p>}
                       </div>
                       <span className='font-medium'>{currencySymbol}{(item.finalPrice * item.quantity).toFixed(2)}</span>
                     </li>
