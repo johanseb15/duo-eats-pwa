@@ -205,10 +205,17 @@ export async function fetchAllOrders(): Promise<Order[]> {
   }
 }
 
-export async function updateOrderStatus(orderId: string, status: Order['status']) {
+export async function updateOrderStatus(orderId: string, status: Order['status'], cancellationReason?: string) {
   try {
     const orderRef = doc(db, 'orders', orderId);
-    await updateDoc(orderRef, { status });
+    const updateData: { status: Order['status'], cancellationReason?: string } = { status };
+    
+    if (status === 'Cancelado') {
+        updateData.cancellationReason = cancellationReason || 'Sin motivo especificado.';
+    }
+
+    await updateDoc(orderRef, updateData);
+
     revalidatePath('/admin/orders');
     revalidatePath('/orders');
     revalidatePath('/admin');

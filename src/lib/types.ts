@@ -51,6 +51,7 @@ export interface Order {
   createdAt: string; // ISO 8601 date string
   deliveryDate?: string; // ISO 8601 date string for scheduled orders
   neighborhood?: string;
+  cancellationReason?: string;
 }
 
 export interface Promotion {

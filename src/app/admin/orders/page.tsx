@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useTransition } from 'react';
 import type { Order } from '@/lib/types';
 import { fetchAllOrders, updateOrderStatus } from '@/app/actions';
 import { Badge } from '@/components/ui/badge';
@@ -20,10 +20,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
-import { Calendar, Search } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Calendar, Search, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -55,6 +66,13 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isUpdating, startUpdateTransition] = useTransition();
+
+  // State for cancellation dialog
+  const [isCancelAlertOpen, setIsCancelAlertOpen] = useState(false);
+  const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
+  const [cancellationReason, setCancellationReason] = useState('');
+
   const { toast } = useToast();
 
   const loadOrders = async () => {
@@ -90,21 +108,57 @@ export default function AdminOrdersPage() {
 
 
   const handleStatusChange = async (orderId: string, newStatus: Order['status']) => {
-    const result = await updateOrderStatus(orderId, newStatus);
-    if (result.success) {
-      toast({
-        title: 'Estado actualizado',
-        description: `El pedido #${orderId.slice(0, 6)} ahora está ${newStatus}.`,
-      });
-      await loadOrders();
-    } else {
-      toast({
-        title: 'Error al actualizar',
-        description: 'No se pudo actualizar el estado del pedido.',
-        variant: 'destructive',
-      });
-    }
+    startUpdateTransition(async () => {
+      const result = await updateOrderStatus(orderId, newStatus);
+      if (result.success) {
+        toast({
+          title: 'Estado actualizado',
+          description: `El pedido #${orderId.slice(0, 6)} ahora está ${newStatus}.`,
+        });
+        await loadOrders();
+      } else {
+        toast({
+          title: 'Error al actualizar',
+          description: 'No se pudo actualizar el estado del pedido.',
+          variant: 'destructive',
+        });
+      }
+    });
   };
+
+  const handleCancellationConfirm = () => {
+    if (!orderToCancel) return;
+
+    startUpdateTransition(async () => {
+        const result = await updateOrderStatus(orderToCancel.id, 'Cancelado', cancellationReason);
+        if (result.success) {
+            toast({
+                title: 'Pedido Cancelado',
+                description: `El pedido #${orderToCancel.id.slice(0, 6)} ha sido cancelado.`,
+            });
+            await loadOrders();
+        } else {
+            toast({
+                title: 'Error al cancelar',
+                description: 'No se pudo cancelar el pedido.',
+                variant: 'destructive',
+            });
+        }
+        setIsCancelAlertOpen(false);
+        setOrderToCancel(null);
+        setCancellationReason('');
+    });
+  }
+
+  const onStatusSelect = (order: Order, newStatus: Order['status']) => {
+      if (newStatus === 'Cancelado') {
+          setOrderToCancel(order);
+          setIsCancelAlertOpen(true);
+      } else {
+          handleStatusChange(order.id, newStatus);
+      }
+  }
+
 
   if (loading) {
     return (
@@ -187,6 +241,12 @@ export default function AdminOrdersPage() {
                     </li>
                   ))}
                 </ul>
+                {order.cancellationReason && (
+                    <div className="mt-4 p-3 bg-destructive/10 rounded-lg">
+                        <p className="text-sm font-bold text-destructive">Motivo de cancelación:</p>
+                        <p className="text-sm text-destructive/90">{order.cancellationReason}</p>
+                    </div>
+                )}
                   <div className="border-t my-2 pt-2 space-y-1">
                     <div className="flex justify-between text-sm font-medium">
                       <span>Subtotal</span>
@@ -206,10 +266,11 @@ export default function AdminOrdersPage() {
                   <p className="text-sm font-medium">Actualizar estado:</p>
                   <Select
                     value={order.status}
-                    onValueChange={(newStatus: Order['status']) => handleStatusChange(order.id, newStatus)}
+                    onValueChange={(newStatus: Order['status']) => onStatusSelect(order, newStatus)}
+                    disabled={isUpdating}
                   >
                     <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue placeholder="Cambiar estado" />
+                      {isUpdating ? <Loader2 className="animate-spin mr-2"/> : <SelectValue placeholder="Cambiar estado" />}
                     </SelectTrigger>
                     <SelectContent>
                       {orderStatuses.map(status => (
@@ -222,6 +283,29 @@ export default function AdminOrdersPage() {
           ))}
         </div>
       )}
+        <AlertDialog open={isCancelAlertOpen} onOpenChange={setIsCancelAlertOpen}>
+            <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Cancelar Pedido</AlertDialogTitle>
+                <AlertDialogDescription>
+                Por favor, introduce un motivo para la cancelación del pedido #{orderToCancel?.id.slice(0,6)}.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <Textarea
+                placeholder="Ej: Falta de stock, error en el pedido, etc."
+                value={cancellationReason}
+                onChange={(e) => setCancellationReason(e.target.value)}
+                disabled={isUpdating}
+            />
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cerrar</AlertDialogCancel>
+                <AlertDialogAction onClick={handleCancellationConfirm} disabled={!cancellationReason || isUpdating} className="bg-destructive hover:bg-destructive/90">
+                 {isUpdating && <Loader2 className="animate-spin mr-2"/>}
+                 Confirmar Cancelación
+                </AlertDialogAction>
+            </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     </>
   );
 }
