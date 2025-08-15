@@ -69,4 +69,16 @@
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
   }
+   .animate-pulse-bg {
+    animation: pulse-bg 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-bg {
+    0%, 100% {
+      background-color: hsl(var(--muted) / 0.3);
+    }
+    50% {
+      background-color: hsl(var(--primary) / 0.2);
+    }
+  }
 }

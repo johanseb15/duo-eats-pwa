@@ -16,11 +16,11 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
   - [✅] Guardar carrito en `localStorage`.
   - [✅] Permitir notas personalizadas por producto.
 - **[✅] Checkout Rápido y Eficiente:**
-  - [ ] Integración con geolocalización (pin en mapa).
+  - [ ] Integración con geolocalización (pin en mapa). (Pospuesto)
   - [✅] Soportar múltiples métodos de pago (efectivo, QR, POS).
 - **[✅] Seguimiento de Pedido en Tiempo Real:**
   - [✅] Visualización de estados del pedido.
-  - [⏳] Implementar notificaciones push ante cambios de estado. (Pendiente)
+  - [⏳] Implementar notificaciones push ante cambios de estado. (Pospuesto)
 - **[✅] Historial y Favoritos:**
   - [✅] Gestionar una lista de productos favoritos.
   - [✅] Permitir repetir un pedido anterior con un clic.
@@ -29,8 +29,8 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
 
 ### Módulo 2: Panel de Administración
 
-- **[ ] Dashboard en Tiempo Real:**
-  - [ ] Notificaciones sonoras/visuales para nuevos pedidos.
+- **[✅] Dashboard en Tiempo Real:**
+  - [✅] Notificaciones sonoras/visuales para nuevos pedidos.
   - [✅] Vista de pedidos por estado (Nuevos, En Preparación, Listos).
 - **[ ] Gestión de Catálogo Completa:**
   - [ ] CRUD de productos con stock.
@@ -67,12 +67,12 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
 ### Módulo 4: Capacidades Técnicas (Fundamento)
 
 - **[ ] Offline-First Real:**
-  - [ ] Cachear assets y datos con Service Worker.
+  - [✅] Cachear assets y datos con Service Worker.
   - [ ] Sincronización de pedidos al recuperar conexión.
 - **[ ] Notificaciones Push Web:**
-  - [ ] Configurar Firebase Cloud Messaging (FCM).
+  - [⏳] Configurar Firebase Cloud Messaging (FCM). (Pospuesto)
 - **[ ] Rendimiento Optimizado (Lighthouse):**
-  - [ ] Optimizar imágenes a formato WebP.
+  - [✅] Optimizar imágenes a formato WebP.
   - [ ] Minificar y empaquetar código CSS/JS.
 - **[ ] Seguridad Robusta:**
   - [ ] Implementar Custom Claims en Firebase para roles.
