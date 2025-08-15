@@ -91,31 +91,36 @@ export default function CartPage() {
   
   useEffect(() => {
     setIsClient(true);
-    const fetchInitialData = async () => {
-        setLoadingZones(true);
-        try {
-            const zonesCol = collection(db, 'deliveryZones');
-            const q = query(zonesCol, orderBy('cost'));
-            const snapshot = await getDocs(q);
+    if (db) {
+        const fetchInitialData = async () => {
+            setLoadingZones(true);
+            try {
+                const zonesCol = collection(db, 'deliveryZones');
+                const q = query(zonesCol, orderBy('cost'));
+                const snapshot = await getDocs(q);
 
-            if (snapshot.empty) {
+                if (snapshot.empty) {
+                    setDeliveryZones(defaultDeliveryZones);
+                } else {
+                    const zoneList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DeliveryZone));
+                    setDeliveryZones(zoneList);
+                }
+
+                const settings = await fetchRestaurantSettings();
+                setRestaurantSettings(settings);
+
+            } catch (error) {
+                console.error("Error fetching initial data, using defaults:", error);
                 setDeliveryZones(defaultDeliveryZones);
-            } else {
-                const zoneList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DeliveryZone));
-                setDeliveryZones(zoneList);
+            } finally {
+                setLoadingZones(false);
             }
-
-            const settings = await fetchRestaurantSettings();
-            setRestaurantSettings(settings);
-
-        } catch (error) {
-            console.error("Error fetching initial data, using defaults:", error);
-            setDeliveryZones(defaultDeliveryZones);
-        } finally {
-            setLoadingZones(false);
-        }
-    };
-    fetchInitialData();
+        };
+        fetchInitialData();
+    } else {
+        setLoadingZones(false);
+        setDeliveryZones(defaultDeliveryZones);
+    }
   }, []);
 
   useEffect(() => {
@@ -244,8 +249,8 @@ export default function CartPage() {
       subtotal: finalSubtotal,
       deliveryCost: deliveryCost,
       deliveryDate: finalDeliveryDate,
-      neighborhood: finalAddress?.neighborhood || manualAddress.neighborhood || undefined,
-      address: finalAddress?.fullAddress || manualAddress.address || (deliveryOption === 'pickup' ? 'Retiro en local' : undefined),
+      neighborhood: deliveryOption === 'pickup' ? undefined : (finalAddress?.neighborhood || manualAddress.neighborhood),
+      address: deliveryOption === 'pickup' ? 'Retiro en local' : (finalAddress?.fullAddress || manualAddress.address),
       addressDetails: finalAddress?.details || addressDetails || undefined,
     };
 
@@ -327,20 +332,14 @@ export default function CartPage() {
     if (deliveryOption === 'pickup') {
         return true;
     }
-    if (deliveryOption === 'delivery') {
-        const isUsingSavedAddress = user && addressSelection !== 'new';
-        if (isUsingSavedAddress) {
-            return !!selectedZoneId;
-        }
-
-        const isManualAddressComplete = 
-            manualAddress.address.trim() !== '' && 
-            manualAddress.neighborhood.trim() !== '' && 
-            !!selectedZoneId;
-        return isManualAddressComplete;
+    // For delivery
+    if (user && addressSelection !== 'new') {
+        // User is using a saved address
+        return !!selectedZoneId;
     }
-    return false;
-}, [deliveryOption, user, addressSelection, manualAddress, selectedZoneId]);
+    // User is entering a manual address
+    return manualAddress.address.trim() !== '' && manualAddress.neighborhood.trim() !== '' && !!selectedZoneId;
+  }, [deliveryOption, user, addressSelection, manualAddress, selectedZoneId]);
 
 
   if (!isClient || authLoading) {
@@ -358,220 +357,223 @@ export default function CartPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-background pb-28">
-      <Header />
-      <main className="flex-grow container mx-auto px-4 py-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Mi Carrito</h1>
-          {items.length > 0 && (
-            <Button variant="destructive" onClick={clearCart} size="sm">
-              <Trash2 className="mr-2 h-4 w-4" /> Vaciar
-            </Button>
-          )}
-        </div>
-
-        {items.length === 0 ? (
-          <div className="text-center py-20">
-             <ShoppingCart className="mx-auto h-24 w-24 text-muted-foreground" />
-            <h2 className="mt-6 text-2xl font-semibold">Tu carrito está vacío</h2>
-            <p className="mt-2 text-muted-foreground">
-              Parece que aún no has añadido nada.
-            </p>
-            <Button asChild className="mt-6 rounded-full">
-              <Link href="/">Comenzar a ordenar</Link>
-            </Button>
+    <>
+      <div className="flex flex-col min-h-screen bg-background pb-28">
+        <Header />
+        <main className="flex-grow container mx-auto px-4 py-6">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold">Mi Carrito</h1>
+            {items.length > 0 && (
+              <Button variant="destructive" onClick={clearCart} size="sm">
+                <Trash2 className="mr-2 h-4 w-4" /> Vaciar
+              </Button>
+            )}
           </div>
-        ) : (
-          <div className="space-y-4 pb-32 md:pb-0">
-              {items.map((item) => {
-                const cartItemId = getCartItemId(item);
-                return (
-                  <Card key={cartItemId} className="flex items-center p-4 shadow-md rounded-2xl overflow-hidden bg-card/60 backdrop-blur-xl border-white/20">
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      width={64}
-                      height={64}
-                      className="rounded-full object-cover"
-                      data-ai-hint={item.aiHint}
-                    />
-                    <div className="ml-4 flex-grow">
-                      <h3 className="font-semibold text-lg">{item.name}</h3>
-                      {item.selectedOptions && Object.values(item.selectedOptions).length > 0 && (
-                        <p className="text-sm text-muted-foreground">{Object.values(item.selectedOptions).join(', ')}</p>
-                      )}
-                       <div className="flex items-center gap-2 mt-2">
-                          <Button variant="outline" size="icon" className='h-8 w-8 rounded-full' onClick={() => updateQuantity(cartItemId, item.quantity - 1)}>
-                          <Minus className="h-4 w-4" />
-                          </Button>
-                          <span className="w-8 text-center font-bold">{item.quantity}</span>
-                          <Button variant="outline" size="icon" className='h-8 w-8 rounded-full' onClick={() => updateQuantity(cartItemId, item.quantity + 1)}>
-                          <Plus className="h-4 w-4" />
-                          </Button>
+
+          {items.length === 0 ? (
+            <div className="text-center py-20">
+              <ShoppingCart className="mx-auto h-24 w-24 text-muted-foreground" />
+              <h2 className="mt-6 text-2xl font-semibold">Tu carrito está vacío</h2>
+              <p className="mt-2 text-muted-foreground">
+                Parece que aún no has añadido nada.
+              </p>
+              <Button asChild className="mt-6 rounded-full">
+                <Link href="/">Comenzar a ordenar</Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4 pb-32 md:pb-0">
+                {items.map((item) => {
+                  const cartItemId = getCartItemId(item);
+                  return (
+                    <Card key={cartItemId} className="flex items-center p-4 shadow-md rounded-2xl overflow-hidden bg-card/60 backdrop-blur-xl border-white/20">
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        width={64}
+                        height={64}
+                        className="rounded-full object-cover"
+                        data-ai-hint={item.aiHint}
+                      />
+                      <div className="ml-4 flex-grow">
+                        <h3 className="font-semibold text-lg">{item.name}</h3>
+                        {item.selectedOptions && Object.values(item.selectedOptions).length > 0 && (
+                          <p className="text-sm text-muted-foreground">{Object.values(item.selectedOptions).join(', ')}</p>
+                        )}
+                        <div className="flex items-center gap-2 mt-2">
+                            <Button variant="outline" size="icon" className='h-8 w-8 rounded-full' onClick={() => updateQuantity(cartItemId, item.quantity - 1)}>
+                            <Minus className="h-4 w-4" />
+                            </Button>
+                            <span className="w-8 text-center font-bold">{item.quantity}</span>
+                            <Button variant="outline" size="icon" className='h-8 w-8 rounded-full' onClick={() => updateQuantity(cartItemId, item.quantity + 1)}>
+                            <Plus className="h-4 w-4" />
+                            </Button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex flex-col items-end">
-                       <p className="text-lg font-bold">{currencySymbol} {(item.finalPrice * item.quantity).toFixed(2)}</p>
-                       <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 h-8 w-8" onClick={() => removeFromCart(cartItemId)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </Card>
-                )
-              })}
+                      <div className="flex flex-col items-end">
+                        <p className="text-lg font-bold">{currencySymbol} {(item.finalPrice * item.quantity).toFixed(2)}</p>
+                        <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 h-8 w-8" onClick={() => removeFromCart(cartItemId)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </Card>
+                  )
+                })}
 
-              
-              <Card className="shadow-xl rounded-2xl bg-card/60 backdrop-blur-xl border-white/20 p-4">
-                  <CardHeader className="p-2">
-                      <CardTitle>Tus Datos y Entrega</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-2 space-y-4">
-                      {!user && (
-                        <div>
-                            <Label htmlFor="guestName">Nombre</Label>
-                            <Input id="guestName" value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Tu nombre completo" />
-                        </div>
-                      )}
-                      
-                      <Label>Opciones de Entrega</Label>
-                       <Select onValueChange={(value: 'delivery' | 'pickup') => setDeliveryOption(value)} value={deliveryOption}>
-                          <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Selecciona una opción" />
-                          </SelectTrigger>
-                          <SelectContent>
-                              <SelectItem value="delivery">Enviar a domicilio</SelectItem>
-                              <SelectItem value="pickup">Retirar en el local</SelectItem>
-                          </SelectContent>
-                      </Select>
-                      
-                      {deliveryOption === 'delivery' && (
-                        <div className="space-y-4">
-                            {user && userAddresses.length > 0 && (
-                                <RadioGroup value={addressSelection} onValueChange={setAddressSelection} className="grid grid-cols-1 gap-2">
-                                    {userAddresses.map(addr => (
-                                        <Label key={addr.id} htmlFor={addr.id} className="flex items-center space-x-3 bg-muted/30 p-3 rounded-lg has-[:checked]:ring-2 has-[:checked]:ring-primary transition-all cursor-pointer">
-                                            <RadioGroupItem value={addr.id} id={addr.id} />
-                                            <div className="flex-grow flex items-center gap-3">
-                                              {getAddressIcon(addr.name)}
-                                              <div>
-                                                <p className="font-semibold">{addr.name}</p>
-                                                <p className="text-sm text-muted-foreground">{addr.fullAddress}</p>
-                                              </div>
-                                            </div>
-                                        </Label>
-                                    ))}
-                                    <Label htmlFor="new" className="flex items-center space-x-3 bg-muted/30 p-3 rounded-lg has-[:checked]:ring-2 has-[:checked]:ring-primary transition-all cursor-pointer">
-                                        <RadioGroupItem value="new" id="new" />
-                                        <span>Usar otra dirección</span>
-                                    </Label>
-                                </RadioGroup>
-                            )}
-                             <div className={cn("space-y-4", (user && userAddresses.length > 0 && addressSelection !== 'new') && 'hidden')}>
-                                <div className="space-y-2">
-                                    <div>
-                                        <Label htmlFor="manual-address">Dirección</Label>
-                                        <Input id="manual-address" placeholder="Ej: Av. Corrientes 1234" value={manualAddress.address} onChange={e => setManualAddress(prev => ({...prev, address: e.target.value}))} />
-                                    </div>
-                                     <div>
-                                        <Label htmlFor="manual-neighborhood">Barrio</Label>
-                                        <Input id="manual-neighborhood" placeholder="Ej: Palermo" value={manualAddress.neighborhood} onChange={e => handleManualNeighborhoodChange(e.target.value)} />
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <Label htmlFor="addressDetails">Aclaraciones de entrega (Opcional)</Label>
-                                <Textarea id="addressDetails" value={addressDetails} onChange={e => setAddressDetails(e.target.value)} placeholder="Ej: Tocar timbre en Depto 5B, no funciona el portero." />
-                            </div>
-                        </div>
-                      )}
-                      
-                       <Separator />
-
-                      <Label>¿Cuándo quieres tu pedido?</Label>
-                       <RadioGroup value={scheduleOption} onValueChange={(value: 'now' | 'later') => setScheduleOption(value)} className='grid grid-cols-2 gap-4'>
-                          <Label htmlFor='now' className='flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer'>
-                              <RadioGroupItem value="now" id="now" className='sr-only' />
-                              <Clock className="mb-3 h-6 w-6" />
-                              Lo antes posible
-                          </Label>
-                           <Label htmlFor='later' className='flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer'>
-                              <RadioGroupItem value="later" id="later" className='sr-only' />
-                              <CalendarIcon className="mb-3 h-6 w-6" />
-                              Programar
-                          </Label>
-                      </RadioGroup>
-
-                      {scheduleOption === 'later' && (
-                          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                                <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                        "w-full justify-start text-left font-normal",
-                                        !scheduledDate && "text-muted-foreground"
-                                    )}
-                                    >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {scheduledDate ? format(scheduledDate, 'PPP', {locale: es}) : <span>Elige una fecha</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar
-                                    mode="single"
-                                    selected={scheduledDate}
-                                    onSelect={setScheduledDate}
-                                    initialFocus
-                                    />
-                                </PopoverContent>
-                                </Popover>
-                               <Select value={scheduledTime} onValueChange={setScheduledTime}>
-                                  <SelectTrigger>
-                                      <SelectValue placeholder="Elige una hora" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                      {timeSlots.map(time => (
-                                          <SelectItem key={time} value={time}>{time}</SelectItem>
-                                      ))}
-                                  </SelectContent>
-                              </Select>
+                
+                <Card className="shadow-xl rounded-2xl bg-card/60 backdrop-blur-xl border-white/20 p-4">
+                    <CardHeader className="p-2">
+                        <CardTitle>Tus Datos y Entrega</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-2 space-y-4">
+                        {!user && (
+                          <div>
+                              <Label htmlFor="guestName">Nombre</Label>
+                              <Input id="guestName" value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Tu nombre completo" />
                           </div>
-                      )}
+                        )}
+                        
+                        <Label>Opciones de Entrega</Label>
+                        <Select onValueChange={(value: 'delivery' | 'pickup') => setDeliveryOption(value)} value={deliveryOption}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Selecciona una opción" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="delivery">Enviar a domicilio</SelectItem>
+                                <SelectItem value="pickup">Retirar en el local</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        
+                        {deliveryOption === 'delivery' && (
+                          <div className="space-y-4">
+                              {user && userAddresses.length > 0 && (
+                                  <RadioGroup value={addressSelection} onValueChange={setAddressSelection} className="grid grid-cols-1 gap-2">
+                                      {userAddresses.map(addr => (
+                                          <Label key={addr.id} htmlFor={addr.id} className="flex items-center space-x-3 bg-muted/30 p-3 rounded-lg has-[:checked]:ring-2 has-[:checked]:ring-primary transition-all cursor-pointer">
+                                              <RadioGroupItem value={addr.id} id={addr.id} />
+                                              <div className="flex-grow flex items-center gap-3">
+                                                {getAddressIcon(addr.name)}
+                                                <div>
+                                                  <p className="font-semibold">{addr.name}</p>
+                                                  <p className="text-sm text-muted-foreground">{addr.fullAddress}</p>
+                                                </div>
+                                              </div>
+                                          </Label>
+                                      ))}
+                                      <Label htmlFor="new" className="flex items-center space-x-3 bg-muted/30 p-3 rounded-lg has-[:checked]:ring-2 has-[:checked]:ring-primary transition-all cursor-pointer">
+                                          <RadioGroupItem value="new" id="new" />
+                                          <span>Usar otra dirección</span>
+                                      </Label>
+                                  </RadioGroup>
+                              )}
+                              <div className={cn("space-y-4", (user && userAddresses.length > 0 && addressSelection !== 'new') && 'hidden')}>
+                                  <div className="space-y-2">
+                                      <div>
+                                          <Label htmlFor="manual-address">Dirección</Label>
+                                          <Input id="manual-address" placeholder="Ej: Av. Corrientes 1234" value={manualAddress.address} onChange={e => setManualAddress(prev => ({...prev, address: e.target.value}))} />
+                                      </div>
+                                      <div>
+                                          <Label htmlFor="manual-neighborhood">Barrio</Label>
+                                          <Input id="manual-neighborhood" placeholder="Ej: Palermo" value={manualAddress.neighborhood} onChange={e => handleManualNeighborhoodChange(e.target.value)} />
+                                      </div>
+                                  </div>
+                              </div>
+                              <div>
+                                  <Label htmlFor="addressDetails">Aclaraciones de entrega (Opcional)</Label>
+                                  <Textarea id="addressDetails" value={addressDetails} onChange={e => setAddressDetails(e.target.value)} placeholder="Ej: Tocar timbre en Depto 5B, no funciona el portero." />
+                              </div>
+                          </div>
+                        )}
+                        
+                        <Separator />
+
+                        <Label>¿Cuándo quieres tu pedido?</Label>
+                        <RadioGroup value={scheduleOption} onValueChange={(value: 'now' | 'later') => setScheduleOption(value as 'now' | 'later')} className='grid grid-cols-2 gap-4'>
+                            <Label htmlFor='now' className='flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer has-[:checked]:border-primary'>
+                                <RadioGroupItem value="now" id="now" className='sr-only' />
+                                <Clock className="mb-3 h-6 w-6" />
+                                Lo antes posible
+                            </Label>
+                            <Label htmlFor='later' className='flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer has-[:checked]:border-primary'>
+                                <RadioGroupItem value="later" id="later" className='sr-only' />
+                                <CalendarIcon className="mb-3 h-6 w-6" />
+                                Programar
+                            </Label>
+                        </RadioGroup>
+
+                        {scheduleOption === 'later' && (
+                            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                                  <Popover>
+                                  <PopoverTrigger asChild>
+                                      <Button
+                                      variant={"outline"}
+                                      className={cn(
+                                          "w-full justify-start text-left font-normal",
+                                          !scheduledDate && "text-muted-foreground"
+                                      )}
+                                      >
+                                      <CalendarIcon className="mr-2 h-4 w-4" />
+                                      {scheduledDate ? format(scheduledDate, 'PPP', {locale: es}) : <span>Elige una fecha</span>}
+                                      </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0">
+                                      <Calendar
+                                      mode="single"
+                                      selected={scheduledDate}
+                                      onSelect={setScheduledDate}
+                                      initialFocus
+                                      />
+                                  </PopoverContent>
+                                  </Popover>
+                                <Select value={scheduledTime} onValueChange={setScheduledTime}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Elige una hora" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {timeSlots.map(time => (
+                                            <SelectItem key={time} value={time}>{time}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                <Card className="shadow-xl rounded-2xl bg-card/60 backdrop-blur-xl border-white/20">
+                  <CardContent className="p-4 space-y-2">
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>Subtotal</span>
+                      <span>{currencySymbol} {subtotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>Envío</span>
+                      <span>{deliveryCost > 0 ? `${currencySymbol} ${deliveryCost.toFixed(2)}` : (selectedZoneId ? 'Gratis' : 'A calcular')}</span>
+                    </div>
+                    <div className="flex justify-between font-bold text-2xl">
+                      <span>Total</span>
+                      <span>{currencySymbol} {total.toFixed(2)}</span>
+                    </div>
                   </CardContent>
-              </Card>
+                </Card>
 
-              <Card className="shadow-xl rounded-2xl bg-card/60 backdrop-blur-xl border-white/20">
-                <CardContent className="p-4 space-y-2">
-                   <div className="flex justify-between text-muted-foreground">
-                    <span>Subtotal</span>
-                    <span>{currencySymbol} {subtotal.toFixed(2)}</span>
-                  </div>
-                   <div className="flex justify-between text-muted-foreground">
-                    <span>Envío</span>
-                    <span>{deliveryCost > 0 ? `${currencySymbol} ${deliveryCost.toFixed(2)}` : (selectedZoneId ? 'Gratis' : 'A calcular')}</span>
-                  </div>
-                   <div className="flex justify-between font-bold text-2xl">
-                    <span>Total</span>
-                    <span>{currencySymbol} {total.toFixed(2)}</span>
-                  </div>
-                </CardContent>
-              </Card>
+                <div className="md:mt-6 md:p-0 p-4 md:static md:bottom-auto md:left-auto md:right-auto fixed bottom-24 left-0 right-0">
+                  <Button onClick={handleCheckout} size="lg" className="w-full rounded-full text-lg py-7 bg-green-500 hover:bg-green-600 text-white" disabled={isProcessing || !canCheckout}>
+                      {isProcessing ? <Loader2 className="animate-spin" /> : 'Finalizar y Enviar por WhatsApp'}
+                    </Button>
+                </div>
+            </div>
+          )}
+        </main>
+        <BottomNav />
+      </div>
 
-              <div className="md:mt-6 md:p-0 p-4 md:static md:bottom-auto md:left-auto md:right-auto fixed bottom-24 left-0 right-0">
-                 <Button onClick={handleCheckout} size="lg" className="w-full rounded-full text-lg py-7 bg-green-500 hover:bg-green-600 text-white" disabled={isProcessing || !canCheckout}>
-                    {isProcessing ? <Loader2 className="animate-spin" /> : 'Finalizar y Enviar por WhatsApp'}
-                  </Button>
-              </div>
-          </div>
-        )}
-      </main>
-      <BottomNav />
       <AlertDialog open={isSuccessAlertOpen} onOpenChange={setIsSuccessAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¡Pedido Realizado con Éxito!</AlertDialogTitle>
             <AlertDialogDescription>
-              Tu pedido ha sido guardado correctamente. Se abrirá WhatsApp para que puedas enviarlo. Luego serás redirigido a la página de seguimiento.
+              Tu pedido ha sido guardado. Se abrió WhatsApp para que lo envíes. Ahora te redirigiremos a la página de seguimiento.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -581,6 +583,8 @@ export default function CartPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 }
+
+    
