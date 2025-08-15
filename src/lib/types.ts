@@ -58,6 +58,7 @@ export interface Order {
   addressDetails?: string;
   cancellationReason?: string;
   paymentMethod: PaymentMethod;
+  paymentConfirmed?: boolean;
   deliveryPersonId: string | null;
   deliveryPersonName: string | null;
 }

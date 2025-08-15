@@ -57,8 +57,8 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
 - **[✅] Navegación y Seguimiento:**
   - [✅] Ver detalle del pedido y ubicación del cliente en un mapa.
   - [✅] Integrar con Google Maps/Waze para la ruta.
-- **[ ] Gestión de Cobros:**
-  - [ ] Confirmar pago (efectivo, POS).
+- **[✅] Gestión de Cobros:**
+  - [✅] Confirmar pago (efectivo, POS).
 - **[ ] Historial de Entregas:**
   - [ ] Ver pedidos completados y total recaudado en el día.
 

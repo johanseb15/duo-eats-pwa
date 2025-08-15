@@ -101,6 +101,7 @@ export async function createOrder(input: CreateOrderInput) {
       addressDetails: input.addressDetails || null,
       deliveryPersonId: null,
       deliveryPersonName: null,
+      paymentConfirmed: false,
     };
     const docRef = await addDoc(collection(db, 'orders'), orderData);
     
