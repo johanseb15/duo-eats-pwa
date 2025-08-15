@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#f97316', // Vibrant Orange from new palette
+  themeColor: '#ff7f50',
 };
 
 export default function RootLayout({

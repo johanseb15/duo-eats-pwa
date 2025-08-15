@@ -7,11 +7,12 @@ const withPWA = require('next-pwa')({
   disable: process.env.NODE_ENV === 'development'
 })
 
+// Content Security Policy
 const ContentSecurityPolicy = `
   default-src 'self';
   script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.google.com https://maps.googleapis.com;
   child-src 'self' https://google.com https://www.google.com https://accounts.google.com;
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com;
   img-src 'self' data: https://placehold.co https://firebasestorage.googleapis.com https://*.google.com https://*.googleusercontent.com;
   font-src 'self' data: https://fonts.gstatic.com;
   connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com wss://firestore.googleapis.com https://*.google.com https://maps.googleapis.com https://apis.google.com;
