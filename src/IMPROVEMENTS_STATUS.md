@@ -14,8 +14,8 @@ Este documento realiza un seguimiento de las mejoras propuestas para la PWA Duo 
 
 ### 2. Product Cards con Selector de Cantidad
 - **Descripción:** Añadir botones `+/-` directamente en las tarjetas de producto en la página de inicio. Una vez que un producto está en el carrito, la tarjeta debería mostrar la cantidad actual y permitir modificarla rápidamente sin abrir el panel de detalles.
-- **Estado:** ⏳ **Pendiente**
-- **Progreso:** `[          ]` (0%)
+- **Estado:** ✅ **Completado**
+- **Progreso:** `[██████████]` (100%)
 
 ---
 
@@ -40,3 +40,4 @@ Este documento realiza un seguimiento de las mejoras propuestas para la PWA Duo 
 - **Estado:** ⚙️ **En Progreso**
 - **Progreso:** `[█████     ]` (50%)
 - **Notas:** Las funciones de backend (`actions`) para leer y escribir los ajustes en Firestore ya están creadas. Falta implementar el formulario y la interfaz en el panel de administración.
+
