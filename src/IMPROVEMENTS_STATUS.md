@@ -16,7 +16,7 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
   - [✅] Guardar carrito en `localStorage`.
   - [✅] Permitir notas personalizadas por producto.
 - **[✅] Checkout Rápido y Eficiente:**
-  - [ ] Integración con geolocalización (pin en mapa). (Pospuesto)
+  - [⏳] Integración con geolocalización (pin en mapa). (Pospuesto)
   - [✅] Soportar múltiples métodos de pago (efectivo, QR, POS).
 - **[✅] Seguimiento de Pedido en Tiempo Real:**
   - [✅] Visualización de estados del pedido.
@@ -32,9 +32,9 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
 - **[✅] Dashboard en Tiempo Real:**
   - [✅] Notificaciones sonoras/visuales para nuevos pedidos.
   - [✅] Vista de pedidos por estado (Nuevos, En Preparación, Listos).
-- **[ ] Gestión de Catálogo Completa:**
+- **[✅] Gestión de Catálogo Completa:**
   - [✅] CRUD de productos con stock.
-  - [ ] CRUD de categorías.
+  - [✅] CRUD de categorías.
 - **[ ] Gestión de Repartidores:**
   - [ ] CRUD de repartidores.
   - [ ] Asignación manual de pedidos a repartidores activos.
