@@ -160,7 +160,7 @@ export default function CartPage() {
       if (user && userAddresses.length > 0 && addressSelection !== 'new') {
         const selectedAddr = userAddresses.find(a => a.id === addressSelection);
         setFinalAddress(selectedAddr || null);
-        const zone = deliveryZones.find(z => z.neighborhoods.some(n => selectedAddr?.neighborhood.includes(n)));
+        const zone = deliveryZones.find(z => z.neighborhoods.some(n => selectedAddr?.neighborhood.toLowerCase().includes(n.toLowerCase())));
         if(zone){
             setDeliveryCost(zone.cost);
             setSelectedZoneId(zone.id);
