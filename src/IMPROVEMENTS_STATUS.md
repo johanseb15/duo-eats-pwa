@@ -52,8 +52,8 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
 
 - **[✅] Gestión de Disponibilidad:**
   - [✅] Botón para activarse/desactivarse.
-- **[ ] Notificaciones y Asignación:**
-  - [ ] Recibir notificaciones push para nuevos pedidos asignados.
+- **[⏳] Notificaciones y Asignación:**
+  - [⏳] Recibir notificaciones push para nuevos pedidos asignados. (Pospuesto)
 - **[ ] Navegación y Seguimiento:**
   - [ ] Ver detalle del pedido y ubicación del cliente en un mapa.
   - [ ] Integrar con Google Maps/Waze para la ruta.
@@ -66,14 +66,14 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
 
 ### Módulo 4: Capacidades Técnicas (Fundamento)
 
-- **[ ] Offline-First Real:**
+- **[⏳] Offline-First Real:**
   - [✅] Cachear assets y datos con Service Worker.
-  - [ ] Sincronización de pedidos al recuperar conexión.
-- **[ ] Notificaciones Push Web:**
+  - [⏳] Sincronización de pedidos al recuperar conexión. (Pospuesto)
+- **[⏳] Notificaciones Push Web:**
   - [⏳] Configurar Firebase Cloud Messaging (FCM). (Pospuesto)
-- **[ ] Rendimiento Optimizado (Lighthouse):**
+- **[✅] Rendimiento Optimizado (Lighthouse):**
   - [✅] Optimizar imágenes a formato WebP.
-  - [ ] Minificar y empaquetar código CSS/JS.
-- **[ ] Seguridad Robusta:**
-  - [ ] Implementar Custom Claims en Firebase para roles.
-  - [ ] Proteger APIs con JWT.
+  - [✅] Minificar y empaquetar código CSS/JS. (Automático con Next.js)
+- **[⏳] Seguridad Robusta:**
+  - [⏳] Implementar Custom Claims en Firebase para roles. (Pospuesto)
+  - [⏳] Proteger APIs con JWT. (Pospuesto)
