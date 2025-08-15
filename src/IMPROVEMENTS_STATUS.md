@@ -36,7 +36,7 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
   - [✅] CRUD de productos con stock.
   - [✅] CRUD de categorías.
 - **[ ] Gestión de Repartidores:**
-  - [ ] CRUD de repartidores.
+  - [✅] CRUD de repartidores.
   - [ ] Asignación manual de pedidos a repartidores activos.
 - **[ ] Reportes y Analítica:**
   - [ ] Filtros por fecha, repartidor y método de pago.

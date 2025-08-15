@@ -4,7 +4,7 @@
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommendations';
 import { suggestCategoryIcon } from '@/ai/flows/suggest-category-icon';
 import { db } from '@/lib/firebase';
-import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone, DashboardAnalytics, ProductSale, OrderOverTime, CartItem, UserAddress, RestaurantSettings, PaymentMethod } from '@/lib/types';
+import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone, DashboardAnalytics, ProductSale, OrderOverTime, CartItem, UserAddress, RestaurantSettings, PaymentMethod, DeliveryPerson } from '@/lib/types';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, limit, getDoc, runTransaction, writeBatch, setDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { getAuth } from 'firebase-admin/auth';
@@ -456,6 +456,44 @@ export async function fetchAddressesByUserId(userId: string): Promise<UserAddres
     } catch (error) {
         console.error("Error fetching addresses: ", error);
         return [];
+    }
+}
+
+// Delivery Person Actions
+export type DeliveryPersonInput = Omit<DeliveryPerson, 'id'>;
+
+export async function addDeliveryPerson(personData: DeliveryPersonInput) {
+    try {
+        const docRef = await addDoc(collection(db, 'deliveryPersons'), personData);
+        revalidatePath('/admin/delivery-persons');
+        return { success: true, personId: docRef.id };
+    } catch (error) {
+        console.error('Error adding delivery person:', error);
+        return { success: false, error: 'Failed to add delivery person' };
+    }
+}
+
+export async function updateDeliveryPerson(personId: string, personData: Partial<DeliveryPersonInput>) {
+    try {
+        const personRef = doc(db, 'deliveryPersons', personId);
+        await updateDoc(personRef, personData);
+        revalidatePath('/admin/delivery-persons');
+        return { success: true };
+    } catch (error) {
+        console.error('Error updating delivery person:', error);
+        return { success: false, error: 'Failed to update delivery person' };
+    }
+}
+
+export async function deleteDeliveryPerson(personId: string) {
+    try {
+        const personRef = doc(db, 'deliveryPersons', personId);
+        await deleteDoc(personRef);
+        revalidatePath('/admin/delivery-persons');
+        return { success: true };
+    } catch (error) {
+        console.error('Error deleting delivery person:', error);
+        return { success: false, error: 'Failed to delete delivery person' };
     }
 }
 

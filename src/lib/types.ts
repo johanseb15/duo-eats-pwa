@@ -75,6 +75,13 @@ export interface DeliveryZone {
     cost: number;
 }
 
+export interface DeliveryPerson {
+    id: string;
+    name: string;
+    phone: string;
+    status: 'active' | 'inactive';
+}
+
 // Analytics Types
 export interface ProductSale {
   name: string;
