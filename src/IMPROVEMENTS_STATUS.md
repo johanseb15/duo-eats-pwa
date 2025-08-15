@@ -33,7 +33,7 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
   - [✅] Notificaciones sonoras/visuales para nuevos pedidos.
   - [✅] Vista de pedidos por estado (Nuevos, En Preparación, Listos).
 - **[ ] Gestión de Catálogo Completa:**
-  - [ ] CRUD de productos con stock.
+  - [✅] CRUD de productos con stock.
   - [ ] CRUD de categorías.
 - **[ ] Gestión de Repartidores:**
   - [ ] CRUD de repartidores.
