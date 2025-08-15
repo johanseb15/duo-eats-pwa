@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from './ui/badge';
 import { useCart } from '@/store/cart';
+import { useState, useEffect } from 'react';
 
 interface ProductCardProps {
   product: Product;
@@ -41,11 +42,16 @@ export function ProductCard({ product }: ProductCardProps) {
   const { toggleFavorite, isFavorite } = useFavorites();
   const { toast } = useToast();
   const { items, addToCart, updateQuantity } = useCart();
-  const isFav = isFavorite(product.id);
+  const [hasMounted, setHasMounted] = useState(false);
+  
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
-  // Find the first cart item that matches the product ID, regardless of options.
-  const cartItem = items.find(item => item.id === product.id);
+  const isFav = hasMounted ? isFavorite(product.id) : false;
+  const cartItem = hasMounted ? items.find(item => item.id === product.id) : undefined;
   const cartItemId = cartItem ? getCartItemId(cartItem, cartItem.selectedOptions) : null;
+
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -87,6 +93,14 @@ export function ProductCard({ product }: ProductCardProps) {
   }
 
   const renderActionButton = () => {
+    if (!hasMounted) {
+      return (
+         <Button size='icon' className='rounded-full h-9 w-9' aria-label={`Añadir ${product.name} al carrito`} disabled>
+            <Plus/>
+        </Button>
+      );
+    }
+      
     if (cartItem && cartItemId) {
         return (
              <div className="flex items-center gap-2">
@@ -112,7 +126,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
+       <DialogTrigger asChild>
         <div className="w-full overflow-hidden transition-all duration-300 rounded-2xl group bg-card/80 backdrop-blur-xl border-white/20 shadow-md hover:shadow-xl hover:-translate-y-1 cursor-pointer">
           <Card className="border-0 bg-transparent shadow-none">
             <CardContent className="p-0 flex items-center gap-4">
@@ -139,9 +153,11 @@ export function ProductCard({ product }: ProductCardProps) {
                 <div className='flex justify-between items-center mt-2'>
                     <p className="text-lg font-bold text-foreground">{currencySymbol}{product.price[currentCurrency].toFixed(2)}</p>
                     <div className="flex items-center gap-1">
-                         <Button variant="ghost" size="icon" className="rounded-full text-primary" onClick={handleFavoriteClick} aria-label={`Marcar ${product.name} como favorito`}>
-                            <Heart className={cn("h-5 w-5", isFav && "fill-current")} />
-                        </Button>
+                        {hasMounted && (
+                            <Button variant="ghost" size="icon" className="rounded-full text-primary" onClick={handleFavoriteClick} aria-label={`Marcar ${product.name} como favorito`}>
+                                <Heart className={cn("h-5 w-5", isFav && "fill-current")} />
+                            </Button>
+                        )}
                         {renderActionButton()}
                     </div>
                 </div>

@@ -14,13 +14,13 @@ export function BottomNav() {
   const pathname = usePathname();
   const { items } = useCart();
   const { user } = useAuth();
-  const [isClient, setIsClient] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
+    setHasMounted(true);
   }, []);
 
-  const itemCount = isClient ? items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+  const itemCount = hasMounted ? items.reduce((sum, item) => sum + item.quantity, 0) : 0;
 
   const navItems = [
     { href: '/', icon: 'logo', label: 'Home' },
