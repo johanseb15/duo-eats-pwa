@@ -36,8 +36,5 @@ Este documento realiza un seguimiento de las mejoras propuestas para la PWA Duo 
 
 ### 5. Gestión de Ajustes de la Tienda desde el Admin
 - **Descripción:** Crear una sección en el panel de administración (`/admin/settings`) donde el dueño del local pueda gestionar fácilmente los horarios de apertura, días de atención y el número de WhatsApp para contacto.
-- **Estado:** ⚙️ **En Progreso**
-- **Progreso:** `[█████     ]` (50%)
-- **Notas:** Las funciones de backend (`actions`) para leer y escribir los ajustes en Firestore ya están creadas. Falta implementar el formulario y la interfaz en el panel de administración.
-
-    
+- **Estado:** ✅ **Completado**
+- **Progreso:** `[██████████]` (100%)

@@ -64,7 +64,7 @@ export function SettingsForm({ onFormSubmit, settings }: SettingsFormProps) {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
-        await updateRestaurantSettings(values);
+        await updateRestaurantSettings(values as RestaurantSettings);
         await onFormSubmit();
     });
   }

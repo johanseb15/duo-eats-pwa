@@ -28,7 +28,9 @@ export default function AdminSettingsPage() {
     setLoading(true);
     try {
         const currentSettings = await fetchRestaurantSettings();
-        setSettings(currentSettings);
+        if (currentSettings) {
+            setSettings(currentSettings);
+        }
     } catch (error) {
         console.error("Failed to load settings:", error);
         toast({ title: "Error", description: "No se pudieron cargar los ajustes.", variant: "destructive" });
