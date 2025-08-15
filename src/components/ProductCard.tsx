@@ -49,7 +49,7 @@ export function ProductCard({ product }: ProductCardProps) {
   }, []);
 
   const isFav = hasMounted ? isFavorite(product.id) : false;
-  const cartItem = hasMounted ? items.find(item => item.id === product.id) : undefined;
+  const cartItem = hasMounted ? items.find(item => item.id === product.id && (!item.selectedOptions || Object.keys(item.selectedOptions).length === 0)) : undefined;
   const cartItemId = cartItem ? getCartItemId(cartItem, cartItem.selectedOptions) : null;
 
 
@@ -68,6 +68,8 @@ export function ProductCard({ product }: ProductCardProps) {
     e.preventDefault();
     
     if (product.options && product.options.length > 0) {
+        // This case is handled by the DialogTrigger, so we do nothing here.
+        // The click will open the dialog.
         return;
     }
 

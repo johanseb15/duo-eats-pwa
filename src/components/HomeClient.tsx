@@ -8,7 +8,7 @@ import * as LucideIcons from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from './ui/button';
-import { FileText, PlusCircle } from 'lucide-react';
+import { FileText, PlusCircle, Search } from 'lucide-react';
 import React, { Suspense, useState, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
@@ -16,6 +16,7 @@ import { ProductCard } from './ProductCard';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { cn } from '@/lib/utils';
 import { Chatbot } from './Chatbot';
+import { Input } from './ui/input';
 
 const PromotionsCarousel = React.lazy(() => import('@/components/PromotionsCarousel'));
 const Recommendations = React.lazy(() => import('@/components/Recommendations'));
@@ -30,6 +31,7 @@ interface HomeClientProps {
 export default function HomeClient({ products, promotions, categories }: HomeClientProps) {
   const { user, loading: authLoading } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   
   const welcomeName = user ? user.displayName?.split(' ')[0] : 'invitado';
 
@@ -38,11 +40,18 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
   };
 
   const filteredProducts = useMemo(() => {
-    if (!selectedCategory) {
-      return products;
+    let productsToShow = products;
+
+    if (selectedCategory) {
+      productsToShow = productsToShow.filter(p => p.category === selectedCategory);
     }
-    return products.filter(p => p.category === selectedCategory);
-  }, [products, selectedCategory]);
+
+    if (searchTerm) {
+        productsToShow = productsToShow.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    }
+
+    return productsToShow;
+  }, [products, selectedCategory, searchTerm]);
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-28">
@@ -123,9 +132,20 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
 
 
         <section>
-          <h2 className="text-xl font-bold mb-4 text-left">
-            Menú Completo
-          </h2>
+          <div className="flex justify-between items-center mb-4">
+             <h2 className="text-xl font-bold text-left">
+                Menú Completo
+             </h2>
+             <div className="relative w-full max-w-xs">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input 
+                    placeholder="Buscar producto..." 
+                    className="pl-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+          </div>
           {products.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProducts.map((product) => (
