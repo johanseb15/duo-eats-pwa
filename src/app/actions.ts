@@ -213,6 +213,32 @@ export async function fetchAllOrders(): Promise<Order[]> {
   }
 }
 
+export async function fetchAssignedOrders(deliveryPersonId: string): Promise<Order[]> {
+    if (!deliveryPersonId) return [];
+    try {
+        const ordersCol = collection(db, 'orders');
+        const q = query(
+            ordersCol,
+            where('deliveryPersonId', '==', deliveryPersonId),
+            where('status', 'in', ['En preparación', 'En camino']),
+            orderBy('createdAt', 'asc')
+        );
+        const snapshot = await getDocs(q);
+        const orderList = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
+            } as Order;
+        });
+        return orderList;
+    } catch (error) {
+        console.error("Error fetching assigned orders: ", error);
+        return [];
+    }
+}
+
 export async function updateOrder(orderId: string, updateData: Partial<Order>) {
   try {
     const orderRef = doc(db, 'orders', orderId);
@@ -223,6 +249,7 @@ export async function updateOrder(orderId: string, updateData: Partial<Order>) {
     revalidatePath('/orders');
     revalidatePath('/admin');
     revalidatePath(`/order/${orderId}`);
+    revalidatePath('/delivery'); // Revalidate delivery page
     return { success: true };
   } catch (error) {
     console.error('Error updating order:', error);

@@ -54,9 +54,9 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
   - [✅] Botón para activarse/desactivarse.
 - **[⏳] Notificaciones y Asignación:**
   - [⏳] Recibir notificaciones push para nuevos pedidos asignados. (Pospuesto)
-- **[ ] Navegación y Seguimiento:**
-  - [ ] Ver detalle del pedido y ubicación del cliente en un mapa.
-  - [ ] Integrar con Google Maps/Waze para la ruta.
+- **[✅] Navegación y Seguimiento:**
+  - [✅] Ver detalle del pedido y ubicación del cliente en un mapa.
+  - [✅] Integrar con Google Maps/Waze para la ruta.
 - **[ ] Gestión de Cobros:**
   - [ ] Confirmar pago (efectivo, POS).
 - **[ ] Historial de Entregas:**

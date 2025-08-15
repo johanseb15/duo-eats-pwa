@@ -9,12 +9,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Power, Loader2, Bike, Bell, History } from 'lucide-react';
-import type { DeliveryPerson } from '@/lib/types';
+import type { DeliveryPerson, Order } from '@/lib/types';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
+import { fetchAssignedOrders } from '../actions';
+import { AssignedOrderCard } from '@/components/AssignedOrderCard';
 
 // This is a simplified version. In a real app, you'd have a more robust
 // way to link a Firebase User UID to a DeliveryPerson document ID.
@@ -53,8 +55,20 @@ export default function DeliveryPage() {
   const { toast } = useToast();
 
   const [deliveryPerson, setDeliveryPerson] = useState<DeliveryPerson | null>(null);
+  const [assignedOrders, setAssignedOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [isUpdatingStatus, startStatusUpdate] = useTransition();
+
+   const loadData = async (person: DeliveryPerson | null) => {
+        if (!person) return;
+        try {
+            const orders = await fetchAssignedOrders(person.id);
+            setAssignedOrders(orders);
+        } catch (err) {
+            toast({ title: 'Error', description: 'No se pudieron cargar los pedidos asignados.', variant: 'destructive'});
+        }
+  };
+
 
   useEffect(() => {
     if (authLoading) return;
@@ -67,10 +81,23 @@ export default function DeliveryPage() {
         setLoading(true);
         const person = await getDeliveryPerson(user.uid);
         setDeliveryPerson(person);
+        if(person) {
+            await loadData(person);
+        }
         setLoading(false);
     };
 
     fetchPersonData();
+     // Set up a polling interval to refresh data every 30 seconds
+    const interval = setInterval(() => {
+        if(deliveryPerson) {
+             loadData(deliveryPerson);
+        }
+    }, 30000);
+
+    return () => clearInterval(interval);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, authLoading, router]);
 
   const handleStatusChange = (isActive: boolean) => {
@@ -95,11 +122,18 @@ export default function DeliveryPage() {
     })
 
   }
+  
+  const handleOrderUpdate = async () => {
+      // Reload data after an order status is changed by the card
+      await loadData(deliveryPerson);
+  }
 
   if (authLoading || loading) {
     return (
-      <div>
-        <Skeleton className="h-8 w-48 mb-4" />
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-64 mb-4" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-48 w-full" />
         <Skeleton className="h-48 w-full" />
       </div>
     );
@@ -158,36 +192,23 @@ export default function DeliveryPage() {
         
         <Separator/>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-muted-foreground">
-             <Card className="bg-card/50">
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Pedidos Asignados</CardTitle>
-                    <Bike className="h-6 w-6"/>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm">Aquí verás los pedidos que te asignen.</p>
-                </CardContent>
-            </Card>
-             <Card className="bg-card/50">
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Notificaciones</CardTitle>
-                    <Bell className="h-6 w-6"/>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm">Las alertas de nuevos pedidos aparecerán aquí.</p>
-                </CardContent>
-            </Card>
-            <Card className="bg-card/50">
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Historial de Entregas</CardTitle>
-                    <History className="h-6 w-6"/>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm">Revisa tus entregas completadas y ganancias.</p>
-                </CardContent>
-            </Card>
+        <div>
+            <div className="flex items-center gap-3 mb-4">
+                 <Bike className="h-6 w-6"/>
+                 <h2 className="text-2xl font-bold">Mis Pedidos Asignados ({assignedOrders.length})</h2>
+            </div>
+             <div className="space-y-4">
+                {assignedOrders.length > 0 ? (
+                    assignedOrders.map(order => (
+                        <AssignedOrderCard key={order.id} order={order} onUpdate={handleOrderUpdate} />
+                    ))
+                ) : (
+                    <div className="text-center py-10 bg-card/50 rounded-2xl border-dashed border-2">
+                         <p className="text-muted-foreground">No tienes pedidos asignados por el momento.</p>
+                    </div>
+                )}
+            </div>
         </div>
-
 
     </div>
   );
