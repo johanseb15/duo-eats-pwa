@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Image from 'next/image';
@@ -15,6 +16,7 @@ import { Badge } from './ui/badge';
 import { useFavorites } from '@/store/favorites';
 import { cn } from '@/lib/utils';
 import { Heart } from 'lucide-react';
+import { Textarea } from './ui/textarea';
 
 interface ProductSheetProps {
     product: Product;
@@ -29,6 +31,7 @@ export function ProductSheet({ product }: ProductSheetProps) {
     const { toggleFavorite, isFavorite } = useFavorites();
     const { toast } = useToast();
     const isFav = isFavorite(product.id);
+    const [notes, setNotes] = useState('');
 
     const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: string }>(() => {
         const defaults: { [key: string]: string } = {};
@@ -67,6 +70,7 @@ export function ProductSheet({ product }: ProductSheetProps) {
           ...product,
           selectedOptions: selectedOptions,
           finalPrice: finalPrice,
+          notes: notes,
         };
         addToCart(cartItem);
         toast({
@@ -110,7 +114,7 @@ export function ProductSheet({ product }: ProductSheetProps) {
                     </div>
                     <DialogDescription className="text-muted-foreground mt-2">{product.description}</DialogDescription>
                 </DialogHeader>
-                <div className="p-6 bg-background">
+                <div className="p-6 pt-0 bg-background space-y-6">
                     {product.options && product.options.length > 0 && (
                     <div className="space-y-6">
                         {product.options.map((option) => (
@@ -135,6 +139,15 @@ export function ProductSheet({ product }: ProductSheetProps) {
                         ))}
                     </div>
                     )}
+
+                    <div>
+                        <h3 className="font-semibold text-lg mb-2">Notas para la cocina (opcional)</h3>
+                        <Textarea 
+                            placeholder="Ej: Sin cebolla, bien cocido, etc."
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                        />
+                    </div>
                 </div>
             </ScrollArea>
              <DialogFooter className="p-6 bg-background/80 backdrop-blur-xl border-t sticky bottom-0">

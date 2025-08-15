@@ -37,6 +37,7 @@ export interface CartItem extends Product {
   quantity: number;
   selectedOptions?: { [key: string]: string };
   finalPrice: number;
+  notes?: string;
 }
 
 export interface Order {

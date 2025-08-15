@@ -12,9 +12,9 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
 - **[✅] Menú Interactivo y Offline:**
   - [✅] Carga diferida de imágenes.
   - [✅] Cachear productos para navegación sin conexión.
-- **[ ] Carrito Persistente:**
+- **[✅] Carrito Persistente:**
   - [✅] Guardar carrito en `localStorage` o `IndexedDB`.
-  - [ ] Permitir notas personalizadas por producto.
+  - [✅] Permitir notas personalizadas por producto.
 - **[ ] Checkout Rápido y Eficiente:**
   - [ ] Integración con geolocalización (pin en mapa).
   - [ ] Soportar múltiples métodos de pago (efectivo, QR, POS).

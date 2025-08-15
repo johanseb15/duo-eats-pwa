@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Image from 'next/image';
@@ -10,7 +11,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Minus, Plus, Trash2, ShoppingCart, Loader2, Calendar as CalendarIcon, Clock, Home, Briefcase, MapPin } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingCart, Loader2, Calendar as CalendarIcon, Clock, Home, Briefcase, MapPin, MessageSquareQuote } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Currency, CartItem, UserAddress, DeliveryZone, RestaurantSettings } from '@/lib/types';
@@ -38,7 +39,8 @@ const getCartItemId = (item: CartItem) => {
     const optionsIdentifier = (item.selectedOptions && Object.keys(item.selectedOptions).length > 0)
       ? Object.entries(item.selectedOptions).sort().map(([key, value]) => `${key}:${value}`).join('-')
       : '';
-    return `${item.id}-${optionsIdentifier}`;
+    const notesIdentifier = item.notes || '';
+    return `${item.id}-${optionsIdentifier}-${notesIdentifier}`;
 };
 
 const defaultDeliveryZones: DeliveryZone[] = [
@@ -324,7 +326,7 @@ export default function CartPage() {
                 {items.map((item) => {
                   const cartItemId = getCartItemId(item);
                   return (
-                    <Card key={cartItemId} className="flex items-center p-4 shadow-md rounded-2xl overflow-hidden bg-card/60 backdrop-blur-xl border-white/20">
+                    <Card key={cartItemId} className="flex items-start p-4 shadow-md rounded-2xl overflow-hidden bg-card/60 backdrop-blur-xl border-white/20">
                       <Image
                         src={item.image}
                         alt={item.name}
@@ -338,6 +340,12 @@ export default function CartPage() {
                         <h3 className="font-semibold text-lg">{item.name}</h3>
                         {item.selectedOptions && Object.values(item.selectedOptions).length > 0 && (
                           <p className="text-sm text-muted-foreground">{Object.values(item.selectedOptions).join(', ')}</p>
+                        )}
+                        {item.notes && (
+                            <div className="flex items-start gap-2 mt-1 text-sm text-amber-600 dark:text-amber-400">
+                                <MessageSquareQuote className="h-4 w-4 mt-0.5 flex-shrink-0"/>
+                                <p className="italic">{item.notes}</p>
+                            </div>
                         )}
                         <div className="flex items-center gap-2 mt-2">
                             <Button variant="outline" size="icon" className='h-8 w-8 rounded-full' onClick={() => updateQuantity(cartItemId, item.quantity - 1)}>

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState, useMemo, useTransition } from 'react';
@@ -33,7 +34,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar, Search, Loader2, MapPin } from 'lucide-react';
+import { Calendar, Search, Loader2, MapPin, MessageSquareQuote } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -235,13 +236,19 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                   <Badge className={`${getStatusVariant(order.status)} text-white`}>{order.status}</Badge>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2">
+                <ul className="space-y-3">
                   {order.items.map((item, index) => (
                     <li key={`${item.id}-${index}`} className="flex justify-between text-sm p-2 rounded-lg bg-muted/30">
                       <div>
                           <span className='font-semibold'>{item.name}</span>
                           <span className='text-muted-foreground'> x {item.quantity}</span>
                           {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && <p className='text-xs text-muted-foreground italic'>({Object.values(item.selectedOptions).join(', ')})</p>}
+                          {item.notes && (
+                            <div className="flex items-start gap-2 mt-1 text-xs text-amber-600 dark:text-amber-400">
+                                <MessageSquareQuote className="h-3 w-3 mt-0.5 flex-shrink-0"/>
+                                <p className="italic">{item.notes}</p>
+                            </div>
+                          )}
                       </div>
                       <span className='font-medium'>{currencySymbol}{(item.finalPrice * item.quantity).toFixed(2)}</span>
                     </li>

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { create } from 'zustand';
@@ -17,7 +18,8 @@ const getCartItemId = (product: Omit<CartItem, 'quantity' | 'id'> & { id: string
   const optionsIdentifier = product.selectedOptions && Object.keys(product.selectedOptions).length > 0
     ? Object.entries(product.selectedOptions).sort().map(([key, value]) => `${key}:${value}`).join('-')
     : '';
-  return `${product.id}-${optionsIdentifier}`;
+  const notesIdentifier = product.notes || '';
+  return `${product.id}-${optionsIdentifier}-${notesIdentifier}`;
 };
 
 export const useCart = create<CartState>()(
