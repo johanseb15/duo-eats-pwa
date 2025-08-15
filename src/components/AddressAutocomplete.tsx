@@ -90,29 +90,28 @@ const AddressAutocomplete = ({onAddressSelect, disabled}: AddressAutocompletePro
 
   useEffect(() => {
     if (!apiKey) return;
-
-    if (typeof window.google === 'undefined' || !window.google.maps) {
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
-        script.async = true;
-        script.defer = true;
-        
-        // The callback function must be on the window object for Google Maps to call it
-        (window as any).initMap = initAutocomplete;
-        
-        document.head.appendChild(script);
-
-        return () => {
-            // Cleanup: remove the script and the callback function
-            document.head.removeChild(script);
-            delete (window as any).initMap;
-        };
-    } else {
-        // If google object is already there, just initialize
-        initAutocomplete();
+  
+    const scriptId = 'google-maps-script';
+    const existingScript = document.getElementById(scriptId);
+  
+    if (!existingScript) {
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
+      script.async = true;
+      script.defer = true;
+  
+      // The callback function must be on the window object for Google Maps to call it
+      (window as any).initMap = initAutocomplete;
+  
+      document.head.appendChild(script);
+  
+    } else if (typeof (window as any).google !== 'undefined') {
+      // If script exists and google is loaded, just initialize
+      initAutocomplete();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiKey, deliveryZones]); // Re-run if deliveryZones change
+  }, [apiKey, deliveryZones]); // Re-run if deliveryZones change, in case they load after maps
 
   if (!apiKey) {
     return null;
