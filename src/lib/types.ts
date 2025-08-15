@@ -40,11 +40,12 @@ export interface CartItem extends Product {
   notes?: string;
 }
 
+export type PaymentMethod = "Efectivo" | "Mercado Pago (QR/Link)" | "Tarjeta (POS)";
+
 export interface Order {
   id: string;
   userId: string | null; // Can be null for guest orders
   userName: string;
-  phone: string;
   items: CartItem[];
   total: number;
   subtotal: number;
@@ -56,6 +57,7 @@ export interface Order {
   address?: string;
   addressDetails?: string;
   cancellationReason?: string;
+  paymentMethod: PaymentMethod;
 }
 
 export interface Promotion {

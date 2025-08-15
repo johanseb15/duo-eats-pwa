@@ -13,11 +13,11 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
   - [✅] Carga diferida de imágenes.
   - [✅] Cachear productos para navegación sin conexión.
 - **[✅] Carrito Persistente:**
-  - [✅] Guardar carrito en `localStorage` o `IndexedDB`.
+  - [✅] Guardar carrito en `localStorage`.
   - [✅] Permitir notas personalizadas por producto.
-- **[ ] Checkout Rápido y Eficiente:**
+- **[✅] Checkout Rápido y Eficiente:**
   - [ ] Integración con geolocalización (pin en mapa).
-  - [ ] Soportar múltiples métodos de pago (efectivo, QR, POS).
+  - [✅] Soportar múltiples métodos de pago (efectivo, QR, POS).
 - **[ ] Seguimiento de Pedido en Tiempo Real:**
   - [ ] Visualización de estados del pedido.
   - [ ] Implementar notificaciones push ante cambios de estado.

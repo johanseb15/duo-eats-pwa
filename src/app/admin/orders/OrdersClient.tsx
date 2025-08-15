@@ -34,7 +34,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar, Search, Loader2, MapPin, MessageSquareQuote } from 'lucide-react';
+import { Calendar, Search, Loader2, MapPin, MessageSquareQuote, CreditCard, Wallet } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -162,6 +162,19 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
       }
   }
 
+  const getPaymentIcon = (method: Order['paymentMethod']) => {
+    switch (method) {
+        case 'Efectivo':
+            return <Wallet className="h-4 w-4" />;
+        case 'Tarjeta (POS)':
+            return <CreditCard className="h-4 w-4" />;
+        case 'Mercado Pago (QR/Link)':
+            return <Image src="/mp.svg" alt="Mercado Pago" width={16} height={16} />;
+        default:
+            return <Wallet className="h-4 w-4" />;
+    }
+  }
+
   return (
     <>
       <div className="flex justify-between items-center mb-6 gap-4 flex-wrap">
@@ -282,6 +295,13 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                       <div className="flex justify-between text-sm font-medium">
                       <span>Envío</span>
                       <span>{currencySymbol}{order.deliveryCost.toFixed(2)}</span>
+                    </div>
+                     <div className="flex justify-between items-center text-sm font-medium">
+                        <span className="flex items-center gap-2">
+                            {getPaymentIcon(order.paymentMethod)}
+                            Método de Pago
+                        </span>
+                        <span className="font-semibold">{order.paymentMethod}</span>
                     </div>
                       <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>

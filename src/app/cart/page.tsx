@@ -11,10 +11,10 @@ import { BottomNav } from '@/components/BottomNav';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Minus, Plus, Trash2, ShoppingCart, Loader2, Calendar as CalendarIcon, Clock, Home, Briefcase, MapPin, MessageSquareQuote } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingCart, Loader2, Calendar as CalendarIcon, Clock, Home, Briefcase, MapPin, MessageSquareQuote, Wallet, CreditCard } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { Currency, CartItem, UserAddress, DeliveryZone, RestaurantSettings } from '@/lib/types';
+import type { Currency, CartItem, UserAddress, DeliveryZone, RestaurantSettings, PaymentMethod } from '@/lib/types';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -78,6 +78,8 @@ export default function CartPage() {
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>();
   const [scheduledTime, setScheduledTime] = useState<string>('');
 
+  // Payment Method
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('Efectivo');
   
   useEffect(() => {
     setIsClient(true);
@@ -238,6 +240,7 @@ export default function CartPage() {
       total: total,
       subtotal: finalSubtotal,
       deliveryCost: deliveryCost,
+      paymentMethod: paymentMethod,
       deliveryDate: finalDeliveryDate,
       neighborhood: deliveryOption === 'pickup' ? undefined : (finalAddress?.neighborhood || manualAddress.neighborhood),
       address: deliveryOption === 'pickup' ? 'Retiro en local' : (finalAddress?.fullAddress || manualAddress.address),
@@ -484,6 +487,27 @@ export default function CartPage() {
                                 </Select>
                             </div>
                         )}
+                        <Separator />
+
+                        <Label>Método de Pago</Label>
+                        <RadioGroup value={paymentMethod} onValueChange={(value: PaymentMethod) => setPaymentMethod(value)} className="grid grid-cols-1 gap-2">
+                           <Label htmlFor="cash" className="flex items-center space-x-3 bg-muted/30 p-3 rounded-lg has-[:checked]:ring-2 has-[:checked]:ring-primary transition-all cursor-pointer">
+                                <RadioGroupItem value="Efectivo" id="cash" />
+                                <Wallet className="h-5 w-5" />
+                                <span>Efectivo</span>
+                            </Label>
+                             <Label htmlFor="mp" className="flex items-center space-x-3 bg-muted/30 p-3 rounded-lg has-[:checked]:ring-2 has-[:checked]:ring-primary transition-all cursor-pointer">
+                                <RadioGroupItem value="Mercado Pago (QR/Link)" id="mp" />
+                                <Image src="/mp.svg" alt="Mercado Pago" width={20} height={20} />
+                                <span>Mercado Pago (QR/Link)</span>
+                            </Label>
+                             <Label htmlFor="pos" className="flex items-center space-x-3 bg-muted/30 p-3 rounded-lg has-[:checked]:ring-2 has-[:checked]:ring-primary transition-all cursor-pointer">
+                                <RadioGroupItem value="Tarjeta (POS)" id="pos" />
+                                <CreditCard className="h-5 w-5" />
+                                <span>Tarjeta (POS del repartidor)</span>
+                            </Label>
+                        </RadioGroup>
+
                     </CardContent>
                 </Card>
 

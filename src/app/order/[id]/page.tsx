@@ -3,7 +3,7 @@
 'use client';
 
 import { useRouter, useParams } from 'next/navigation';
-import { ChevronLeft, FileText, Loader2, MessageSquareQuote } from 'lucide-react';
+import { ChevronLeft, FileText, Loader2, MessageSquareQuote, Wallet, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react';
 import { fetchOrderById } from '../../actions';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
+import Image from 'next/image';
 
 const currencySymbol = '$';
 
@@ -47,6 +48,19 @@ const getStatusProgress = (status: Order['status']): number => {
             return 0;
         default:
             return 0;
+    }
+}
+
+const getPaymentIcon = (method: Order['paymentMethod']) => {
+    switch (method) {
+        case 'Efectivo':
+            return <Wallet className="h-4 w-4" />;
+        case 'Tarjeta (POS)':
+            return <CreditCard className="h-4 w-4" />;
+        case 'Mercado Pago (QR/Link)':
+            return <Image src="/mp.svg" alt="Mercado Pago" width={16} height={16} />;
+        default:
+            return <Wallet className="h-4 w-4" />;
     }
 }
 
@@ -208,6 +222,13 @@ export default function OrderTrackingPage() {
                 <div className="w-full flex justify-between text-sm">
                     <span className="text-muted-foreground">Envío</span>
                     <span>{currencySymbol}{order.deliveryCost.toFixed(2)}</span>
+                </div>
+                 <div className="w-full flex justify-between items-center text-sm">
+                    <span className="flex items-center gap-2 text-muted-foreground">
+                        {getPaymentIcon(order.paymentMethod)}
+                        Método de Pago
+                    </span>
+                    <span className="font-semibold">{order.paymentMethod}</span>
                 </div>
                 <div className="w-full flex justify-between text-lg font-bold">
                     <span>Total</span>
