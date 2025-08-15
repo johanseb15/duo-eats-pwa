@@ -22,8 +22,8 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
   - [✅] Visualización de estados del pedido.
   - [⏳] Implementar notificaciones push ante cambios de estado. (Pendiente)
 - **[✅] Historial y Favoritos:**
-  - [✅] Permitir repetir un pedido anterior con un clic.
   - [✅] Gestionar una lista de productos favoritos.
+  - [✅] Permitir repetir un pedido anterior con un clic.
 
 ---
 
@@ -31,7 +31,7 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
 
 - **[ ] Dashboard en Tiempo Real:**
   - [ ] Notificaciones sonoras/visuales para nuevos pedidos.
-  - [ ] Vista de pedidos por estado (Nuevos, En Preparación, Listos).
+  - [✅] Vista de pedidos por estado (Nuevos, En Preparación, Listos).
 - **[ ] Gestión de Catálogo Completa:**
   - [ ] CRUD de productos con stock.
   - [ ] CRUD de categorías.
