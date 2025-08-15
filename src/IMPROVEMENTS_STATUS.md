@@ -1,57 +1,79 @@
-# Plan de Mejoras y Estado de Avance (Hoja de Ruta)
+# Plan de Acción y Estado de Avance
 
-Este documento describe el plan de desarrollo para la PWA de Pedidos, basado en el mapa de funcionalidades definido.
-
----
-
-### Módulo Cliente (Experiencia de Usuario)
-
-- **Catálogo y Menú Offline:** Permitir la navegación y selección de productos sin conexión.
-  - **Estado:** ⏳ `Pendiente`
-- **Checkout Rápido y Eficiente:** Optimizar el proceso de finalización de compra.
-  - **Estado:** ⚙️ `En Progreso`
-- **Autenticación (Registro/Login):** Sistema de usuarios para una experiencia personalizada.
-  - **Estado:** ✅ `Completado`
-- **Favoritos y Repetir Pedido:** Funcionalidades para clientes recurrentes.
-  - **Estado:** ✅ `Completado`
-- **Carrito Persistente:** Guardar el carrito entre sesiones.
-  - **Estado:** ✅ `Completado`
-- **Seguimiento de Pedidos en Tiempo Real:** Actualizaciones en vivo del estado del pedido.
-  - **Estado:** ✅ `Completado`
-- **Notificaciones Push:** Avisos sobre el estado del pedido.
-  - **Estado:** ⏳ `Pendiente`
+Este documento detalla la hoja de ruta para la implementación de funcionalidades en la PWA Duo Eats, basada en un análisis de requerimientos completo.
 
 ---
 
-### Módulo de Administración (Gestión del Negocio)
+### Módulo 1: Experiencia del Cliente (PWA)
 
-- **Control de Caja y Recaudación:** Herramientas para la gestión financiera.
-  - **Estado:** ⏳ `Pendiente`
-- **Reportes y Analíticas:** Dashboard con métricas clave de ventas y rendimiento.
-  - **Estado:** ✅ `Completado`
-- **Gestión de Roles y Permisos:** Diferentes niveles de acceso para el personal.
-  - **Estado:** ✅ `Completado` (Requiere mejoras de seguridad)
-- **Gestión de Repartidores:** Asignación y seguimiento de repartidores.
-  - **Estado:** ⏳ `Pendiente`
+- **[✅] Registro/Login Flexible:**
+  - [✅] Implementar login social (Google).
+  - [✅] Añadir recuperación de contraseña.
+- **[ ] Menú Interactivo y Offline:**
+  - [ ] Carga diferida de imágenes.
+  - [ ] Cachear productos para navegación sin conexión.
+- **[ ] Carrito Persistente:**
+  - [ ] Guardar carrito en `localStorage` o `IndexedDB`.
+  - [ ] Permitir notas personalizadas por producto.
+- **[ ] Checkout Rápido y Eficiente:**
+  - [ ] Integración con geolocalización (pin en mapa).
+  - [ ] Soportar múltiples métodos de pago (efectivo, QR, POS).
+- **[ ] Seguimiento de Pedido en Tiempo Real:**
+  - [ ] Visualización de estados del pedido.
+  - [ ] Implementar notificaciones push ante cambios de estado.
+- **[ ] Historial y Favoritos:**
+  - [ ] Permitir repetir un pedido anterior con un clic.
+  - [ ] Gestionar una lista de productos favoritos.
 
 ---
 
-### Módulo Multi-Inquilino (Escalabilidad)
+### Módulo 2: Panel de Administración
 
-- **Soporte para Múltiples Locales:** Capacidad para que la plataforma sea usada por diferentes restaurantes.
-  - **Estado:** ⏳ `Pendiente`
+- **[ ] Dashboard en Tiempo Real:**
+  - [ ] Notificaciones sonoras/visuales para nuevos pedidos.
+  - [ ] Vista de pedidos por estado (Nuevos, En Preparación, Listos).
+- **[ ] Gestión de Catálogo Completa:**
+  - [ ] CRUD de productos con stock.
+  - [ ] CRUD de categorías.
+- **[ ] Gestión de Repartidores:**
+  - [ ] CRUD de repartidores.
+  - [ ] Asignación manual de pedidos a repartidores activos.
+- **[ ] Reportes y Analítica:**
+  - [ ] Filtros por fecha, repartidor y método de pago.
+  - [ ] Visualización de productos más vendidos.
+- **[ ] Control de Caja:**
+  - [ ] Reporte de cuadre diario por repartidor.
+- **[ ] Múltiples Roles:**
+  - [ ] Definir permisos para Admin, Cajero y Cocina.
 
 ---
 
-### Capacidades Técnicas (Fundamento de la PWA)
+### Módulo 3: Módulo de Repartidor (PWA)
 
-- **Diseño Responsivo:** Adaptación a cualquier dispositivo (móvil, tablet, escritorio).
-  - **Estado:** ✅ `Completado`
-- **Optimización de Rendimiento:** Carga rápida de la aplicación.
-  - **Estado:** ⚙️ `En Progreso`
-- **Instalable (PWA):** Permitir que los usuarios "instalen" la app en su dispositivo.
-  - **Estado:** ✅ `Completado`
-- **Offline-First:** Garantizar funcionalidad básica sin conexión a internet.
-  - **Estado:** ⏳ `Pendiente`
-- **Disponibilidad de la Tienda:** Permitir al admin configurar si la tienda está abierta o cerrada.
-  - **Estado:** ✅ `Completado`
+- **[ ] Gestión de Disponibilidad:**
+  - [ ] Botón para activarse/desactivarse.
+- **[ ] Notificaciones y Asignación:**
+  - [ ] Recibir notificaciones push para nuevos pedidos asignados.
+- **[ ] Navegación y Seguimiento:**
+  - [ ] Ver detalle del pedido y ubicación del cliente en un mapa.
+  - [ ] Integrar con Google Maps/Waze para la ruta.
+- **[ ] Gestión de Cobros:**
+  - [ ] Confirmar pago (efectivo, POS).
+- **[ ] Historial de Entregas:**
+  - [ ] Ver pedidos completados y total recaudado en el día.
+
+---
+
+### Módulo 4: Capacidades Técnicas (Fundamento)
+
+- **[ ] Offline-First Real:**
+  - [ ] Cachear assets y datos con Service Worker.
+  - [ ] Sincronización de pedidos al recuperar conexión.
+- **[ ] Notificaciones Push Web:**
+  - [ ] Configurar Firebase Cloud Messaging (FCM).
+- **[ ] Rendimiento Optimizado (Lighthouse):**
+  - [ ] Optimizar imágenes a formato WebP.
+  - [ ] Minificar y empaquetar código CSS/JS.
+- **[ ] Seguridad Robusta:**
+  - [ ] Implementar Custom Claims en Firebase para roles.
+  - [ ] Proteger APIs con JWT.
