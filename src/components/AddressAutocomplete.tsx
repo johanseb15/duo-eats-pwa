@@ -2,7 +2,7 @@
 'use client';
 
 import React, {useRef, useEffect, useState} from 'react';
-import {APIProvider, useMapsLibrary} from '@vis.gl/react-google-maps';
+import Script from 'next/script';
 import {Input} from './ui/input';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -20,23 +20,8 @@ const defaultDeliveryZones: DeliveryZone[] = [
 
 const AddressAutocomplete = ({onAddressSelect, disabled}: AddressAutocompleteProps) => {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-  if (!apiKey) {
-    return null;
-  }
-
-  return (
-    <APIProvider apiKey={apiKey}>
-      <AutocompleteComponent onAddressSelect={onAddressSelect} disabled={disabled} />
-    </APIProvider>
-  );
-};
-
-function AutocompleteComponent({onAddressSelect, disabled}: AddressAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, setInputValue] = useState('');
-  const places = useMapsLibrary('places');
-  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
   const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
   const { toast } = useToast();
 
@@ -61,22 +46,19 @@ function AutocompleteComponent({onAddressSelect, disabled}: AddressAutocompleteP
     fetchZones();
   }, []);
 
-  useEffect(() => {
-    if (!places || !inputRef.current) return;
+  const handleScriptLoad = () => {
+    if (!inputRef.current || typeof google === 'undefined' || !google.maps.places) {
+        return;
+    }
 
-    const autocompleteInstance = new places.Autocomplete(inputRef.current, {
+    const autocompleteInstance = new google.maps.places.Autocomplete(inputRef.current, {
         componentRestrictions: { country: 'ar' },
         fields: ["address_components", "formatted_address"],
         types: ["address"],
     });
-    setAutocomplete(autocompleteInstance);
-  }, [places]);
 
-  useEffect(() => {
-    if (!autocomplete) return;
-
-    const listener = autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace();
+    autocompleteInstance.addListener('place_changed', () => {
+        const place = autocompleteInstance.getPlace();
         if (place) {
           const formattedAddress = place.formatted_address || '';
           const neighborhood =
@@ -105,30 +87,35 @@ function AutocompleteComponent({onAddressSelect, disabled}: AddressAutocompleteP
           setInputValue(formattedAddress);
         }
     });
+  };
 
-    return () => {
-        if (typeof google !== 'undefined') {
-          google.maps.event.removeListener(listener);
-        }
-    }
-  }, [autocomplete, onAddressSelect, deliveryZones, toast]);
-
+  if (!apiKey) {
+    return null;
+  }
 
   return (
-    <div>
-      <label htmlFor="address-input" className="text-sm font-medium">
-        Dirección de Entrega
-      </label>
-      <Input
-        id="address-input"
-        ref={inputRef}
-        value={inputValue}
-        onChange={e => setInputValue(e.target.value)}
-        placeholder="Escribe tu calle y número..."
-        disabled={disabled}
+    <>
+      <Script
+        src={`https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`}
+        async
+        defer
+        onLoad={handleScriptLoad}
       />
-    </div>
+      <div>
+        <label htmlFor="address-input" className="text-sm font-medium">
+          Dirección de Entrega
+        </label>
+        <Input
+          id="address-input"
+          ref={inputRef}
+          value={inputValue}
+          onChange={e => setInputValue(e.target.value)}
+          placeholder="Escribe tu calle y número..."
+          disabled={disabled}
+        />
+      </div>
+    </>
   );
-}
+};
 
 export default AddressAutocomplete;
