@@ -43,8 +43,8 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
   - [✅] Visualización de productos más vendidos.
 - **[✅] Control de Caja:**
   - [✅] Reporte de cuadre diario por repartidor.
-- **[ ] Múltiples Roles:**
-  - [ ] Definir permisos para Admin, Cajero y Cocina.
+- **[⏳] Múltiples Roles:**
+  - [⏳] Definir permisos para Admin, Cajero y Cocina. (Pospuesto)
 
 ---
 
