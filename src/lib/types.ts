@@ -58,8 +58,8 @@ export interface Order {
   addressDetails?: string;
   cancellationReason?: string;
   paymentMethod: PaymentMethod;
-  deliveryPersonId?: string;
-  deliveryPersonName?: string;
+  deliveryPersonId: string | null;
+  deliveryPersonName: string | null;
 }
 
 export interface Promotion {

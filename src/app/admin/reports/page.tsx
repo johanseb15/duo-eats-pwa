@@ -2,12 +2,12 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import type { Order, DeliveryPerson } from '@/lib/types';
+import type { Order, DeliveryPerson, PaymentMethod } from '@/lib/types';
 import { fetchAllOrders, fetchDeliveryPersons } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DollarSign, ShoppingCart, TrendingUp, Calendar as CalendarIcon, User, CreditCard, X } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { DollarSign, ShoppingCart, TrendingUp, Calendar as CalendarIcon, User, CreditCard, X, ListChecks } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { getStatusVariant } from '../orders/OrdersClient';
@@ -72,8 +72,37 @@ export default function ReportsPage() {
         const totalRevenue = relevantOrders.reduce((sum, order) => sum + order.total, 0);
         const totalOrders = filteredOrders.length;
         const averageOrderValue = relevantOrders.length > 0 ? totalRevenue / relevantOrders.length : 0;
-        return { totalRevenue, totalOrders, averageOrderValue };
-    }, [filteredOrders]);
+        
+        // Cash reconciliation logic
+        const cashReconciliation = {
+            totalOrders: 0,
+            totalCash: 0,
+            totalCard: 0,
+            totalMP: 0,
+            totalGeneral: 0,
+        };
+
+        if (deliveryPersonId !== 'all') {
+            const personDeliveredOrders = filteredOrders.filter(o => o.status === 'Entregado' && o.deliveryPersonId === deliveryPersonId);
+            cashReconciliation.totalOrders = personDeliveredOrders.length;
+            personDeliveredOrders.forEach(order => {
+                cashReconciliation.totalGeneral += order.total;
+                switch (order.paymentMethod) {
+                    case 'Efectivo':
+                        cashReconciliation.totalCash += order.total;
+                        break;
+                    case 'Tarjeta (POS)':
+                        cashReconciliation.totalCard += order.total;
+                        break;
+                    case 'Mercado Pago (QR/Link)':
+                        cashReconciliation.totalMP += order.total;
+                        break;
+                }
+            });
+        }
+        
+        return { totalRevenue, totalOrders, averageOrderValue, cashReconciliation };
+    }, [filteredOrders, deliveryPersonId]);
 
     const clearFilters = () => {
         setDateRange({ from: addDays(new Date(), -7), to: new Date() });
@@ -181,7 +210,7 @@ export default function ReportsPage() {
                 </CardContent>
             </Card>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                  <Card className="shadow-lg rounded-2xl bg-card/60 backdrop-blur-xl border-white/20">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Ingresos (Entregados)</CardTitle>
@@ -210,6 +239,36 @@ export default function ReportsPage() {
                     </CardContent>
                 </Card>
             </div>
+            
+             {deliveryPersonId !== 'all' && (
+                <Card className="shadow-lg rounded-2xl bg-primary/10 border-primary/20">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-3">
+                            <ListChecks className="h-6 w-6 text-primary" />
+                            Cuadre de Caja para {deliveryPersons.find(p => p.id === deliveryPersonId)?.name}
+                        </CardTitle>
+                        <CardDescription>Resumen de los pedidos entregados por el repartidor seleccionado para el rango de fechas elegido.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                        <div className="p-4 bg-background/50 rounded-lg">
+                            <p className="text-sm text-muted-foreground">Pedidos Entregados</p>
+                            <p className="text-2xl font-bold">{analytics.cashReconciliation.totalOrders}</p>
+                        </div>
+                        <div className="p-4 bg-background/50 rounded-lg">
+                            <p className="text-sm text-muted-foreground">Total Efectivo</p>
+                            <p className="text-2xl font-bold">{currencySymbol}{analytics.cashReconciliation.totalCash.toFixed(2)}</p>
+                        </div>
+                        <div className="p-4 bg-background/50 rounded-lg">
+                            <p className="text-sm text-muted-foreground">Total Tarjeta/MP</p>
+                            <p className="text-2xl font-bold">{currencySymbol}{(analytics.cashReconciliation.totalCard + analytics.cashReconciliation.totalMP).toFixed(2)}</p>
+                        </div>
+                        <div className="p-4 bg-background/50 rounded-lg">
+                            <p className="text-sm text-muted-foreground">Total General</p>
+                            <p className="text-2xl font-bold">{currencySymbol}{analytics.cashReconciliation.totalGeneral.toFixed(2)}</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             <div className="rounded-2xl border bg-card/60 backdrop-blur-xl overflow-hidden">
                 <Table>
