@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Minus, Plus, Trash2, ShoppingCart, Loader2, Calendar as CalendarIcon, Clock, Home, Briefcase, MapPin } from 'lucide-react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Currency, CartItem, UserAddress, DeliveryZone, RestaurantSettings } from '@/lib/types';
 import { useAuth } from '@/hooks/useAuth';
@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { Textarea } from '@/components/ui/textarea';
 
 
 const currentCurrency: Currency = 'ARS';
@@ -71,6 +72,7 @@ export default function CartPage() {
   const [userAddresses, setUserAddresses] = useState<UserAddress[]>([]);
   const [finalAddress, setFinalAddress] = useState<UserAddress | null>(null);
   const [manualAddress, setManualAddress] = useState({ address: '', neighborhood: '' });
+  const [addressDetails, setAddressDetails] = useState('');
   
   const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
   const [loadingZones, setLoadingZones] = useState(true);
@@ -234,7 +236,7 @@ export default function CartPage() {
       deliveryDate: finalDeliveryDate,
       neighborhood: finalAddress?.neighborhood || manualAddress.neighborhood || undefined,
       address: finalAddress?.fullAddress || manualAddress.address || (deliveryOption === 'pickup' ? 'Retiro en local' : undefined),
-      addressDetails: finalAddress?.details || undefined,
+      addressDetails: finalAddress?.details || addressDetails || undefined,
     };
 
     const result = await createOrder(orderInput);
@@ -456,6 +458,10 @@ export default function CartPage() {
                                         <Input id="manual-neighborhood" placeholder="Ej: Palermo" value={manualAddress.neighborhood} onChange={e => handleManualNeighborhoodChange(e.target.value)} />
                                     </div>
                                 </div>
+                            </div>
+                            <div>
+                                <Label htmlFor="addressDetails">Aclaraciones de entrega (Opcional)</Label>
+                                <Textarea id="addressDetails" value={addressDetails} onChange={e => setAddressDetails(e.target.value)} placeholder="Ej: Tocar timbre en Depto 5B, no funciona el portero." />
                             </div>
                         </div>
                       )}
