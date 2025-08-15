@@ -2,7 +2,6 @@
 'use client';
 
 import React, {useRef, useEffect, useState} from 'react';
-import Script from 'next/script';
 import {Input} from './ui/input';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -46,7 +45,7 @@ const AddressAutocomplete = ({onAddressSelect, disabled}: AddressAutocompletePro
     fetchZones();
   }, []);
 
-  const handleScriptLoad = () => {
+  const initAutocomplete = () => {
     if (!inputRef.current || typeof google === 'undefined' || !google.maps.places) {
         return;
     }
@@ -89,18 +88,37 @@ const AddressAutocomplete = ({onAddressSelect, disabled}: AddressAutocompletePro
     });
   };
 
+  useEffect(() => {
+    if (!apiKey) return;
+
+    if (typeof window.google === 'undefined' || !window.google.maps) {
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
+        script.async = true;
+        script.defer = true;
+        
+        // The callback function must be on the window object for Google Maps to call it
+        (window as any).initMap = initAutocomplete;
+        
+        document.head.appendChild(script);
+
+        return () => {
+            // Cleanup: remove the script and the callback function
+            document.head.removeChild(script);
+            delete (window as any).initMap;
+        };
+    } else {
+        // If google object is already there, just initialize
+        initAutocomplete();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiKey, deliveryZones]); // Re-run if deliveryZones change
+
   if (!apiKey) {
     return null;
   }
 
   return (
-    <>
-      <Script
-        src={`https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`}
-        async
-        defer
-        onLoad={handleScriptLoad}
-      />
       <div>
         <label htmlFor="address-input" className="text-sm font-medium">
           Dirección de Entrega
@@ -114,7 +132,6 @@ const AddressAutocomplete = ({onAddressSelect, disabled}: AddressAutocompletePro
           disabled={disabled}
         />
       </div>
-    </>
   );
 };
 
