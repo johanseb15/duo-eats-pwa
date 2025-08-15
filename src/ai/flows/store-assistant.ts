@@ -13,12 +13,12 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { fetchRestaurantSettings } from '@/app/actions';
 
-export const StoreAssistantInputSchema = z.object({
+const StoreAssistantInputSchema = z.object({
   query: z.string().describe('The user\'s question.'),
 });
 export type StoreAssistantInput = z.infer<typeof StoreAssistantInputSchema>;
 
-export const StoreAssistantOutputSchema = z.object({
+const StoreAssistantOutputSchema = z.object({
   answer: z.string().describe('The assistant\'s answer.'),
 });
 export type StoreAssistantOutput = z.infer<typeof StoreAssistantOutputSchema>;
