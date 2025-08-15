@@ -20,7 +20,7 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
   - [✅] Soportar múltiples métodos de pago (efectivo, QR, POS).
 - **[✅] Seguimiento de Pedido en Tiempo Real:**
   - [✅] Visualización de estados del pedido.
-  - [ ] Implementar notificaciones push ante cambios de estado.
+  - [⏳] Implementar notificaciones push ante cambios de estado. (Pendiente)
 - **[ ] Historial y Favoritos:**
   - [ ] Permitir repetir un pedido anterior con un clic.
   - [ ] Gestionar una lista de productos favoritos.
