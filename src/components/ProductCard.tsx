@@ -12,10 +12,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { ProductSheet } from './ProductSheet';
 import { useFavorites } from '@/store/favorites';
 import { cn } from '@/lib/utils';
@@ -35,7 +35,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const isFav = isFavorite(product.id);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Evita que se abra el sheet
+    e.stopPropagation(); 
     toggleFavorite(product);
     toast({
         title: isFav ? 'Eliminado de favoritos' : 'Añadido a favoritos',
@@ -44,7 +44,7 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <Sheet>
+    <Dialog>
         <div className="w-full overflow-hidden transition-all duration-300 rounded-2xl group bg-card/80 backdrop-blur-xl border-white/20 shadow-md hover:shadow-xl hover:-translate-y-1">
           <Card className="border-0 bg-transparent shadow-none">
             <CardContent className="p-0 flex items-center gap-4">
@@ -74,20 +74,20 @@ export function ProductCard({ product }: ProductCardProps) {
                          <Button variant="ghost" size="icon" className="rounded-full text-primary" onClick={handleFavoriteClick} aria-label={`Marcar ${product.name} como favorito`}>
                             <Heart className={cn("h-5 w-5", isFav && "fill-current")} />
                         </Button>
-                        <SheetTrigger asChild>
+                        <DialogTrigger asChild>
                             <Button size='icon' className='rounded-full h-9 w-9' aria-label={`Añadir ${product.name} al carrito`} disabled={product.stock <= 0}>
                                 <Plus/>
                             </Button>
-                        </SheetTrigger>
+                        </DialogTrigger>
                     </div>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
-      <SheetContent className="w-full max-w-lg p-0">
+      <DialogContent className="w-full max-w-lg p-0 border-0">
          <ProductSheet product={product} />
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import type { Currency, Product } from '@/lib/types';
 import { Button } from './ui/button';
-import { SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from './ui/sheet';
+import { DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from './ui/dialog';
 import { ScrollArea } from './ui/scroll-area';
 import { Badge } from './ui/badge';
 import { useFavorites } from '@/store/favorites';
@@ -85,32 +85,30 @@ export function ProductSheet({ product }: ProductSheetProps) {
     
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-[90vh] sm:h-auto">
             <ScrollArea className="flex-grow">
-                <SheetClose asChild>
-                    <div className="relative h-72 w-full">
-                        <Image
-                            src={product.image}
-                            alt={product.name}
-                            fill
-                            className="object-cover"
-                            data-ai-hint={product.aiHint}
-                        />
-                        {product.stock <= 0 && (
-                            <Badge variant="destructive" className="absolute top-4 left-4 text-lg">Sin Stock</Badge>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
-                    </div>
-                </SheetClose>
-                <SheetHeader className="p-6 -mt-16 relative bg-background rounded-t-3xl text-left">
+                <div className="relative h-72 w-full">
+                    <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-cover"
+                        data-ai-hint={product.aiHint}
+                    />
+                    {product.stock <= 0 && (
+                        <Badge variant="destructive" className="absolute top-4 left-4 text-lg">Sin Stock</Badge>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+                </div>
+                <DialogHeader className="p-6 -mt-16 relative bg-background rounded-t-3xl text-left">
                     <div className="flex justify-between items-start">
-                        <SheetTitle className="text-3xl font-bold text-foreground max-w-[calc(100%-4rem)]">{product.name}</SheetTitle>
+                        <DialogTitle className="text-3xl font-bold text-foreground max-w-[calc(100%-4rem)]">{product.name}</DialogTitle>
                          <Button variant="ghost" size="icon" className="rounded-full text-primary flex-shrink-0" onClick={handleFavoriteClick}>
                             <Heart className={cn("h-7 w-7", isFav && "fill-current")} />
                         </Button>
                     </div>
-                    <SheetDescription className="text-muted-foreground mt-2">{product.description}</SheetDescription>
-                </SheetHeader>
+                    <DialogDescription className="text-muted-foreground mt-2">{product.description}</DialogDescription>
+                </DialogHeader>
                 <div className="p-6 bg-background">
                     {product.options && product.options.length > 0 && (
                     <div className="space-y-6">
@@ -138,18 +136,18 @@ export function ProductSheet({ product }: ProductSheetProps) {
                     )}
                 </div>
             </ScrollArea>
-             <SheetFooter className="p-6 bg-background/80 backdrop-blur-xl border-t sticky bottom-0">
+             <DialogFooter className="p-6 bg-background/80 backdrop-blur-xl border-t sticky bottom-0">
                 <div className="flex justify-between items-center w-full gap-4">
                      <p className="text-2xl font-extrabold text-foreground">
                         {currencySymbol}{finalPrice.toFixed(2)}
                     </p>
-                    <SheetClose asChild>
+                    <DialogClose asChild>
                       <Button onClick={handleAddToCart} size="lg" className="rounded-full flex-grow" disabled={product.stock <= 0}>
                           {product.stock <= 0 ? 'Sin Stock' : 'Agregar al carrito'}
                       </Button>
-                    </SheetClose>
+                    </DialogClose>
                 </div>
-            </SheetFooter>
+            </DialogFooter>
         </div>
     )
 }
