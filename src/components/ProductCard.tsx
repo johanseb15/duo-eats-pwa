@@ -91,5 +91,3 @@ export function ProductCard({ product }: ProductCardProps) {
     </Sheet>
   );
 }
-
-    
