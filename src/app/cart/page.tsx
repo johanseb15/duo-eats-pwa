@@ -325,17 +325,22 @@ export default function CartPage() {
   
   const canCheckout = useMemo(() => {
     if (deliveryOption === 'pickup') {
-      return true;
+        return true;
     }
     if (deliveryOption === 'delivery') {
-      if (user && addressSelection !== 'new') {
-        return !!selectedZoneId; // For saved addresses, just need a valid zone
-      }
-      // For manual address or guests
-      return manualAddress.address.trim() !== '' && manualAddress.neighborhood.trim() !== '' && !!selectedZoneId;
+        const isUsingSavedAddress = user && addressSelection !== 'new';
+        if (isUsingSavedAddress) {
+            return !!selectedZoneId;
+        }
+
+        const isManualAddressComplete = 
+            manualAddress.address.trim() !== '' && 
+            manualAddress.neighborhood.trim() !== '' && 
+            !!selectedZoneId;
+        return isManualAddressComplete;
     }
     return false;
-  }, [deliveryOption, selectedZoneId, manualAddress, user, addressSelection]);
+}, [deliveryOption, user, addressSelection, manualAddress, selectedZoneId]);
 
 
   if (!isClient || authLoading) {
@@ -579,5 +584,3 @@ export default function CartPage() {
     </div>
   );
 }
-
-    
