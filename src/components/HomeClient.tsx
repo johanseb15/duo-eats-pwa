@@ -73,8 +73,8 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
           </h2>
           {categories.length > 0 ? (
              <div className="flex gap-4 text-center overflow-x-auto pb-4 -mx-4 px-4 no-scrollbar">
-                 <button onClick={() => setSelectedCategory(null)} className="flex flex-col items-center gap-2 group flex-shrink-0">
-                    <div className={cn("w-20 h-20 bg-card/80 backdrop-blur-xl rounded-2xl shadow-md flex items-center justify-center transition-all duration-300 group-hover:scale-110", !selectedCategory ? "ring-2 ring-primary" : "ring-1 ring-border")}>
+                 <button onClick={() => setSelectedCategory(null)} className="flex flex-col items-center gap-2 group flex-shrink-0 w-24">
+                    <div className={cn("w-20 h-20 bg-card rounded-2xl shadow-md flex items-center justify-center transition-all duration-300 group-hover:scale-105 border", !selectedCategory ? "ring-2 ring-primary" : "ring-1 ring-border")}>
                         <LucideIcons.List className="h-9 w-9 text-primary" />
                     </div>
                     <span className="font-semibold text-foreground text-sm mt-1">Todas</span>
@@ -83,8 +83,8 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
                   const Icon = getIcon(category.icon);
                   const isSelected = selectedCategory === category.slug;
                   return (
-                    <button onClick={() => setSelectedCategory(category.slug)} key={category.id} className="flex flex-col items-center gap-2 group flex-shrink-0">
-                      <div className={cn("w-20 h-20 bg-card/80 backdrop-blur-xl rounded-2xl shadow-md flex items-center justify-center transition-all duration-300 group-hover:scale-110", isSelected ? "ring-2 ring-primary" : "ring-1 ring-border")}>
+                    <button onClick={() => setSelectedCategory(category.slug)} key={category.id} className="flex flex-col items-center gap-2 group flex-shrink-0 w-24">
+                      <div className={cn("w-20 h-20 bg-card rounded-2xl shadow-md flex items-center justify-center transition-all duration-300 group-hover:scale-105 border", isSelected ? "ring-2 ring-primary" : "ring-1 ring-border")}>
                         <Icon className="h-9 w-9 text-primary" />
                       </div>
                       <span className="font-semibold text-foreground text-sm mt-1">{category.name}</span>
@@ -93,7 +93,7 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
               })}
             </div>
           ) : (
-             <div className="text-center py-10 bg-card/60 backdrop-blur-xl rounded-2xl">
+             <div className="text-center py-10 bg-card rounded-2xl border">
                 <h3 className="text-lg font-semibold">No hay categorías</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
                   Añade algunas desde el panel de administrador para empezar.
@@ -104,7 +104,7 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
 
         <Suspense fallback={
             <div className="mb-12">
-                <Card className="bg-card/60 backdrop-blur-xl border-primary/50 border-dashed">
+                <Card className="border-primary/50 border-dashed">
                     <CardHeader>
                         <Skeleton className="h-7 w-48" />
                     </CardHeader>
@@ -133,14 +133,14 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
               ))}
             </div>
           ) : (
-             <div className="text-center py-20 bg-card/60 backdrop-blur-xl rounded-2xl">
+             <div className="text-center py-20 bg-card rounded-2xl border">
               <FileText className="mx-auto h-24 w-24 text-muted-foreground" />
               <h2 className="mt-6 text-2xl font-semibold">Nuestro menú está vacío</h2>
               <p className="mt-2 text-muted-foreground">
                 Parece que aún no has añadido ningún producto.
               </p>
-              {user && ( // Only show button if user is logged in
-                <Button asChild className="mt-6 rounded-full">
+              {user && (
+                <Button asChild className="mt-6">
                   <Link href="/admin/products"><PlusCircle className='mr-2'/>Añadir Productos</Link>
                 </Button>
               )}

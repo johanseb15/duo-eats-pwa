@@ -67,9 +67,7 @@ export function ProductCard({ product }: ProductCardProps) {
     e.stopPropagation();
     e.preventDefault();
     
-    // If product has options, open the sheet. Otherwise, add directly.
     if (product.options && product.options.length > 0) {
-        // This click will be captured by the DialogTrigger, so we don't need to do anything.
         return;
     }
 
@@ -127,7 +125,7 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Dialog>
        <DialogTrigger asChild>
-        <div className="w-full overflow-hidden transition-all duration-300 rounded-2xl group bg-card/80 backdrop-blur-xl border-white/20 shadow-md hover:shadow-xl hover:-translate-y-1 cursor-pointer">
+        <div className="w-full overflow-hidden transition-all duration-300 rounded-2xl group bg-card hover:shadow-xl hover:-translate-y-1 cursor-pointer border">
           <Card className="border-0 bg-transparent shadow-none">
             <CardContent className="p-0 flex items-center gap-4">
               <div className="relative w-28 h-28 flex-shrink-0">

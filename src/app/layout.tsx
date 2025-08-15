@@ -1,15 +1,20 @@
-
 import type { Metadata, Viewport } from 'next';
-import { PT_Sans } from 'next/font/google';
+import { Open_Sans, Poppins } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 
-const fontPtSans = PT_Sans({
+const fontSans = Open_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-sans',
+});
+
+const fontHeading = Poppins({
   subsets: ['latin'],
   weight: ['400', '700'],
   display: 'swap',
-  variable: '--font-pt-sans',
+  variable: '--font-heading',
 });
 
 export const metadata: Metadata = {
@@ -18,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#FF7F50', // Vibrant Coral
+  themeColor: '#f97316', // Vibrant Orange from new palette
 };
 
 export default function RootLayout({
@@ -31,7 +36,8 @@ export default function RootLayout({
       <body
         className={cn(
           'min-h-screen bg-background font-sans antialiased',
-          fontPtSans.variable,
+          fontSans.variable,
+          fontHeading.variable
         )}
         suppressHydrationWarning={true}
       >
