@@ -21,9 +21,8 @@ Este documento realiza un seguimiento de las mejoras propuestas para la PWA Duo 
 
 ### 3. Chatbot Asistente con IA
 - **Descripción:** Implementar un chatbot flotante utilizando Genkit. El bot debe poder responder preguntas de los clientes sobre horarios, días de apertura y otra información de la tienda, consultando los datos desde Firestore en tiempo real.
-- **Estado:** ⚙️ **En Progreso**
-- **Progreso:** `[█████     ]` (50%)
-- **Notas:** La lógica del backend (`flow` de Genkit) y las herramientas (`tools`) para obtener la información de la tienda ya están implementadas. Falta construir la interfaz de usuario del chat.
+- **Estado:** ✅ **Completado**
+- **Progreso:** `[██████████]` (100%)
 
 ---
 

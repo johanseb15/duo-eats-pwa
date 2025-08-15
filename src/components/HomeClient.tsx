@@ -15,6 +15,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { ProductCard } from './ProductCard';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { cn } from '@/lib/utils';
+import { Chatbot } from './Chatbot';
 
 const PromotionsCarousel = React.lazy(() => import('@/components/PromotionsCarousel'));
 const Recommendations = React.lazy(() => import('@/components/Recommendations'));
@@ -148,6 +149,7 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
         </section>
       </main>
       <BottomNav />
+      <Chatbot />
     </div>
   );
 }
