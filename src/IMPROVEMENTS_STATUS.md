@@ -11,7 +11,7 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
   - [✅] Añadir recuperación de contraseña.
 - **[✅] Menú Interactivo y Offline:**
   - [✅] Carga diferida de imágenes.
-  - [ ] Cachear productos para navegación sin conexión.
+  - [✅] Cachear productos para navegación sin conexión.
 - **[ ] Carrito Persistente:**
   - [ ] Guardar carrito en `localStorage` o `IndexedDB`.
   - [ ] Permitir notas personalizadas por producto.
