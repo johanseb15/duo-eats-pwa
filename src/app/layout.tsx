@@ -15,7 +15,6 @@ const fontPtSans = PT_Sans({
 export const metadata: Metadata = {
   title: 'Dúo Eats',
   description: 'Sabores intensos.',
-  manifest: '/manifest.json',
 };
 
 export const viewport: Viewport = {
