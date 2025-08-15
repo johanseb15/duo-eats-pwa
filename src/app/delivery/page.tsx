@@ -1,0 +1,194 @@
+
+'use client';
+
+import { useEffect, useState, useTransition } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Power, Loader2, Bike, Bell, History } from 'lucide-react';
+import type { DeliveryPerson } from '@/lib/types';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator';
+
+// This is a simplified version. In a real app, you'd have a more robust
+// way to link a Firebase User UID to a DeliveryPerson document ID.
+// For now, we'll assume the UID matches the document ID for simplicity.
+async function getDeliveryPerson(uid: string): Promise<DeliveryPerson | null> {
+    if (!uid) return null;
+    try {
+        const personRef = doc(db, 'deliveryPersons', uid);
+        const docSnap = await getDoc(personRef);
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() } as DeliveryPerson;
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching delivery person data:", error);
+        return null;
+    }
+}
+
+async function updateDeliveryPersonStatus(uid: string, status: 'active' | 'inactive') {
+    if (!uid) return { success: false, error: 'User ID is missing' };
+    try {
+        const personRef = doc(db, 'deliveryPersons', uid);
+        await updateDoc(personRef, { status });
+        return { success: true };
+    } catch (error) {
+        console.error("Error updating status:", error);
+        return { success: false, error: 'Failed to update status' };
+    }
+}
+
+
+export default function DeliveryPage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const [deliveryPerson, setDeliveryPerson] = useState<DeliveryPerson | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isUpdatingStatus, startStatusUpdate] = useTransition();
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      router.push('/auth/signin');
+      return;
+    }
+
+    const fetchPersonData = async () => {
+        setLoading(true);
+        const person = await getDeliveryPerson(user.uid);
+        setDeliveryPerson(person);
+        setLoading(false);
+    };
+
+    fetchPersonData();
+  }, [user, authLoading, router]);
+
+  const handleStatusChange = (isActive: boolean) => {
+    if (!deliveryPerson) return;
+    const newStatus = isActive ? 'active' : 'inactive';
+    
+    startStatusUpdate(async () => {
+        const result = await updateDeliveryPersonStatus(deliveryPerson.id, newStatus);
+        if(result.success) {
+            setDeliveryPerson(prev => prev ? { ...prev, status: newStatus } : null);
+            toast({
+                title: `Estado actualizado a: ${isActive ? 'Activo' : 'Inactivo'}`,
+                description: isActive ? 'Estás listo para recibir pedidos.' : 'No recibirás nuevos pedidos.',
+            })
+        } else {
+             toast({
+                title: 'Error',
+                description: 'No se pudo actualizar tu estado. Inténtalo de nuevo.',
+                variant: 'destructive'
+            })
+        }
+    })
+
+  }
+
+  if (authLoading || loading) {
+    return (
+      <div>
+        <Skeleton className="h-8 w-48 mb-4" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    );
+  }
+
+  if (!deliveryPerson) {
+      return (
+           <Card className="border-destructive">
+             <CardHeader>
+                <CardTitle>Acceso de Repartidor Requerido</CardTitle>
+                <CardDescription>
+                    Tu cuenta de usuario no está registrada como repartidor. Por favor, contacta al administrador del sistema.
+                </CardDescription>
+             </CardHeader>
+           </Card>
+      )
+  }
+
+  const isActive = deliveryPerson.status === 'active';
+
+  return (
+    <div className="space-y-8">
+        <div>
+            <h1 className="text-3xl font-bold">Portal del Repartidor</h1>
+            <p className="text-muted-foreground">Bienvenido, {deliveryPerson.name.split(' ')[0]}.</p>
+        </div>
+
+        <Card className={cn("transition-all", isActive ? 'border-green-500 bg-green-500/10' : 'border-border')}>
+            <CardHeader>
+                <CardTitle>Gestión de Disponibilidad</CardTitle>
+                <CardDescription>Actívate para que puedan asignarte nuevos pedidos.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="flex items-center space-x-4 rounded-lg border p-4">
+                    <Power className={cn("h-8 w-8 transition-colors", isActive ? 'text-green-500' : 'text-destructive')} />
+                    <div className="flex-1 space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                        Estado Actual: {isActive ? 'Activo' : 'Inactivo'}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                        {isActive ? 'Listo para recibir entregas.' : 'No estás recibiendo pedidos.'}
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {isUpdatingStatus && <Loader2 className="h-5 w-5 animate-spin"/>}
+                        <Switch
+                            checked={isActive}
+                            onCheckedChange={handleStatusChange}
+                            disabled={isUpdatingStatus}
+                            aria-label="Toggle delivery status"
+                        />
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+        
+        <Separator/>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-muted-foreground">
+             <Card className="bg-card/50">
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>Pedidos Asignados</CardTitle>
+                    <Bike className="h-6 w-6"/>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm">Aquí verás los pedidos que te asignen.</p>
+                </CardContent>
+            </Card>
+             <Card className="bg-card/50">
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>Notificaciones</CardTitle>
+                    <Bell className="h-6 w-6"/>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm">Las alertas de nuevos pedidos aparecerán aquí.</p>
+                </CardContent>
+            </Card>
+            <Card className="bg-card/50">
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>Historial de Entregas</CardTitle>
+                    <History className="h-6 w-6"/>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm">Revisa tus entregas completadas y ganancias.</p>
+                </CardContent>
+            </Card>
+        </div>
+
+
+    </div>
+  );
+}

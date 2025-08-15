@@ -50,8 +50,8 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
 
 ### Módulo 3: Módulo de Repartidor (PWA)
 
-- **[ ] Gestión de Disponibilidad:**
-  - [ ] Botón para activarse/desactivarse.
+- **[✅] Gestión de Disponibilidad:**
+  - [✅] Botón para activarse/desactivarse.
 - **[ ] Notificaciones y Asignación:**
   - [ ] Recibir notificaciones push para nuevos pedidos asignados.
 - **[ ] Navegación y Seguimiento:**
