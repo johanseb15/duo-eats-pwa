@@ -85,9 +85,6 @@ export default function CartPage() {
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>();
   const [scheduledTime, setScheduledTime] = useState<string>('');
 
-  // Success Dialog
-  const [isSuccessAlertOpen, setIsSuccessAlertOpen] = useState(false);
-  const [lastOrderId, setLastOrderId] = useState<string | null>(null);
   
   useEffect(() => {
     setIsClient(true);
@@ -257,10 +254,8 @@ export default function CartPage() {
     const result = await createOrder(orderInput);
 
     if (result.success && result.orderId) {
-        sendWhatsApp(result.orderId, userName, orderInput.address, finalDeliveryDate, orderInput.addressDetails);
-        setLastOrderId(result.orderId);
-        setIsSuccessAlertOpen(true);
         clearCart();
+        router.push(`/order/confirm/${result.orderId}`);
     } else {
         toast({
           title: 'Error al crear el pedido',
@@ -270,53 +265,6 @@ export default function CartPage() {
     }
 
     setIsProcessing(false);
-  };
-
-
-  const sendWhatsApp = (orderId?: string, name?: string, address?: string, deliveryDate?: string, addressDetails?: string) => {
-    const phone = restaurantSettings?.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '549111234567';
-    let message = `¡Hola! Quisiera hacer el siguiente pedido:\n`;
-    if (orderId) {
-      message += `\n*N° de Pedido: ${orderId.slice(0, 6)}*\n`;
-    }
-    if (name) {
-      message += `*Cliente: ${name}*\n`;
-    }
-    
-    if (deliveryOption === 'pickup') {
-      message += `*Modalidad: Retiro en local*\n`;
-    } else if (address) {
-      message += `*Dirección de Entrega: ${address}*\n`;
-    }
-
-    if (addressDetails) {
-        message += `*Detalles: ${addressDetails}*\n`;
-    }
-
-    if (deliveryDate) {
-        message += `*Entrega Programada para: ${format(new Date(deliveryDate), "eeee d 'de' MMMM 'a las' HH:mm", { locale: es })}hs*\n`;
-    }
-
-
-    message += `\n${items
-        .map((i) => {
-          const optionsString = i.selectedOptions && Object.values(i.selectedOptions).length > 0 ? ` (${Object.values(i.selectedOptions).join(', ')})` : '';
-          return `* ${i.name}${optionsString} x ${i.quantity} (${currencySymbol}${(i.finalPrice * i.quantity).toFixed(2)})`
-        })
-        .join('\n')}\n`
-    
-    message += `\n*Subtotal: ${currencySymbol}${finalSubtotal.toFixed(2)}*\n*Envío: ${currencySymbol}${deliveryCost.toFixed(2)}*\n*Total: ${currencySymbol}${total.toFixed(2)}*`
-    
-    const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
-  };
-
-  const handleSuccessAlertClose = () => {
-    setIsSuccessAlertOpen(false);
-    if (lastOrderId) {
-        router.push(`/order/${lastOrderId}`);
-    }
-    setLastOrderId(null);
   };
 
   const timeSlots = ['12:00', '12:30', '13:00', '13:30', '14:00', '20:00', '20:30', '21:00', '21:30', '22:00'];
@@ -330,16 +278,11 @@ export default function CartPage() {
   
   const canCheckout = useMemo(() => {
     if (deliveryOption === 'pickup') {
-        return true;
+      return true;
     }
-    // For delivery
-    if (user && addressSelection !== 'new') {
-        // User is using a saved address
-        return !!selectedZoneId;
-    }
-    // User is entering a manual address
-    return manualAddress.address.trim() !== '' && manualAddress.neighborhood.trim() !== '' && !!selectedZoneId;
-  }, [deliveryOption, user, addressSelection, manualAddress, selectedZoneId]);
+    // For delivery, check if a valid zone is selected
+    return !!selectedZoneId;
+  }, [deliveryOption, selectedZoneId]);
 
 
   if (!isClient || authLoading) {
@@ -568,23 +511,10 @@ export default function CartPage() {
         <BottomNav />
       </div>
 
-      <AlertDialog open={isSuccessAlertOpen} onOpenChange={setIsSuccessAlertOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¡Pedido Realizado con Éxito!</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tu pedido ha sido guardado. Se abrió WhatsApp para que lo envíes. Ahora te redirigiremos a la página de seguimiento.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={handleSuccessAlertClose}>
-              Aceptar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }
+
+    
 
     

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { cn } from '@/lib/utils';
-import { ClipboardList, Package, Loader2, Megaphone, LayoutGrid, Truck, LineChart, Settings } from 'lucide-react';
+import { ClipboardList, Package, Loader2, Megaphone, LayoutGrid, Truck, Settings, LineChart } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect } from 'react';
 
@@ -30,13 +30,13 @@ export default function AdminLayout({
   const router = useRouter();
   const { user, isAdmin, loading } = useAuth();
 
-  // useEffect(() => {
-  //   if (loading) return;
+  useEffect(() => {
+    if (loading) return;
 
-  //   if (!user || !isAdmin) {
-  //     router.push('/');
-  //   }
-  // }, [user, isAdmin, loading, router]);
+    if (!user || !isAdmin) {
+      router.push('/');
+    }
+  }, [user, isAdmin, loading, router]);
   
   if (loading) {
     return (
@@ -77,3 +77,5 @@ export default function AdminLayout({
     </div>
   );
 }
+
+    
