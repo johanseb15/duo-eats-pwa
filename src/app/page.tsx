@@ -616,7 +616,7 @@ async function getProducts(): Promise<Product[]> {
         aiHint: data.aiHint,
         category: data.category,
         options: data.options || [],
-        stock: data.stock || 0,
+        stock: data.stock === undefined ? 10 : data.stock,
       } as Product;
     });
     return productList;
@@ -695,3 +695,4 @@ export const revalidate = 60; // Revalidate every 60 seconds
     
 
     
+

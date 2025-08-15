@@ -9,11 +9,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from './ui/button';
 import { FileText, PlusCircle } from 'lucide-react';
-import React, { Suspense } from 'react';
+import React, { Suspense, useState, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { ProductCard } from './ProductCard';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { cn } from '@/lib/utils';
 
 const PromotionsCarousel = React.lazy(() => import('@/components/PromotionsCarousel'));
 const Recommendations = React.lazy(() => import('@/components/Recommendations'));
@@ -27,6 +28,7 @@ interface HomeClientProps {
 
 export default function HomeClient({ products, promotions, categories }: HomeClientProps) {
   const { user, loading: authLoading } = useAuth();
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
   const welcomeName = user ? user.displayName?.split(' ')[0] : 'invitado';
 
@@ -34,6 +36,12 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
     return (LucideIcons as any)[name] || LucideIcons.Package;
   };
 
+  const filteredProducts = useMemo(() => {
+    if (!selectedCategory) {
+      return products;
+    }
+    return products.filter(p => p.category === selectedCategory);
+  }, [products, selectedCategory]);
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-28">
@@ -63,16 +71,23 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
             Categorías
           </h2>
           {categories.length > 0 ? (
-            <div className="grid grid-cols-4 gap-4 text-center">
+             <div className="flex gap-4 text-center overflow-x-auto pb-4 -mx-4 px-4">
+                 <button onClick={() => setSelectedCategory(null)} className="flex flex-col items-center gap-2 group flex-shrink-0">
+                    <div className={cn("w-20 h-20 bg-card/80 backdrop-blur-xl rounded-2xl shadow-md flex items-center justify-center transition-all duration-300 group-hover:scale-110", !selectedCategory ? "ring-2 ring-primary" : "ring-1 ring-border")}>
+                        <LucideIcons.List className="h-9 w-9 text-primary" />
+                    </div>
+                    <span className="font-semibold text-foreground text-sm mt-1">Todas</span>
+                </button>
               {categories.map((category) => {
                   const Icon = getIcon(category.icon);
+                  const isSelected = selectedCategory === category.slug;
                   return (
-                    <Link href={`/category/${category.slug}`} key={category.id} className="flex flex-col items-center gap-2 group">
-                      <div className="w-20 h-20 bg-card/80 backdrop-blur-xl rounded-2xl shadow-md flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                    <button onClick={() => setSelectedCategory(category.slug)} key={category.id} className="flex flex-col items-center gap-2 group flex-shrink-0">
+                      <div className={cn("w-20 h-20 bg-card/80 backdrop-blur-xl rounded-2xl shadow-md flex items-center justify-center transition-all duration-300 group-hover:scale-110", isSelected ? "ring-2 ring-primary" : "ring-1 ring-border")}>
                         <Icon className="h-9 w-9 text-primary" />
                       </div>
                       <span className="font-semibold text-foreground text-sm mt-1">{category.name}</span>
-                    </Link>
+                    </button>
                   )
               })}
             </div>
@@ -112,7 +127,7 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
           </h2>
           {products.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
