@@ -43,6 +43,7 @@ export interface Order {
   id: string;
   userId: string | null; // Can be null for guest orders
   userName: string;
+  phone: string;
   items: CartItem[];
   total: number;
   subtotal: number;
