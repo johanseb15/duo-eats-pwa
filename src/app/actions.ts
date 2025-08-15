@@ -11,6 +11,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { adminApp } from '@/lib/firebase-admin';
 import { auth } from '@/lib/firebase';
 import { subDays, format } from 'date-fns';
+import { sendPasswordResetEmail } from 'firebase/auth';
 
 
 export async function fetchAllUsers() {
@@ -623,5 +624,24 @@ export async function updateRestaurantSettings(settingsData: RestaurantSettings)
     } catch (error) {
         console.error('Error updating restaurant settings:', error);
         return { success: false, error: 'Failed to update settings' };
+    }
+}
+
+// Auth Actions
+export async function sendPasswordReset(email: string) {
+    try {
+        await sendPasswordResetEmail(auth, email);
+        return { success: true };
+    } catch (error: any) {
+        console.error('Error sending password reset email:', error);
+        // Map Firebase auth errors to user-friendly messages
+        switch (error.code) {
+            case 'auth/user-not-found':
+                return { success: false, error: 'No existe un usuario con ese correo electrónico.' };
+            case 'auth/invalid-email':
+                return { success: false, error: 'El formato del correo electrónico no es válido.' };
+            default:
+                return { success: false, error: 'Ocurrió un error al intentar enviar el correo.' };
+        }
     }
 }
