@@ -99,6 +99,8 @@ export async function createOrder(input: CreateOrderInput) {
       neighborhood: input.neighborhood || null,
       address: input.address || null,
       addressDetails: input.addressDetails || null,
+      deliveryPersonId: null,
+      deliveryPersonName: null,
     };
     const docRef = await addDoc(collection(db, 'orders'), orderData);
     
@@ -211,14 +213,9 @@ export async function fetchAllOrders(): Promise<Order[]> {
   }
 }
 
-export async function updateOrderStatus(orderId: string, status: Order['status'], cancellationReason?: string) {
+export async function updateOrder(orderId: string, updateData: Partial<Order>) {
   try {
     const orderRef = doc(db, 'orders', orderId);
-    const updateData: { status: Order['status'], cancellationReason?: string } = { status };
-    
-    if (status === 'Cancelado') {
-        updateData.cancellationReason = cancellationReason || 'Sin motivo especificado.';
-    }
 
     await updateDoc(orderRef, updateData);
 
@@ -228,8 +225,8 @@ export async function updateOrderStatus(orderId: string, status: Order['status']
     revalidatePath(`/order/${orderId}`);
     return { success: true };
   } catch (error) {
-    console.error('Error updating order status:', error);
-    return { success: false, error: 'Failed to update status' };
+    console.error('Error updating order:', error);
+    return { success: false, error: 'Failed to update order' };
   }
 }
 
@@ -495,6 +492,22 @@ export async function deleteDeliveryPerson(personId: string) {
         console.error('Error deleting delivery person:', error);
         return { success: false, error: 'Failed to delete delivery person' };
     }
+}
+
+export async function fetchDeliveryPersons(): Promise<DeliveryPerson[]> {
+  try {
+    const personsCol = collection(db, 'deliveryPersons');
+    const q = query(personsCol, orderBy('name'));
+    const snapshot = await getDocs(q);
+    const personList = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as DeliveryPerson));
+    return personList;
+  } catch (error) {
+      console.error("Error fetching delivery persons:", error)
+      return []
+  }
 }
 
 
