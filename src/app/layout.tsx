@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#3B82F6', // Blue-500
+  themeColor: '#FF7F50', // Vibrant Coral
 };
 
 export default function RootLayout({
@@ -32,7 +32,7 @@ export default function RootLayout({
       <body
         className={cn(
           'min-h-screen bg-background font-sans antialiased',
-          fontPtSans.variable
+          fontPtSans.variable,
         )}
         suppressHydrationWarning={true}
       >
