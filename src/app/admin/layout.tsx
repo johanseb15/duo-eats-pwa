@@ -30,19 +30,19 @@ export default function AdminLayout({
   const router = useRouter();
   const { user, isAdmin, loading } = useAuth();
 
-  useEffect(() => {
-    if (loading) return;
+  // useEffect(() => {
+  //   if (loading) return;
 
-    if (!user || !isAdmin) {
-      router.push('/');
-    }
-  }, [user, isAdmin, loading, router]);
+  //   if (!user || !isAdmin) {
+  //     router.push('/');
+  //   }
+  // }, [user, isAdmin, loading, router]);
   
-  if (loading || !isAdmin) {
+  if (loading) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">Verificando acceso...</p>
+        <p className="mt-4 text-muted-foreground">Cargando...</p>
       </div>
     );
   }
