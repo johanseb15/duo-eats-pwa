@@ -52,7 +52,8 @@ export function ProductCard({ product }: ProductCardProps) {
                 <Image
                   src={product.image}
                   alt={product.name}
-                  fill
+                  width={112}
+                  height={112}
                   className="object-cover"
                   data-ai-hint={product.aiHint}
                 />
@@ -70,11 +71,11 @@ export function ProductCard({ product }: ProductCardProps) {
                 <div className='flex justify-between items-center mt-2'>
                     <p className="text-lg font-bold text-foreground">{currencySymbol}{product.price[currentCurrency].toFixed(2)}</p>
                     <div className="flex items-center gap-1">
-                         <Button variant="ghost" size="icon" className="rounded-full text-primary" onClick={handleFavoriteClick}>
+                         <Button variant="ghost" size="icon" className="rounded-full text-primary" onClick={handleFavoriteClick} aria-label={`Marcar ${product.name} como favorito`}>
                             <Heart className={cn("h-5 w-5", isFav && "fill-current")} />
                         </Button>
                         <SheetTrigger asChild>
-                            <Button size='icon' className='rounded-full h-9 w-9' aria-label="Añadir al carrito" disabled={product.stock <= 0}>
+                            <Button size='icon' className='rounded-full h-9 w-9' aria-label={`Añadir ${product.name} al carrito`} disabled={product.stock <= 0}>
                                 <Plus/>
                             </Button>
                         </SheetTrigger>
@@ -90,3 +91,5 @@ export function ProductCard({ product }: ProductCardProps) {
     </Sheet>
   );
 }
+
+    

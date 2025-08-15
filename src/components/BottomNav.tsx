@@ -24,10 +24,10 @@ export function BottomNav() {
 
   const navItems = [
     { href: '/', icon: 'logo', label: 'Home' },
-    { href: '/favorites', icon: Heart, label: 'Favorites' },
-    { href: '/orders', icon: ClipboardList, label: 'Orders' },
-    { href: '/cart', icon: ShoppingCart, label: 'Cart', badge: itemCount },
-    { href: user ? '/profile' : '/auth/signin', icon: User, label: 'Profile' },
+    { href: '/favorites', icon: Heart, label: 'Favoritos' },
+    { href: '/orders', icon: ClipboardList, label: 'Pedidos' },
+    { href: '/cart', icon: ShoppingCart, label: 'Carrito', badge: itemCount },
+    { href: user ? '/profile' : '/auth/signin', icon: User, label: 'Perfil' },
   ];
 
   return (
@@ -43,6 +43,7 @@ export function BottomNav() {
                 'flex flex-col items-center justify-center w-full h-full transition-colors',
                 isActive ? 'text-primary' : 'text-muted-foreground hover:text-primary'
               )}
+              aria-label={label}
             >
               <div className="relative">
                 {typeof Icon === 'string' && Icon === 'logo' ? (
@@ -56,6 +57,7 @@ export function BottomNav() {
                   </span>
                 ) : null}
               </div>
+              <span className="sr-only">{label}</span>
             </Link>
           );
         })}
@@ -63,3 +65,5 @@ export function BottomNav() {
     </nav>
   );
 }
+
+    

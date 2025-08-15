@@ -64,7 +64,8 @@ export default function PromotionsCarousel({ promotions, products }: PromotionsC
                             <Image
                                 src={promo.image}
                                 alt={promo.title}
-                                fill
+                                width={96}
+                                height={96}
                                 className="rounded-full object-cover"
                                 data-ai-hint={promo.aiHint}
                             />
@@ -85,3 +86,5 @@ export default function PromotionsCarousel({ promotions, products }: PromotionsC
     </Carousel>
   );
 }
+
+    
