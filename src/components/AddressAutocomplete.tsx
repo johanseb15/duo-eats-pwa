@@ -20,16 +20,13 @@ const defaultDeliveryZones: DeliveryZone[] = [
 
 const AddressAutocomplete = ({onAddressSelect, disabled}: AddressAutocompleteProps) => {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-  
 
   if (!apiKey) {
-    // If no API key, do not render the component.
-    // The parent will handle the fallback UI.
     return null;
   }
 
   return (
-    <APIProvider apiKey={apiKey} libraries={['places']}>
+    <APIProvider apiKey={apiKey}>
       <AutocompleteComponent onAddressSelect={onAddressSelect} disabled={disabled} />
     </APIProvider>
   );
@@ -110,7 +107,9 @@ function AutocompleteComponent({onAddressSelect, disabled}: AddressAutocompleteP
     });
 
     return () => {
-        google.maps.event.removeListener(listener);
+        if (typeof google !== 'undefined') {
+          google.maps.event.removeListener(listener);
+        }
     }
   }, [autocomplete, onAddressSelect, deliveryZones, toast]);
 
