@@ -583,6 +583,14 @@ const testPromotions: Promotion[] = [
     "image": 'https://placehold.co/600x400.png',
     "aiHint": 'pizza offer',
   },
+  {
+    id: '3',
+    title: '¡Prueba la Clásica!',
+    description: 'La favorita de todos, ¡pídela ahora!',
+    image: 'https://placehold.co/400x400.png',
+    aiHint: 'classic burger',
+    productId: 'p1',
+  },
 ];
 
 
@@ -636,6 +644,7 @@ async function getPromotions(): Promise<Promotion[]> {
               description: data.description,
               image: data.image,
               aiHint: data.aiHint,
+              productId: data.productId,
           } as Promotion;
       });
       return promotionList;
