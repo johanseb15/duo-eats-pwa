@@ -171,9 +171,19 @@ export default function CartPage() {
             setDeliveryCost(0);
             setSelectedZoneId(null);
         }
+      } else {
+        // Handle manual address input logic here again in case deliveryZones load late
+        const zone = deliveryZones.find(z => z.neighborhoods.some(n => n.toLowerCase() === manualAddress.neighborhood.toLowerCase()));
+         if (zone) {
+            setDeliveryCost(zone.cost);
+            setSelectedZoneId(zone.id);
+        } else {
+            setDeliveryCost(0);
+            setSelectedZoneId(null);
+        }
       }
     }
-  }, [deliveryOption, addressSelection, user, userAddresses, loadingZones, deliveryZones]);
+  }, [deliveryOption, addressSelection, user, userAddresses, loadingZones, deliveryZones, manualAddress.neighborhood]);
 
   const { subtotal, finalSubtotal } = useMemo(() => {
     const rawSubtotal = items.reduce(
@@ -315,13 +325,17 @@ export default function CartPage() {
   
   const canCheckout = useMemo(() => {
     if (deliveryOption === 'pickup') {
-        return true;
+      return true;
     }
-    if (deliveryOption === 'delivery' && selectedZoneId) {
-        return true;
+    if (deliveryOption === 'delivery') {
+      if (user && addressSelection !== 'new') {
+        return !!selectedZoneId; // For saved addresses, just need a valid zone
+      }
+      // For manual address or guests
+      return manualAddress.address.trim() !== '' && manualAddress.neighborhood.trim() !== '' && !!selectedZoneId;
     }
     return false;
-  }, [deliveryOption, selectedZoneId]);
+  }, [deliveryOption, selectedZoneId, manualAddress, user, addressSelection]);
 
 
   if (!isClient || authLoading) {
@@ -565,3 +579,5 @@ export default function CartPage() {
     </div>
   );
 }
+
+    
