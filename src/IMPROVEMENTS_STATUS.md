@@ -29,9 +29,8 @@ Este documento realiza un seguimiento de las mejoras propuestas para la PWA Duo 
 
 ### 4. Confirmación de Pedido en la App (Sin Redirección a WhatsApp)
 - **Descripción:** Modificar el flujo de checkout para que, después de confirmar el pedido, el cliente vea una página de éxito y seguimiento directamente en la aplicación. El pedido se envía al panel del administrador sin requerir que el cliente envíe un mensaje de WhatsApp. El número de teléfono se captura para contacto manual si es necesario.
-- **Estado:** ⚙️ **En Progreso**
-- **Progreso:** `[█████     ]` (50%)
-- **Notas:** La lógica para crear el pedido sin la redirección a WhatsApp está parcialmente implementada. Falta refinar la página de confirmación y el flujo post-pedido.
+- **Estado:** ✅ **Completado**
+- **Progreso:** `[██████████]` (100%)
 
 ---
 
@@ -41,3 +40,4 @@ Este documento realiza un seguimiento de las mejoras propuestas para la PWA Duo 
 - **Progreso:** `[█████     ]` (50%)
 - **Notas:** Las funciones de backend (`actions`) para leer y escribir los ajustes en Firestore ya están creadas. Falta implementar el formulario y la interfaz en el panel de administración.
 
+    

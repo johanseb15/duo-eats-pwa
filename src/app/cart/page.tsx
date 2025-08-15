@@ -26,15 +26,6 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
 import { Separator } from '@/components/ui/separator';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Textarea } from '@/components/ui/textarea';
@@ -44,7 +35,7 @@ const currentCurrency: Currency = 'ARS';
 const currencySymbol = '$';
 
 const getCartItemId = (item: CartItem) => {
-    const optionsIdentifier = item.selectedOptions && Object.keys(item.selectedOptions).length > 0
+    const optionsIdentifier = (item.selectedOptions && Object.keys(item.selectedOptions).length > 0)
       ? Object.entries(item.selectedOptions).sort().map(([key, value]) => `${key}:${value}`).join('-')
       : '';
     return `${item.id}-${optionsIdentifier}`;
@@ -255,7 +246,11 @@ export default function CartPage() {
 
     if (result.success && result.orderId) {
         clearCart();
-        router.push(`/order/confirm/${result.orderId}`);
+        toast({
+          title: '¡Pedido realizado!',
+          description: 'Tu pedido ha sido creado y está siendo procesado.',
+        });
+        router.push(`/order/${result.orderId}`);
     } else {
         toast({
           title: 'Error al crear el pedido',
@@ -502,7 +497,7 @@ export default function CartPage() {
 
                 <div className="md:mt-6 md:p-0 p-4 md:static md:bottom-auto md:left-auto md:right-auto fixed bottom-24 left-0 right-0">
                   <Button onClick={handleCheckout} size="lg" className="w-full rounded-full text-lg py-7 bg-green-500 hover:bg-green-600 text-white" disabled={isProcessing || !canCheckout}>
-                      {isProcessing ? <Loader2 className="animate-spin" /> : 'Finalizar y Enviar por WhatsApp'}
+                      {isProcessing ? <Loader2 className="animate-spin" /> : 'Finalizar Pedido'}
                     </Button>
                 </div>
             </div>
@@ -514,7 +509,5 @@ export default function CartPage() {
     </>
   );
 }
-
-    
 
     
