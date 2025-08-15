@@ -5,7 +5,7 @@ import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommen
 import { suggestCategoryIcon } from '@/ai/flows/suggest-category-icon';
 import { db } from '@/lib/firebase';
 import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone, DashboardAnalytics, ProductSale, OrderOverTime, CartItem, UserAddress, RestaurantSettings } from '@/lib/types';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, limit, getDoc, runTransaction, writeBatch } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, limit, getDoc, runTransaction, writeBatch, setDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { getAuth } from 'firebase-admin/auth';
 import { adminApp } from '@/lib/firebase-admin';
@@ -617,7 +617,7 @@ export async function updateRestaurantSettings(settingsData: RestaurantSettings)
         const settingsRef = doc(db, 'settings', SETTINGS_DOC_ID);
         // Use set with merge: true to create the document if it doesn't exist,
         // or update it if it does.
-        await updateDoc(settingsRef, settingsData);
+        await setDoc(settingsRef, settingsData, { merge: true });
         revalidatePath('/admin/settings');
         return { success: true };
     } catch (error) {
