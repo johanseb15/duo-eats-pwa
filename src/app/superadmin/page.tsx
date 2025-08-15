@@ -1,4 +1,6 @@
 
+'use client';
+
 import { fetchAllUsers } from "@/app/actions";
 import {
   Table,
@@ -13,12 +15,66 @@ import { Badge } from "@/components/ui/badge";
 import { UserCog } from "lucide-react";
 import { SuperAdminActions } from "@/components/SuperAdminActions";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
+type User = {
+    uid: string;
+    email?: string;
+    displayName?: string;
+    photoURL?: string;
+};
 
-export default async function SuperAdminPage() {
-    const users = await fetchAllUsers();
+export default function SuperAdminPage() {
+    const { user, isSuperAdmin, loading: authLoading } = useAuth();
+    const router = useRouter();
+    const [users, setUsers] = useState<User[]>([]);
+    const [loading, setLoading] = useState(true);
+
     const adminUids = (process.env.NEXT_PUBLIC_ADMIN_UIDS || "").split(',');
     const superAdminUids = (process.env.NEXT_PUBLIC_SUPERADMIN_UIDS || "").split(',');
+    
+    // useEffect(() => {
+    //     if (!authLoading && !isSuperAdmin) {
+    //         router.push('/');
+    //     }
+    // }, [user, isSuperAdmin, authLoading, router]);
+
+    useEffect(() => {
+        const loadUsers = async () => {
+            setLoading(true);
+            const fetchedUsers = await fetchAllUsers();
+            setUsers(fetchedUsers);
+            setLoading(false);
+        };
+        loadUsers();
+    }, []);
+    
+    if (authLoading || loading) {
+        return (
+             <div className="space-y-8">
+                 <div className="flex items-center gap-4">
+                     <UserCog className="h-8 w-8 text-purple-500" />
+                     <div>
+                        <h1 className="text-3xl font-bold">Panel de Superadministrador</h1>
+                         <p className="text-muted-foreground">
+                            Gestión avanzada de usuarios y datos de la aplicación.
+                        </p>
+                     </div>
+                </div>
+                <div className="rounded-2xl border">
+                    <div className="p-6">
+                        <Skeleton className="h-6 w-1/2" />
+                        <Skeleton className="h-4 w-3/4 mt-2" />
+                    </div>
+                    <Skeleton className="h-48 w-full" />
+                </div>
+            </div>
+        )
+    }
+    
 
     return (
         <div className="space-y-8">
