@@ -12,8 +12,7 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "import:data": "tsx src/lib/import-script.ts",
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.14.1",
@@ -65,10 +64,10 @@
     "zustand": "4.4.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.45.3",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "cypress": "^13.13.1",
     "genkit-cli": "^1.14.1",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
