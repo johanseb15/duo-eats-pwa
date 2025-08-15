@@ -7,8 +7,8 @@ Este documento realiza un seguimiento de las mejoras propuestas para la PWA Duo 
 
 ### 1. Rediseño de UI y Tema Oscuro Mejorado
 - **Descripción:** Refinar la paleta de colores y los estilos de la aplicación para una apariencia más moderna y profesional, con especial atención al modo oscuro.
-- **Estado:** ⏳ **Pendiente**
-- **Progreso:** `[          ]` (0%)
+- **Estado:** ✅ **Completado**
+- **Progreso:** `[██████████]` (100%)
 
 ---
 

@@ -1,15 +1,9 @@
 
 import type { Metadata, Viewport } from 'next';
-import { Playfair_Display, PT_Sans } from 'next/font/google';
+import { PT_Sans } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
-
-const fontPlayfair = Playfair_Display({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-playfair',
-});
 
 const fontPtSans = PT_Sans({
   subsets: ['latin'],
@@ -25,7 +19,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#FF7F50',
+  themeColor: '#3B82F6', // Blue-500
 };
 
 export default function RootLayout({
@@ -37,8 +31,7 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <body
         className={cn(
-          'min-h-screen bg-background font-pt-sans antialiased',
-          fontPlayfair.variable,
+          'min-h-screen bg-background font-sans antialiased',
           fontPtSans.variable
         )}
         suppressHydrationWarning={true}
