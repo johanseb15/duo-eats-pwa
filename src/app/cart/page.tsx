@@ -88,6 +88,8 @@ export default function CartPage() {
   // Success Dialog
   const [isSuccessAlertOpen, setIsSuccessAlertOpen] = useState(false);
   const [lastOrderId, setLastOrderId] = useState<string | null>(null);
+  
+  const hasGoogleMapsKey = useMemo(() => !!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY, []);
 
   useEffect(() => {
     setIsClient(true);
@@ -141,6 +143,22 @@ export default function CartPage() {
     setDeliveryCost(cost);
     setSelectedZoneId(zoneId);
   };
+
+  const handleManualNeighborhoodChange = (neighborhood: string) => {
+    setManualAddress(prev => ({...prev, neighborhood}));
+    const zone = deliveryZones.find(z => z.neighborhoods.some(n => n.toLowerCase() === neighborhood.toLowerCase()));
+    if (zone) {
+        setDeliveryCost(zone.cost);
+        setSelectedZoneId(zone.id);
+         toast({
+            title: "¡Zona encontrada!",
+            description: `Costo de envío para ${neighborhood}: $${zone.cost.toFixed(2)}`
+        });
+    } else {
+        setDeliveryCost(0);
+        setSelectedZoneId(null);
+    }
+  }
   
   useEffect(() => {
     if (loadingZones) return;
@@ -431,10 +449,23 @@ export default function CartPage() {
                                     </Label>
                                 </RadioGroup>
                             )}
-                             <div className={cn((user && userAddresses.length > 0 && addressSelection !== 'new') && 'hidden')}>
-                                <Suspense fallback={<Skeleton className='h-10 w-full' />}>
-                                    <AddressAutocomplete onAddressSelect={handleAddressSelect} disabled={deliveryOption === 'pickup'} />
-                                </Suspense>
+                             <div className={cn("space-y-4", (user && userAddresses.length > 0 && addressSelection !== 'new') && 'hidden')}>
+                                {hasGoogleMapsKey ? (
+                                    <Suspense fallback={<Skeleton className='h-10 w-full' />}>
+                                        <AddressAutocomplete onAddressSelect={handleAddressSelect} disabled={deliveryOption === 'pickup'} />
+                                    </Suspense>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <div>
+                                            <Label htmlFor="manual-address">Dirección</Label>
+                                            <Input id="manual-address" placeholder="Ej: Av. Corrientes 1234" value={manualAddress.address} onChange={e => setManualAddress(prev => ({...prev, address: e.target.value}))} />
+                                        </div>
+                                         <div>
+                                            <Label htmlFor="manual-neighborhood">Barrio</Label>
+                                            <Input id="manual-neighborhood" placeholder="Ej: Palermo" value={manualAddress.neighborhood} onChange={e => handleManualNeighborhoodChange(e.target.value)} />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                       )}

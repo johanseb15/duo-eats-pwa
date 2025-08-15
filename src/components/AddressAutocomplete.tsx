@@ -23,12 +23,9 @@ const AddressAutocomplete = ({onAddressSelect, disabled}: AddressAutocompletePro
   
 
   if (!apiKey) {
-    return (
-      <div className="text-destructive">
-        La clave de API de Google Maps no está configurada. Por favor, añada
-        NEXT_PUBLIC_GOOGLE_MAPS_API_KEY a su .env
-      </div>
-    );
+    // If no API key, do not render the component.
+    // The parent will handle the fallback UI.
+    return null;
   }
 
   return (
