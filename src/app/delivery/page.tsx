@@ -1,26 +1,26 @@
 
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Power, Loader2, Bike, Bell, History } from 'lucide-react';
+import { Power, Loader2, Bike, History, Wallet, Package } from 'lucide-react';
 import type { DeliveryPerson, Order } from '@/lib/types';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
-import { fetchAssignedOrders } from '../actions';
+import { fetchAssignedOrders, fetchCompletedOrdersForDeliveryPerson } from '../actions';
 import { AssignedOrderCard } from '@/components/AssignedOrderCard';
+import { isToday } from 'date-fns';
 
-// This is a simplified version. In a real app, you'd have a more robust
-// way to link a Firebase User UID to a DeliveryPerson document ID.
-// For now, we'll assume the UID matches the document ID for simplicity.
+const currencySymbol = '$';
+
 async function getDeliveryPerson(uid: string): Promise<DeliveryPerson | null> {
     if (!uid) return null;
     try {
@@ -56,14 +56,19 @@ export default function DeliveryPage() {
 
   const [deliveryPerson, setDeliveryPerson] = useState<DeliveryPerson | null>(null);
   const [assignedOrders, setAssignedOrders] = useState<Order[]>([]);
+  const [completedOrders, setCompletedOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [isUpdatingStatus, startStatusUpdate] = useTransition();
 
    const loadData = async (person: DeliveryPerson | null) => {
         if (!person) return;
         try {
-            const orders = await fetchAssignedOrders(person.id);
-            setAssignedOrders(orders);
+            const [assigned, completed] = await Promise.all([
+                fetchAssignedOrders(person.id),
+                fetchCompletedOrdersForDeliveryPerson(person.id)
+            ]);
+            setAssignedOrders(assigned);
+            setCompletedOrders(completed);
         } catch (err) {
             toast({ title: 'Error', description: 'No se pudieron cargar los pedidos asignados.', variant: 'destructive'});
         }
@@ -99,6 +104,15 @@ export default function DeliveryPage() {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, authLoading, router]);
+  
+  const { completedToday, totalCollectedToday } = useMemo(() => {
+      const todayOrders = completedOrders.filter(order => isToday(new Date(order.createdAt)));
+      const total = todayOrders.reduce((sum, order) => sum + order.total, 0);
+      return {
+          completedToday: todayOrders,
+          totalCollectedToday: total
+      };
+  }, [completedOrders]);
 
   const handleStatusChange = (isActive: boolean) => {
     if (!deliveryPerson) return;
@@ -189,6 +203,24 @@ export default function DeliveryPage() {
                 </div>
             </CardContent>
         </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Resumen de Hoy</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col items-center justify-center p-4 bg-card/50 rounded-lg">
+                    <Package className="h-8 w-8 mb-2 text-primary" />
+                    <p className="text-2xl font-bold">{completedToday.length}</p>
+                    <p className="text-sm text-muted-foreground">Pedidos Completados</p>
+                </div>
+                <div className="flex flex-col items-center justify-center p-4 bg-card/50 rounded-lg">
+                    <Wallet className="h-8 w-8 mb-2 text-primary" />
+                    <p className="text-2xl font-bold">{currencySymbol}{totalCollectedToday.toFixed(2)}</p>
+                    <p className="text-sm text-muted-foreground">Total Recaudado</p>
+                </div>
+            </CardContent>
+        </Card>
         
         <Separator/>
 
@@ -205,6 +237,26 @@ export default function DeliveryPage() {
                 ) : (
                     <div className="text-center py-10 bg-card/50 rounded-2xl border-dashed border-2">
                          <p className="text-muted-foreground">No tienes pedidos asignados por el momento.</p>
+                    </div>
+                )}
+            </div>
+        </div>
+
+        <Separator/>
+        
+        <div>
+            <div className="flex items-center gap-3 mb-4">
+                 <History className="h-6 w-6"/>
+                 <h2 className="text-2xl font-bold">Historial de Hoy ({completedToday.length})</h2>
+            </div>
+             <div className="space-y-4">
+                {completedToday.length > 0 ? (
+                    completedToday.map(order => (
+                        <AssignedOrderCard key={order.id} order={order} onUpdate={handleOrderUpdate} isHistory />
+                    ))
+                ) : (
+                    <div className="text-center py-10 bg-card/50 rounded-2xl border-dashed border-2">
+                         <p className="text-muted-foreground">Aún no has completado ninguna entrega hoy.</p>
                     </div>
                 )}
             </div>

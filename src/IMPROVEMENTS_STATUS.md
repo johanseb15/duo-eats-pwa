@@ -59,8 +59,8 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
   - [✅] Integrar con Google Maps/Waze para la ruta.
 - **[✅] Gestión de Cobros:**
   - [✅] Confirmar pago (efectivo, POS).
-- **[ ] Historial de Entregas:**
-  - [ ] Ver pedidos completados y total recaudado en el día.
+- **[✅] Historial de Entregas:**
+  - [✅] Ver pedidos completados y total recaudado en el día.
 
 ---
 

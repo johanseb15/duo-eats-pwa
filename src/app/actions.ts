@@ -240,6 +240,31 @@ export async function fetchAssignedOrders(deliveryPersonId: string): Promise<Ord
     }
 }
 
+export async function fetchCompletedOrdersForDeliveryPerson(deliveryPersonId: string): Promise<Order[]> {
+    if (!deliveryPersonId) return [];
+    try {
+        const ordersCol = collection(db, 'orders');
+        const q = query(
+            ordersCol,
+            where('deliveryPersonId', '==', deliveryPersonId),
+            where('status', '==', 'Entregado'),
+            orderBy('createdAt', 'desc')
+        );
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
+            } as Order;
+        });
+    } catch (error) {
+        console.error("Error fetching completed orders: ", error);
+        return [];
+    }
+}
+
 export async function updateOrder(orderId: string, updateData: Partial<Order>) {
   try {
     const orderRef = doc(db, 'orders', orderId);

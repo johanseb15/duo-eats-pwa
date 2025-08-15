@@ -64,9 +64,10 @@ const getPaymentIcon = (method: Order['paymentMethod']) => {
 interface AssignedOrderCardProps {
     order: Order;
     onUpdate: () => Promise<void>;
+    isHistory?: boolean;
 }
 
-export function AssignedOrderCard({ order, onUpdate }: AssignedOrderCardProps) {
+export function AssignedOrderCard({ order, onUpdate, isHistory = false }: AssignedOrderCardProps) {
     const { toast } = useToast();
     const [isUpdating, startUpdateTransition] = useTransition();
     const [isConfirmAlertOpen, setIsConfirmAlertOpen] = useState(false);
@@ -181,25 +182,27 @@ export function AssignedOrderCard({ order, onUpdate }: AssignedOrderCardProps) {
                     </div>
 
                 </CardContent>
-                <CardFooter className="flex-col gap-2 justify-end items-center bg-muted/20 p-4">
-                    <div className="w-full flex sm:flex-row gap-2 justify-between items-center">
-                            <p className="text-sm font-medium">Marcar como:</p>
-                            <Select
-                                value={order.status}
-                                onValueChange={(newStatus: Order['status']) => handleStatusChange(newStatus)}
-                                disabled={isUpdating}
-                            >
-                                <SelectTrigger className="w-full sm:w-[180px]">
-                                {isUpdating ? <Loader2 className="animate-spin mr-2"/> : <SelectValue placeholder="Cambiar estado" />}
-                                </SelectTrigger>
-                                <SelectContent>
-                                {deliveryStatuses.map(status => (
-                                    <SelectItem key={status} value={status}>{status}</SelectItem>
-                                ))}
-                                </SelectContent>
-                            </Select>
-                    </div>
-                </CardFooter>
+                {!isHistory && (
+                    <CardFooter className="flex-col gap-2 justify-end items-center bg-muted/20 p-4">
+                        <div className="w-full flex sm:flex-row gap-2 justify-between items-center">
+                                <p className="text-sm font-medium">Marcar como:</p>
+                                <Select
+                                    value={order.status}
+                                    onValueChange={(newStatus: Order['status']) => handleStatusChange(newStatus)}
+                                    disabled={isUpdating}
+                                >
+                                    <SelectTrigger className="w-full sm:w-[180px]">
+                                    {isUpdating ? <Loader2 className="animate-spin mr-2"/> : <SelectValue placeholder="Cambiar estado" />}
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                    {deliveryStatuses.map(status => (
+                                        <SelectItem key={status} value={status}>{status}</SelectItem>
+                                    ))}
+                                    </SelectContent>
+                                </Select>
+                        </div>
+                    </CardFooter>
+                )}
             </Card>
             <AlertDialog open={isConfirmAlertOpen} onOpenChange={setIsConfirmAlertOpen}>
                 <AlertDialogContent>
