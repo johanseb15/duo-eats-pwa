@@ -71,7 +71,7 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
             Categorías
           </h2>
           {categories.length > 0 ? (
-             <div className="flex gap-4 text-center overflow-x-auto pb-4 -mx-4 px-4">
+             <div className="flex gap-4 text-center overflow-x-auto pb-4 -mx-4 px-4 no-scrollbar">
                  <button onClick={() => setSelectedCategory(null)} className="flex flex-col items-center gap-2 group flex-shrink-0">
                     <div className={cn("w-20 h-20 bg-card/80 backdrop-blur-xl rounded-2xl shadow-md flex items-center justify-center transition-all duration-300 group-hover:scale-110", !selectedCategory ? "ring-2 ring-primary" : "ring-1 ring-border")}>
                         <LucideIcons.List className="h-9 w-9 text-primary" />
