@@ -1,40 +1,57 @@
+# Plan de Mejoras y Estado de Avance (Hoja de Ruta)
 
-# Plan de Mejoras y Estado de Avance
-
-Este documento realiza un seguimiento de las mejoras propuestas para la PWA Duo Eats, inspiradas en el análisis de `pedidosfree.com.ar` y las necesidades detectadas.
-
----
-
-### 1. Rediseño de UI y Tema Oscuro Mejorado
-- **Descripción:** Refinar la paleta de colores y los estilos de la aplicación para una apariencia más moderna y profesional, con especial atención al modo oscuro.
-- **Estado:** ⚙️ **En Progreso**
-- **Progreso:** `[███████   ]` (75%)
-- **Notas:** Se está implementando una nueva identidad visual basada en el análisis de diseño, utilizando una paleta de colores y tipografía renovadas. La navegación y el feedback visual están siendo mejorados.
+Este documento describe el plan de desarrollo para la PWA de Pedidos, basado en el mapa de funcionalidades definido.
 
 ---
 
-### 2. Product Cards con Selector de Cantidad
-- **Descripción:** Añadir botones `+/-` directamente en las tarjetas de producto en la página de inicio. Una vez que un producto está en el carrito, la tarjeta debería mostrar la cantidad actual y permitir modificarla rápidamente sin abrir el panel de detalles.
-- **Estado:** ✅ **Completado**
-- **Progreso:** `[██████████]` (100%)
+### Módulo Cliente (Experiencia de Usuario)
+
+- **Catálogo y Menú Offline:** Permitir la navegación y selección de productos sin conexión.
+  - **Estado:** ⏳ `Pendiente`
+- **Checkout Rápido y Eficiente:** Optimizar el proceso de finalización de compra.
+  - **Estado:** ⚙️ `En Progreso`
+- **Autenticación (Registro/Login):** Sistema de usuarios para una experiencia personalizada.
+  - **Estado:** ✅ `Completado`
+- **Favoritos y Repetir Pedido:** Funcionalidades para clientes recurrentes.
+  - **Estado:** ✅ `Completado`
+- **Carrito Persistente:** Guardar el carrito entre sesiones.
+  - **Estado:** ✅ `Completado`
+- **Seguimiento de Pedidos en Tiempo Real:** Actualizaciones en vivo del estado del pedido.
+  - **Estado:** ✅ `Completado`
+- **Notificaciones Push:** Avisos sobre el estado del pedido.
+  - **Estado:** ⏳ `Pendiente`
 
 ---
 
-### 3. Chatbot Asistente con IA
-- **Descripción:** Implementar un chatbot flotante utilizando Genkit. El bot debe poder responder preguntas de los clientes sobre horarios, días de apertura y otra información de la tienda, consultando los datos desde Firestore en tiempo real.
-- **Estado:** ✅ **Completado**
-- **Progreso:** `[██████████]` (100%)
+### Módulo de Administración (Gestión del Negocio)
+
+- **Control de Caja y Recaudación:** Herramientas para la gestión financiera.
+  - **Estado:** ⏳ `Pendiente`
+- **Reportes y Analíticas:** Dashboard con métricas clave de ventas y rendimiento.
+  - **Estado:** ✅ `Completado`
+- **Gestión de Roles y Permisos:** Diferentes niveles de acceso para el personal.
+  - **Estado:** ✅ `Completado` (Requiere mejoras de seguridad)
+- **Gestión de Repartidores:** Asignación y seguimiento de repartidores.
+  - **Estado:** ⏳ `Pendiente`
 
 ---
 
-### 4. Confirmación de Pedido en la App (Sin Redirección a WhatsApp)
-- **Descripción:** Modificar el flujo de checkout para que, después de confirmar el pedido, el cliente vea una página de éxito y seguimiento directamente en la aplicación. El pedido se envía al panel del administrador sin requerir que el cliente envíe un mensaje de WhatsApp. El número de teléfono se captura para contacto manual si es necesario.
-- **Estado:** ✅ **Completado**
-- **Progreso:** `[██████████]` (100%)
+### Módulo Multi-Inquilino (Escalabilidad)
+
+- **Soporte para Múltiples Locales:** Capacidad para que la plataforma sea usada por diferentes restaurantes.
+  - **Estado:** ⏳ `Pendiente`
 
 ---
 
-### 5. Gestión de Ajustes de la Tienda desde el Admin
-- **Descripción:** Crear una sección en el panel de administración (`/admin/settings`) donde el dueño del local pueda gestionar fácilmente los horarios de apertura, días de atención y el número de WhatsApp para contacto.
-- **Estado:** ✅ **Completado**
-- **Progreso:** `[██████████]` (100%)
+### Capacidades Técnicas (Fundamento de la PWA)
+
+- **Diseño Responsivo:** Adaptación a cualquier dispositivo (móvil, tablet, escritorio).
+  - **Estado:** ✅ `Completado`
+- **Optimización de Rendimiento:** Carga rápida de la aplicación.
+  - **Estado:** ⚙️ `En Progreso`
+- **Instalable (PWA):** Permitir que los usuarios "instalen" la app en su dispositivo.
+  - **Estado:** ✅ `Completado`
+- **Offline-First:** Garantizar funcionalidad básica sin conexión a internet.
+  - **Estado:** ⏳ `Pendiente`
+- **Disponibilidad de la Tienda:** Permitir al admin configurar si la tienda está abierta o cerrada.
+  - **Estado:** ✅ `Completado`

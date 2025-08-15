@@ -385,7 +385,7 @@ function OptionField({ control, optionIndex, remove }: OptionFieldProps) {
                                 <FormItem>
                                      <FormLabel className="sr-only">Modificador de Precio</FormLabel>
                                     <FormControl>
-                                        <Input type="number" step="0.01" placeholder="Ej: 800" {...field} />
+                                        <Input type="number" step="0.01" placeholder="+/-" {...field} />
                                     </FormControl>
                                      <FormMessage />
                                 </FormItem>
