@@ -322,7 +322,13 @@ export default function CartPage() {
   }
   
   const canCheckout = useMemo(() => {
-    return deliveryOption === 'pickup' || (deliveryOption === 'delivery' && selectedZoneId !== null);
+    if (deliveryOption === 'pickup') {
+        return true;
+    }
+    if (deliveryOption === 'delivery' && selectedZoneId) {
+        return true;
+    }
+    return false;
   }, [deliveryOption, selectedZoneId]);
 
 
