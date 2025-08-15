@@ -168,6 +168,15 @@ export default function ProfilePage() {
     if (lowerName.includes('trabajo')) return <Briefcase className="w-5 h-5 text-primary" />;
     return <MapPin className="w-5 h-5 text-primary" />;
   }
+  
+  const FormSkeleton = () => (
+    <div className="space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-10 w-full mt-4" />
+    </div>
+  );
 
   return (
     <>
@@ -256,7 +265,7 @@ export default function ProfilePage() {
                           <DialogHeader>
                               <DialogTitle>{selectedAddress ? 'Editar Dirección' : 'Añadir Nueva Dirección'}</DialogTitle>
                           </DialogHeader>
-                          <Suspense fallback={<Skeleton className="h-48 w-full" />}>
+                          <Suspense fallback={<FormSkeleton />}>
                             <AddressForm
                                 userId={user.uid}
                                 address={selectedAddress}
@@ -338,5 +347,3 @@ export default function ProfilePage() {
     </>
   );
 }
-
-    

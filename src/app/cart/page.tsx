@@ -10,7 +10,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Minus, Plus, Trash2, ShoppingCart, Loader2, CalendarIcon, Clock, Home, Briefcase, MapPin } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingCart, Loader2, Calendar as CalendarIcon, Clock, Home, Briefcase, MapPin } from 'lucide-react';
 import { useState, useEffect, useMemo, lazy, Suspense, useCallback } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Currency, CartItem, UserAddress, DeliveryZone, RestaurantSettings } from '@/lib/types';
@@ -520,7 +520,7 @@ export default function CartPage() {
         )}
       </main>
       <BottomNav />
-      <AlertDialog open={isSuccessAlertOpen} onOpenChange={handleSuccessAlertClose}>
+      <AlertDialog open={isSuccessAlertOpen} onOpenChange={setIsSuccessAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¡Pedido Realizado con Éxito!</AlertDialogTitle>
@@ -538,7 +538,3 @@ export default function CartPage() {
     </div>
   );
 }
-
-    
-
-    
