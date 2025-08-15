@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Minus, Plus, Trash2, ShoppingCart, Loader2, Calendar as CalendarIcon, Clock, Home, Briefcase, MapPin } from 'lucide-react';
-import { useState, useEffect, useMemo, lazy, Suspense, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Currency, CartItem, UserAddress, DeliveryZone, RestaurantSettings } from '@/lib/types';
 import { useAuth } from '@/hooks/useAuth';
@@ -38,8 +38,6 @@ import {
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-
-const AddressAutocomplete = lazy(() => import('@/components/AddressAutocomplete'));
 
 const currentCurrency: Currency = 'ARS';
 const currencySymbol = '$';
@@ -89,8 +87,6 @@ export default function CartPage() {
   const [isSuccessAlertOpen, setIsSuccessAlertOpen] = useState(false);
   const [lastOrderId, setLastOrderId] = useState<string | null>(null);
   
-  const hasGoogleMapsKey = useMemo(() => !!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY, []);
-
   useEffect(() => {
     setIsClient(true);
     const fetchInitialData = async () => {
@@ -138,12 +134,6 @@ export default function CartPage() {
     }
   }, [user]);
   
-  const handleAddressSelect = (address: string, neighborhood: string | null, cost: number, zoneId: string | null) => {
-    setManualAddress({ address, neighborhood: neighborhood || '' });
-    setDeliveryCost(cost);
-    setSelectedZoneId(zoneId);
-  };
-
   const handleManualNeighborhoodChange = (neighborhood: string) => {
     setManualAddress(prev => ({...prev, neighborhood}));
     const zone = deliveryZones.find(z => z.neighborhoods.some(n => n.toLowerCase() === neighborhood.toLowerCase()));
@@ -456,22 +446,16 @@ export default function CartPage() {
                                 </RadioGroup>
                             )}
                              <div className={cn("space-y-4", (user && userAddresses.length > 0 && addressSelection !== 'new') && 'hidden')}>
-                                {hasGoogleMapsKey ? (
-                                    <Suspense fallback={<Skeleton className='h-10 w-full' />}>
-                                        <AddressAutocomplete onAddressSelect={handleAddressSelect} disabled={deliveryOption === 'pickup'} />
-                                    </Suspense>
-                                ) : (
-                                    <div className="space-y-2">
-                                        <div>
-                                            <Label htmlFor="manual-address">Dirección</Label>
-                                            <Input id="manual-address" placeholder="Ej: Av. Corrientes 1234" value={manualAddress.address} onChange={e => setManualAddress(prev => ({...prev, address: e.target.value}))} />
-                                        </div>
-                                         <div>
-                                            <Label htmlFor="manual-neighborhood">Barrio</Label>
-                                            <Input id="manual-neighborhood" placeholder="Ej: Palermo" value={manualAddress.neighborhood} onChange={e => handleManualNeighborhoodChange(e.target.value)} />
-                                        </div>
+                                <div className="space-y-2">
+                                    <div>
+                                        <Label htmlFor="manual-address">Dirección</Label>
+                                        <Input id="manual-address" placeholder="Ej: Av. Corrientes 1234" value={manualAddress.address} onChange={e => setManualAddress(prev => ({...prev, address: e.target.value}))} />
                                     </div>
-                                )}
+                                     <div>
+                                        <Label htmlFor="manual-neighborhood">Barrio</Label>
+                                        <Input id="manual-neighborhood" placeholder="Ej: Palermo" value={manualAddress.neighborhood} onChange={e => handleManualNeighborhoodChange(e.target.value)} />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                       )}

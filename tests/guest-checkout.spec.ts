@@ -33,13 +33,11 @@ test.describe('Flujo de Checkout como Invitado', () => {
     await page.getByLabel('Nombre').fill('Cliente de Prueba');
 
     // Seleccionar la opción de envío a domicilio (ya está por defecto)
-    // Escribir una dirección en el autocompletado de Google
-    const addressInput = page.getByPlaceholder('Escribe tu calle y número...');
-    await addressInput.fill('Av. Corrientes 1234, Buenos Aires');
+    // Escribir una dirección manualmente
+    await page.getByLabel('Dirección').fill('Av. Corrientes 1234');
+    await page.getByLabel('Barrio').fill('Palermo');
     
-    // Esperamos a que Google Maps responda y aparezca el costo de envío
-    // Playwright maneja las esperas automáticas, pero una espera explícita puede ser útil para APIs lentas.
-    await page.waitForTimeout(2000); 
+    // Esperamos a que aparezca el costo de envío
     await expect(page.getByText('A calcular')).not.toBeVisible();
     await expect(page.getByText(/^\$\d+\.\d{2}$/).or(page.getByText('Gratis'))).toBeVisible();
 

@@ -9,12 +9,12 @@ const withPWA = require('next-pwa')({
 
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' https://maps.googleapis.com https://apis.google.com;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline';
   child-src 'self' https://google.com https://www.google.com;
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: https://placehold.co https://firebasestorage.googleapis.com;
   font-src 'self' data:;
-  connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com wss://firestore.googleapis.com https://maps.googleapis.com;
+  connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com wss://firestore.googleapis.com;
   frame-src 'self' https://duo-eats.firebaseapp.com;
 `;
 
