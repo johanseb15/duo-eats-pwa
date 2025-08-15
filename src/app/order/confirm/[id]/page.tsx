@@ -20,9 +20,9 @@ const WhatsAppRedirect = ({ order, settings }: { order: Order | null, settings: 
     const router = useRouter();
 
     const sendWhatsApp = () => {
-        if (!order || !settings) return;
+        if (!order) return;
 
-        const phone = settings.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '549111234567';
+        const phone = settings?.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '549111234567';
         let message = `¡Hola! Quisiera hacer el siguiente pedido:\n`;
         message += `\n*N° de Pedido: ${order.id.slice(0, 6)}*\n`;
         message += `*Cliente: ${order.userName}*\n`;
@@ -86,10 +86,8 @@ export default function OrderConfirmationPage() {
 
       setLoading(true);
       try {
-        const [fetchedOrder, fetchedSettings] = await Promise.all([
-          fetchOrderById(orderId),
-          fetchRestaurantSettings()
-        ]);
+        const fetchedOrder = await fetchOrderById(orderId);
+        const fetchedSettings = await fetchRestaurantSettings();
         setOrder(fetchedOrder);
         setSettings(fetchedSettings);
       } catch (error) {
@@ -192,5 +190,3 @@ export default function OrderConfirmationPage() {
     </div>
   );
 }
-
-    
