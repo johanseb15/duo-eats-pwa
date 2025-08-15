@@ -1,77 +1,56 @@
-# Historias de Usuario de la PWA de Pedidos
+# Historias de Usuario Clave - PWA Duo Eats
 
-Este documento detalla los flujos clave desde la perspectiva de los diferentes roles (personas) que interactúan con la aplicación.
-
----
-
-## Persona 1: Cliente
-**Objetivo:** Pedir comida de forma rápida y sencilla.
-
-### HU-01: Realizar un pedido
-**Como** cliente,
-**Quiero** poder navegar por el menú, añadir productos (con opciones) a un carrito persistente, y finalizar mi pedido,
-**Para** recibir mi comida en casa.
-- **Checklist:**
-  - [ ] Puedo ver categorías y productos.
-  - [ ] Puedo añadir un producto simple al carrito.
-  - [ ] Puedo personalizar un producto con opciones (ej. tamaño) y añadirlo.
-  - [ ] El carrito se mantiene si recargo la página.
-  - [ ] Puedo finalizar el pedido (checkout).
-  - [ ] Recibo un enlace para seguir mi pedido en tiempo real.
-
-### HU-02: Gestionar mi cuenta
-**Como** cliente registrado,
-**Quiero** poder ver mis pedidos anteriores y marcar platos como favoritos,
-**Para** agilizar futuras compras.
-- **Checklist:**
-  - [ ] Puedo registrarme e iniciar sesión.
-  - [ ] Tengo una sección de "Mis Pedidos" con mi historial.
-  - [ ] Puedo marcar/desmarcar un producto como favorito.
-  - [ ] Existe una sección "Mis Favoritos".
+Este documento define los flujos principales para probar la aplicación desde la perspectiva de los roles clave: Cliente, Administrador y Repartidor.
 
 ---
 
-## Persona 2: Administrador del Local
-**Objetivo:** Gestionar las operaciones del restaurante de forma eficiente.
+### Persona 1: Ana, la Cliente
+**Objetivo:** Pedir comida de forma rápida, personalizada y con seguimiento claro.
 
-### HU-03: Gestionar el catálogo
-**Como** administrador,
-**Quiero** poder crear, leer, actualizar y eliminar productos y categorías,
-**Para** mantener el menú siempre al día.
-- **Checklist:**
-  - [ ] Puedo acceder a un panel de administración seguro.
-  - [ ] Existe un CRUD completo para Productos.
-  - [ ] Existe un CRUD completo para Categorías.
+#### HU-01: Realizar un Pedido Personalizado
+**Como** Ana, **quiero** poder añadir una hamburguesa al carrito, personalizarla quitando un ingrediente, agregar una nota especial, pagar con QR y seguir mi pedido en tiempo real, **para** tener una experiencia de compra completa y satisfactoria.
 
-### HU-04: Gestionar pedidos entrantes
-**Como** administrador,
-**Quiero** ver los pedidos en tiempo real y cambiar su estado,
-**Para** coordinar la cocina y mantener al cliente informado.
-- **Checklist:**
-  - [ ] Veo los nuevos pedidos en un dashboard.
-  - [ ] Puedo actualizar el estado (Pendiente -> En preparación -> En camino -> Entregado).
-  - [ ] El cliente ve el cambio de estado en su página de seguimiento.
-
-### HU-05: Analizar el rendimiento
-**Como** administrador,
-**Quiero** ver reportes de ventas y productos más vendidos,
-**Para** tomar decisiones de negocio informadas.
-- **Checklist:**
-  - [ ] El dashboard muestra métricas clave (ingresos, total de pedidos).
-  - [ ] Hay un gráfico de ventas a lo largo del tiempo.
-  - [ ] Hay un ranking de los productos más populares.
+- **Checklist de Prueba:**
+  - [ ] Puedo añadir un producto al carrito.
+  - [ ] Puedo abrir el carrito y modificar la cantidad de un producto.
+  - [ ] Puedo añadir una nota como "Sin cebolla, por favor".
+  - [ ] El carrito persiste si recargo la página.
+  - [ ] En el checkout, puedo seleccionar mi dirección guardada (o añadir una nueva con geolocalización).
+  - [ ] Puedo seleccionar un método de pago (ej. "Mercado Pago QR").
+  - [ ] Tras confirmar, soy redirigido a una página de seguimiento (`/order/[id]`).
+  - [ ] La página de seguimiento me muestra el estado "Pendiente".
+  - [ ] Recibo una notificación push cuando el estado del pedido cambia.
 
 ---
 
-## Persona 3: Repartidor
-**Objetivo:** Ver los pedidos asignados y gestionar las entregas.
+### Persona 2: Laura, la Administradora del Local
+**Objetivo:** Gestionar eficientemente los pedidos entrantes y los repartidores.
 
-### HU-06: Gestionar entregas
-**Como** repartidor,
-**Quiero** tener una interfaz simple para ver los pedidos que debo entregar y marcarlos como completados,
-**Para** optimizar mi ruta y mi tiempo.
-- **Checklist:**
-  - [ ] Puedo iniciar sesión con un rol de "Repartidor".
-  - [ ] Veo una lista de pedidos asignados con dirección.
-  - [ ] Puedo marcar un pedido como "Entregado".
-  - [ ] (Futuro) Mi ubicación se actualiza en el mapa del cliente.
+#### HU-02: Gestionar un Pedido y Asignar un Repartidor
+**Como** Laura, **quiero** recibir una notificación de un nuevo pedido, verlo en mi panel, cambiar su estado a "En preparación" y asignárselo a un repartidor disponible, **para** coordinar la operación de la cocina y la logística de entrega.
+
+- **Checklist de Prueba:**
+  - [ ] Al llegar un nuevo pedido, recibo una notificación sonora y/o visual en el panel `/admin/orders`.
+  - [ ] El pedido de Ana aparece en la columna "Nuevos".
+  - [ ] Puedo cambiar el estado del pedido a "En preparación". El pedido se mueve a la columna correspondiente.
+  - [ ] Veo una lista de repartidores activos.
+  - [ ] Puedo asignar el pedido a "Juan Pérez (repartidor)".
+  - [ ] El repartidor asignado recibe una notificación del nuevo pedido.
+
+---
+
+### Persona 3: Juan, el Repartidor
+**Objetivo:** Gestionar las entregas asignadas de forma clara y eficiente.
+
+#### HU-03: Completar una Entrega Asignada
+**Como** Juan, **quiero** poder marcarme como "disponible", recibir un nuevo pedido, ver la ruta óptima para la entrega, marcar el pedido como "Entregado" y registrar el pago, **para** cumplir con mi trabajo y llevar un control del dinero recaudado.
+
+- **Checklist de Prueba:**
+  - [ ] Puedo iniciar sesión y activar mi estado a "Disponible" en mi interfaz de repartidor.
+  - [ ] Recibo una notificación push con el pedido de Ana que me asignó Laura.
+  - [ ] Puedo ver los detalles del pedido y la dirección del cliente en un mapa.
+  - [ ] Puedo hacer clic en un botón "Navegar" que me abre Google Maps con la ruta.
+  - [ ] Una vez en el domicilio, puedo cambiar el estado a "Entregado".
+  - [ ] El cliente (Ana) y la administradora (Laura) ven el estado actualizado a "Entregado".
+  - [ ] Puedo registrar que el pago fue recibido (ej. "Efectivo" o "Confirmado por QR").
+  - [ ] En mi resumen diario, el monto del pedido de Ana se suma a mi total recaudado.

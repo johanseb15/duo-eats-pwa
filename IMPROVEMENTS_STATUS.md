@@ -1,43 +1,79 @@
+# Plan de Acción y Estado de Avance
 
-# Plan de Mejoras y Estado de Avance
-
-Este documento realiza un seguimiento de las mejoras propuestas para la PWA Duo Eats, inspiradas en el análisis de `pedidosfree.com.ar` y las necesidades detectadas.
-
----
-
-### 1. Rediseño de UI y Tema Oscuro Mejorado
-- **Descripción:** Refinar la paleta de colores y los estilos de la aplicación para una apariencia más moderna y profesional, con especial atención al modo oscuro.
-- **Estado:** ⚙️ **En Progreso**
-- **Progreso:** `[█████     ]` (50%)
-- **Notas:** Se está implementando una nueva identidad visual basada en el análisis de diseño, utilizando una paleta de colores y tipografía renovadas.
+Este documento detalla la hoja de ruta para la implementación de funcionalidades en la PWA Duo Eats, basada en un análisis de requerimientos completo.
 
 ---
 
-### 2. Product Cards con Selector de Cantidad
-- **Descripción:** Añadir botones `+/-` directamente en las tarjetas de producto en la página de inicio. Una vez que un producto está en el carrito, la tarjeta debería mostrar la cantidad actual y permitir modificarla rápidamente sin abrir el panel de detalles.
-- **Estado:** ⏳ **Pendiente**
-- **Progreso:** `[          ]` (0%)
+### Módulo 1: Experiencia del Cliente (PWA)
+
+- **[ ] Registro/Login Flexible:**
+  - [ ] Implementar login social (Google).
+  - [ ] Añadir recuperación de contraseña.
+- **[ ] Menú Interactivo y Offline:**
+  - [ ] Carga diferida de imágenes.
+  - [ ] Cachear productos para navegación sin conexión.
+- **[ ] Carrito Persistente:**
+  - [ ] Guardar carrito en `localStorage` o `IndexedDB`.
+  - [ ] Permitir notas personalizadas por producto.
+- **[ ] Checkout Rápido y Eficiente:**
+  - [ ] Integración con geolocalización (pin en mapa).
+  - [ ] Soportar múltiples métodos de pago (efectivo, QR, POS).
+- **[ ] Seguimiento de Pedido en Tiempo Real:**
+  - [ ] Visualización de estados del pedido.
+  - [ ] Implementar notificaciones push ante cambios de estado.
+- **[ ] Historial y Favoritos:**
+  - [ ] Permitir repetir un pedido anterior con un clic.
+  - [ ] Gestionar una lista de productos favoritos.
 
 ---
 
-### 3. Chatbot Asistente con IA
-- **Descripción:** Implementar un chatbot flotante utilizando Genkit. El bot debe poder responder preguntas de los clientes sobre horarios, días de apertura y otra información de la tienda, consultando los datos desde Firestore en tiempo real.
-- **Estado:** ⚙️ **En Progreso**
-- **Progreso:** `[█████     ]` (50%)
-- **Notas:** La lógica del backend (`flow` de Genkit) y las herramientas (`tools`) para obtener la información de la tienda ya están implementadas. Falta construir la interfaz de usuario del chat.
+### Módulo 2: Panel de Administración
+
+- **[ ] Dashboard en Tiempo Real:**
+  - [ ] Notificaciones sonoras/visuales para nuevos pedidos.
+  - [ ] Vista de pedidos por estado (Nuevos, En Preparación, Listos).
+- **[ ] Gestión de Catálogo Completa:**
+  - [ ] CRUD de productos con stock.
+  - [ ] CRUD de categorías.
+- **[ ] Gestión de Repartidores:**
+  - [ ] CRUD de repartidores.
+  - [ ] Asignación manual de pedidos a repartidores activos.
+- **[ ] Reportes y Analítica:**
+  - [ ] Filtros por fecha, repartidor y método de pago.
+  - [ ] Visualización de productos más vendidos.
+- **[ ] Control de Caja:**
+  - [ ] Reporte de cuadre diario por repartidor.
+- **[ ] Múltiples Roles:**
+  - [ ] Definir permisos para Admin, Cajero y Cocina.
 
 ---
 
-### 4. Confirmación de Pedido en la App (Sin Redirección a WhatsApp)
-- **Descripción:** Modificar el flujo de checkout para que, después de confirmar el pedido, el cliente vea una página de éxito y seguimiento directamente en la aplicación. El pedido se envía al panel del administrador sin requerir que el cliente envíe un mensaje de WhatsApp. El número de teléfono se captura para contacto manual si es necesario.
-- **Estado:** ⚙️ **En Progreso**
-- **Progreso:** `[█████     ]` (50%)
-- **Notas:** La lógica para crear el pedido sin la redirección a WhatsApp está parcialmente implementada. Falta refinar la página de confirmación y el flujo post-pedido.
+### Módulo 3: Módulo de Repartidor (PWA)
+
+- **[ ] Gestión de Disponibilidad:**
+  - [ ] Botón para activarse/desactivarse.
+- **[ ] Notificaciones y Asignación:**
+  - [ ] Recibir notificaciones push para nuevos pedidos asignados.
+- **[ ] Navegación y Seguimiento:**
+  - [ ] Ver detalle del pedido y ubicación del cliente en un mapa.
+  - [ ] Integrar con Google Maps/Waze para la ruta.
+- **[ ] Gestión de Cobros:**
+  - [ ] Confirmar pago (efectivo, POS).
+- **[ ] Historial de Entregas:**
+  - [ ] Ver pedidos completados y total recaudado en el día.
 
 ---
 
-### 5. Gestión de Ajustes de la Tienda desde el Admin
-- **Descripción:** Crear una sección en el panel de administración (`/admin/settings`) donde el dueño del local pueda gestionar fácilmente los horarios de apertura, días de atención y el número de WhatsApp para contacto.
-- **Estado:** ⚙️ **En Progreso**
-- **Progreso:** `[█████     ]` (50%)
-- **Notas:** Las funciones de backend (`actions`) para leer y escribir los ajustes en Firestore ya están creadas. Falta implementar el formulario y la interfaz en el panel de administración.
+### Módulo 4: Capacidades Técnicas (Fundamento)
+
+- **[ ] Offline-First Real:**
+  - [ ] Cachear assets y datos con Service Worker.
+  - [ ] Sincronización de pedidos al recuperar conexión.
+- **[ ] Notificaciones Push Web:**
+  - [ ] Configurar Firebase Cloud Messaging (FCM).
+- **[ ] Rendimiento Optimizado (Lighthouse):**
+  - [ ] Optimizar imágenes a formato WebP.
+  - [ ] Minificar y empaquetar código CSS/JS.
+- **[ ] Seguridad Robusta:**
+  - [ ] Implementar Custom Claims en Firebase para roles.
+  - [ ] Proteger APIs con JWT.
