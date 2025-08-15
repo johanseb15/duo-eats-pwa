@@ -12,6 +12,7 @@ interface CartState {
   removeFromCart: (cartItemId: string) => void;
   updateQuantity: (cartItemId: string, quantity: number) => void;
   clearCart: () => void;
+  setCart: (items: Omit<CartItem, 'quantity'>[]) => void;
 }
 
 const getCartItemId = (product: Omit<CartItem, 'quantity' | 'id'> & { id: string }) => {
@@ -60,6 +61,10 @@ export const useCart = create<CartState>()(
         }
       },
       clearCart: () => set({ items: [] }),
+      setCart: (items) => {
+        const itemsWithQuantity = items.map(item => ({...item, quantity: (item as CartItem).quantity || 1}));
+        set({ items: itemsWithQuantity });
+      },
     }),
     {
       name: 'duo-eats-cart-storage',

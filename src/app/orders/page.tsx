@@ -1,8 +1,9 @@
 
+
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, FileText } from 'lucide-react';
+import { ChevronLeft, FileText, Repeat } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
@@ -15,6 +16,7 @@ import { useEffect, useState } from 'react';
 import { fetchOrdersByUserId } from '../actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { useCart } from '@/store/cart';
 
 
 const currencySymbol = '$';
@@ -37,6 +39,7 @@ const getStatusVariant = (status: string) => {
 export default function OrdersPage() {
     const router = useRouter();
     const { user, loading: authLoading } = useAuth();
+    const { setCart } = useCart();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
@@ -68,6 +71,15 @@ export default function OrdersPage() {
             getOrders();
         }
     }, [user, authLoading, router, toast]);
+    
+    const handleRepeatOrder = (order: Order) => {
+        setCart(order.items);
+        toast({
+            title: '¡Pedido repetido!',
+            description: 'Los productos de tu pedido anterior han sido añadidos a tu carrito.',
+        });
+        router.push('/cart');
+    };
 
     if (authLoading || loading) {
         return (
@@ -145,9 +157,15 @@ export default function OrdersPage() {
                     </CardContent>
                     <CardFooter className="flex justify-between items-center p-4 bg-muted/20">
                         <p className="text-lg font-bold">Total: {currencySymbol} {order.total.toFixed(2)}</p>
-                        <Button asChild variant="outline" className="rounded-full">
-                           <Link href={`/order/${order.id}`}>Ver detalles</Link>
-                        </Button>
+                        <div className="flex gap-2">
+                             <Button onClick={() => handleRepeatOrder(order)} variant="outline" className="rounded-full">
+                                <Repeat className="mr-2 h-4 w-4" />
+                                Repetir
+                            </Button>
+                            <Button asChild variant="outline" className="rounded-full">
+                               <Link href={`/order/${order.id}`}>Ver detalles</Link>
+                            </Button>
+                        </div>
                     </CardFooter>
                     </Card>
                 ))}
