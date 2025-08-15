@@ -1,9 +1,7 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp, getApps } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -15,13 +13,24 @@ const firebaseConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
 };
 
-// Initialize Firebase
+// Initialize Firebase only if the project ID is available
 let app;
-if (!getApps().length) {
-  app = initializeApp(firebaseConfig);
-}
+let auth: any; // Use 'any' to allow for late initialization
+let db: any;
 
-const auth = getAuth(app);
-const db = getFirestore(app);
+if (firebaseConfig.projectId) {
+    if (!getApps().length) {
+        app = initializeApp(firebaseConfig);
+    } else {
+        app = getApp();
+    }
+    auth = getAuth(app);
+    db = getFirestore(app);
+} else {
+    console.warn("Firebase configuration is missing. App will run in offline mode with test data.");
+    // Assign null or mock objects if needed for other parts of the app to not break
+    auth = null;
+    db = null;
+}
 
 export { auth, db };
