@@ -21,6 +21,7 @@ import { useFavorites } from '@/store/favorites';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from './ui/badge';
+import { useCart } from '@/store/cart';
 
 interface ProductCardProps {
   product: Product;
@@ -32,10 +33,14 @@ const currencySymbol = '$';
 export function ProductCard({ product }: ProductCardProps) {
   const { toggleFavorite, isFavorite } = useFavorites();
   const { toast } = useToast();
+  const { items } = useCart();
   const isFav = isFavorite(product.id);
 
+  const cartItem = items.find(item => item.id === product.id);
+
   const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
+    e.preventDefault();
     toggleFavorite(product);
     toast({
         title: isFav ? 'Eliminado de favoritos' : 'Añadido a favoritos',
@@ -45,6 +50,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Dialog>
+      <DialogTrigger asChild>
         <div className="w-full overflow-hidden transition-all duration-300 rounded-2xl group bg-card/80 backdrop-blur-xl border-white/20 shadow-md hover:shadow-xl hover:-translate-y-1">
           <Card className="border-0 bg-transparent shadow-none">
             <CardContent className="p-0 flex items-center gap-4">
@@ -54,15 +60,18 @@ export function ProductCard({ product }: ProductCardProps) {
                   alt={product.name}
                   width={112}
                   height={112}
-                  className="object-cover"
+                  className="object-cover h-full w-full"
                   data-ai-hint={product.aiHint}
                 />
                  {product.stock <= 0 && (
                   <Badge variant="destructive" className="absolute top-2 left-2">Sin Stock</Badge>
                 )}
+                 {cartItem && (
+                  <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">{cartItem.quantity}</Badge>
+                )}
               </div>
               <div className="py-3 pr-3 flex-grow">
-                <CardTitle className="text-lg font-semibold truncate">
+                <CardTitle className="text-lg font-semibold truncate leading-tight">
                   {product.name}
                 </CardTitle>
                 <CardDescription className="text-muted-foreground mt-1 h-10 overflow-hidden text-sm">
@@ -74,17 +83,16 @@ export function ProductCard({ product }: ProductCardProps) {
                          <Button variant="ghost" size="icon" className="rounded-full text-primary" onClick={handleFavoriteClick} aria-label={`Marcar ${product.name} como favorito`}>
                             <Heart className={cn("h-5 w-5", isFav && "fill-current")} />
                         </Button>
-                        <DialogTrigger asChild>
-                            <Button size='icon' className='rounded-full h-9 w-9' aria-label={`Añadir ${product.name} al carrito`} disabled={product.stock <= 0}>
-                                <Plus/>
-                            </Button>
-                        </DialogTrigger>
+                        <Button size='icon' className='rounded-full h-9 w-9' aria-label={`Añadir ${product.name} al carrito`} disabled={product.stock <= 0}>
+                            <Plus/>
+                        </Button>
                     </div>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
+      </DialogTrigger>
       <DialogContent className="w-full max-w-lg p-0 border-0">
          <ProductSheet product={product} />
       </DialogContent>

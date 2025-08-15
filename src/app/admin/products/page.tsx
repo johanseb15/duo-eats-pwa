@@ -267,7 +267,7 @@ export default function AdminProductsPage() {
                 </TableCell>
                 <TableCell>{product.price[currentCurrency] ? `${currencySymbol}${product.price[currentCurrency].toFixed(2)}` : 'N/A'}</TableCell>
                 <TableCell>
-                    {product.stock > 0 ? product.stock : <Badge variant="destructive">Sin Stock</Badge>}
+                    {typeof product.stock === 'number' && product.stock > 0 ? product.stock : <Badge variant="destructive">Sin Stock</Badge>}
                 </TableCell>
                 <TableCell className="text-right">
                    <DropdownMenu>

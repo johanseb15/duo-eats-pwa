@@ -172,7 +172,7 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
         price: prices as Prices,
         stock: values.stock,
         category: values.category,
-        image: values.image || `https://placehold.co/400x225.png`,
+        image: values.image || `https://placehold.co/400x400.png`,
         aiHint: values.aiHint || values.name.toLowerCase().split(' ').slice(0, 2).join(' '),
         options: finalOptions,
       };
