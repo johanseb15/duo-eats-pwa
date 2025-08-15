@@ -7,7 +7,7 @@
  *    Example:
  *    GOOGLE_APPLICATION_CREDENTIALS="..."
  *    GOOGLE_CLIENT_EMAIL="firebase-adminsdk-..."
- *    GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n..."
+ *    GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\n..."
  *    NEXT_PUBLIC_FIREBASE_PROJECT_ID="..."
  * 3. Run the following command in your terminal:
  *    npm run import:data
@@ -16,7 +16,7 @@
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { config } from 'dotenv';
-import products from './productos-test.json';
+import products from '../data/productos-test.json';
 
 // Load environment variables from .env file
 config();
@@ -47,7 +47,7 @@ async function importData() {
 
   products.forEach(product => {
     // Use the ID from the JSON file or let Firestore generate one
-    const docRef = productsCollection.doc(product.id || undefined);
+    const docRef = productsCollection.doc(product.id);
     batch.set(docRef, product);
   });
 
