@@ -332,6 +332,7 @@ export default function CartPage() {
                         height={64}
                         className="rounded-full object-cover"
                         data-ai-hint={item.aiHint}
+                        loading="lazy"
                       />
                       <div className="ml-4 flex-grow">
                         <h3 className="font-semibold text-lg">{item.name}</h3>
@@ -509,5 +510,4 @@ export default function CartPage() {
     </>
   );
 }
-
     

@@ -58,6 +58,7 @@ export default function PromotionsCarousel({ promotions, products }: PromotionsC
                             height={96}
                             className="rounded-full object-cover"
                             data-ai-hint={promo.aiHint}
+                            loading="lazy"
                         />
                     </div>
                 </CardContent>

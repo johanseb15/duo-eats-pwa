@@ -94,6 +94,7 @@ export function ProductSheet({ product }: ProductSheetProps) {
                         fill
                         className="object-cover"
                         data-ai-hint={product.aiHint}
+                        loading="lazy"
                     />
                     {product.stock <= 0 && (
                         <Badge variant="destructive" className="absolute top-4 left-4 text-lg">Sin Stock</Badge>

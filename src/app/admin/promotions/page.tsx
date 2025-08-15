@@ -236,6 +236,7 @@ export default function AdminPromotionsPage() {
                     width={50}
                     height={50}
                     className="rounded-md object-cover"
+                    loading="lazy"
                   />
                 </TableCell>
                 <TableCell className="font-medium">{promotion.title}</TableCell>

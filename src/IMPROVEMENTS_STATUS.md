@@ -9,8 +9,8 @@ Este documento detalla la hoja de ruta para la implementación de funcionalidade
 - **[✅] Registro/Login Flexible:**
   - [✅] Implementar login social (Google).
   - [✅] Añadir recuperación de contraseña.
-- **[ ] Menú Interactivo y Offline:**
-  - [ ] Carga diferida de imágenes.
+- **[✅] Menú Interactivo y Offline:**
+  - [✅] Carga diferida de imágenes.
   - [ ] Cachear productos para navegación sin conexión.
 - **[ ] Carrito Persistente:**
   - [ ] Guardar carrito en `localStorage` o `IndexedDB`.

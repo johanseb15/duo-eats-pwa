@@ -138,6 +138,7 @@ export function ProductCard({ product }: ProductCardProps) {
                   height={112}
                   className="object-cover h-full w-full"
                   data-ai-hint={product.aiHint}
+                  loading="lazy"
                 />
                  {product.stock <= 0 && (
                   <Badge variant="destructive" className="absolute top-2 left-2">Sin Stock</Badge>
