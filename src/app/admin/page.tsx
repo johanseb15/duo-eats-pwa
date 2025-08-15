@@ -1,3 +1,4 @@
+
 'use client';
 
 import { fetchDashboardAnalytics } from "@/app/actions";
@@ -6,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
-import { getStatusVariant } from "./orders/page";
+import { getStatusVariant } from "./orders/OrdersClient";
 import { DollarSign, Package, ShoppingCart, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { DashboardAnalytics } from "@/lib/types";
