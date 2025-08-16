@@ -8,7 +8,7 @@ import type { Order, Product, Promotion, ProductCategoryData, DeliveryZone, Dash
 import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, limit, getDoc, runTransaction, writeBatch, setDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { getAuth } from 'firebase-admin/auth';
-import { adminApp } from '@/lib/firebase-admin';
+import { getAdminApp } from '@/lib/firebase-admin';
 import { auth } from '@/lib/firebase';
 import { subDays, format } from 'date-fns';
 import { sendPasswordResetEmail } from 'firebase/auth';
@@ -16,10 +16,7 @@ import { sendPasswordResetEmail } from 'firebase/auth';
 
 export async function fetchAllUsers() {
     try {
-        if (!adminApp) {
-          console.log("Admin SDK not initialized. Cannot fetch users.");
-          return [];
-        }
+        const adminApp = getAdminApp();
         const auth = getAuth(adminApp);
         const userRecords = await auth.listUsers();
         return userRecords.users.map(user => ({
@@ -30,6 +27,7 @@ export async function fetchAllUsers() {
         }));
     } catch (error) {
         console.error('Error fetching users:', error);
+        // Return empty array to prevent breaking the UI, the console error will be the indicator
         return [];
     }
 }
