@@ -41,6 +41,7 @@ export default function AdminSettingsPage() {
 
   useEffect(() => {
     loadSettings();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFormSubmit = async () => {
@@ -82,3 +83,5 @@ export default function AdminSettingsPage() {
     </Card>
   );
 }
+
+    
