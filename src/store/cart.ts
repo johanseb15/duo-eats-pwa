@@ -16,7 +16,7 @@ interface CartState {
 }
 
 const getCartItemId = (product: Omit<CartItem, 'quantity' | 'id'> & { id: string }) => {
-  const optionsIdentifier = product.selectedOptions && Object.keys(product.selectedOptions).length > 0
+  const optionsIdentifier = (product.selectedOptions && Object.keys(product.selectedOptions).length > 0)
     ? Object.entries(product.selectedOptions).sort().map(([key, value]) => `${key}:${value}`).join('-')
     : '';
   const notesIdentifier = product.notes || '';

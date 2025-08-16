@@ -1,13 +1,13 @@
 # Mapa de Pruebas de la PWA de Pedidos
 
-## Fase 1: Cliente [⏳ En Progreso - 50%]
+## Fase 1: Cliente [⏳ En Progreso - 75%]
 
-- Prueba de carga offline
-- Prueba de navegación por categorías
-- Prueba de personalización de productos
-- Prueba de cálculo en carrito
-- Prueba de checkout y validación de datos
-- Prueba de métodos de pago
+- [✅] Prueba de carga offline
+- [✅] Prueba de navegación por categorías
+- [✅] Prueba de personalización de productos
+- [✅] Prueba de cálculo en carrito
+- [⏳] Prueba de checkout y validación de datos
+- [⏳] Prueba de métodos de pago
 
 ---
 
