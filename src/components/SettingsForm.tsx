@@ -16,8 +16,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { updateRestaurantSettings } from '@/app/actions';
-import { useEffect, useTransition } from 'react';
+import { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { Day, RestaurantSettings } from '@/lib/types';
 import { Separator } from './ui/separator';
@@ -34,13 +33,12 @@ const formSchema = z.object({
 });
 
 interface SettingsFormProps {
-  onFormSubmit: () => Promise<void>;
+  onSubmit: (values: RestaurantSettings) => void;
   settings: RestaurantSettings;
+  isSubmitting: boolean;
 }
 
-export function SettingsForm({ onFormSubmit, settings }: SettingsFormProps) {
-  const [isSubmitting, startTransition] = useTransition();
-
+export function SettingsForm({ onSubmit, settings, isSubmitting }: SettingsFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: settings,
@@ -49,17 +47,14 @@ export function SettingsForm({ onFormSubmit, settings }: SettingsFormProps) {
   useEffect(() => {
     form.reset(settings);
   }, [settings, form]);
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    startTransition(async () => {
-        await updateRestaurantSettings(values as RestaurantSettings);
-        await onFormSubmit();
-    });
-  }
+  
+  const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
+    onSubmit(values as RestaurantSettings);
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
          <FormField
             control={form.control}
             name="whatsappNumber"
@@ -168,5 +163,3 @@ export function SettingsForm({ onFormSubmit, settings }: SettingsFormProps) {
     </Form>
   );
 }
-
-    

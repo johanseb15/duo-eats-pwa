@@ -1,14 +1,15 @@
 
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useTransition, Suspense } from 'react';
 import type { RestaurantSettings } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { fetchRestaurantSettings } from '@/app/actions';
+import { fetchRestaurantSettings, updateRestaurantSettings } from '@/app/actions';
 import { SettingsForm } from '@/components/SettingsForm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2 } from 'lucide-react';
 
 const FormSkeleton = () => (
     <div className="space-y-6">
@@ -22,6 +23,7 @@ const FormSkeleton = () => (
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<RestaurantSettings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, startTransition] = useTransition();
   const { toast } = useToast();
 
   const loadSettings = async () => {
@@ -42,12 +44,23 @@ export default function AdminSettingsPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleFormSubmit = async () => {
-    toast({
-      title: "Ajustes Guardados",
-      description: "La configuración del restaurante se ha actualizado correctamente.",
+  const handleFormSubmit = (values: RestaurantSettings) => {
+    startTransition(async () => {
+      const result = await updateRestaurantSettings(values);
+      if (result.success) {
+        toast({
+          title: "Ajustes Guardados",
+          description: "La configuración del restaurante se ha actualizado correctamente.",
+        });
+        await loadSettings();
+      } else {
+        toast({
+          title: "Error al guardar",
+          description: result.error,
+          variant: "destructive",
+        });
+      }
     });
-    await loadSettings();
   };
 
   if (loading || !settings) {
@@ -73,13 +86,12 @@ export default function AdminSettingsPage() {
         <CardContent>
             <Suspense fallback={<FormSkeleton />}>
                 <SettingsForm
-                    onFormSubmit={handleFormSubmit}
+                    onSubmit={handleFormSubmit}
                     settings={settings}
+                    isSubmitting={isSubmitting}
                 />
             </Suspense>
         </CardContent>
     </Card>
   );
 }
-
-    
