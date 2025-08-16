@@ -701,7 +701,7 @@ export async function deleteAllOrders() {
 // Restaurant Settings
 const SETTINGS_DOC_ID = "main_settings";
 
-export async function fetchRestaurantSettings(): Promise<RestaurantSettings | null> {
+export async function fetchRestaurantSettings(): Promise<RestaurantSettings> {
     try {
         const settingsRef = doc(db, 'settings', SETTINGS_DOC_ID);
         const settingsSnap = await getDoc(settingsRef);
@@ -709,10 +709,22 @@ export async function fetchRestaurantSettings(): Promise<RestaurantSettings | nu
         if (settingsSnap.exists()) {
             return settingsSnap.data() as RestaurantSettings;
         }
-        return null; // Return null if no settings are found
+        // Return default settings if document doesn't exist
+        return {
+            whatsappNumber: '',
+            openingTime: '11:00',
+            closingTime: '23:00',
+            openDays: ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
+        };
     } catch (error) {
         console.error("Error fetching restaurant settings:", error);
-        return null;
+        // Return default settings on error as well
+        return {
+            whatsappNumber: '',
+            openingTime: '11:00',
+            closingTime: '23:00',
+            openDays: ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
+        };
     }
 }
 
@@ -748,4 +760,5 @@ export async function sendPasswordReset(email: string) {
         }
     }
 }
+    
     

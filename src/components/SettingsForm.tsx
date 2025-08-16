@@ -35,7 +35,7 @@ const formSchema = z.object({
 
 interface SettingsFormProps {
   onFormSubmit: () => Promise<void>;
-  settings?: RestaurantSettings | null;
+  settings: RestaurantSettings;
 }
 
 export function SettingsForm({ onFormSubmit, settings }: SettingsFormProps) {
@@ -43,23 +43,11 @@ export function SettingsForm({ onFormSubmit, settings }: SettingsFormProps) {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      whatsappNumber: '',
-      openingTime: '11:00',
-      closingTime: '23:00',
-      openDays: [],
-    },
+    defaultValues: settings,
   });
 
   useEffect(() => {
-    if (settings) {
-      form.reset({
-        whatsappNumber: settings.whatsappNumber,
-        openingTime: settings.openingTime,
-        closingTime: settings.closingTime,
-        openDays: settings.openDays,
-      });
-    }
+    form.reset(settings);
   }, [settings, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -180,3 +168,5 @@ export function SettingsForm({ onFormSubmit, settings }: SettingsFormProps) {
     </Form>
   );
 }
+
+    
