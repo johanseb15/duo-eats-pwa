@@ -44,7 +44,7 @@ const getCartItemId = (item: CartItem) => {
 };
 
 const defaultDeliveryZones: DeliveryZone[] = [
-  { id: 'retiro', neighborhoods: ['Retiro en local'], cost: 0.00 },
+  { id: 'retiro', name: 'Retiro en local', neighborhoods: ['Retiro en local'], cost: 0.00 },
 ];
 
 export default function CartPage() {
@@ -94,7 +94,14 @@ export default function CartPage() {
                 if (snapshot.empty) {
                     setDeliveryZones(defaultDeliveryZones);
                 } else {
-                    const zoneList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DeliveryZone));
+                    const zoneList = snapshot.docs.map(doc => {
+                        const data = doc.data();
+                        return {
+                            ...data, // Spread existing data first
+                            id: doc.id,
+                            name: data.name || (data.neighborhoods && data.neighborhoods.length > 0 ? data.neighborhoods[0] : 'Zona sin nombre'), // Add name property
+                        } as DeliveryZone;
+                    });
                     setDeliveryZones(zoneList);
                 }
 

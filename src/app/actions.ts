@@ -14,6 +14,8 @@ import { subDays, format } from 'date-fns';
 import { sendPasswordResetEmail } from 'firebase/auth';
 
 
+
+
 export async function fetchAllUsers() {
     try {
         const adminApp = getAdminApp();
@@ -545,21 +547,7 @@ export async function deleteDeliveryPerson(personId: string) {
     }
 }
 
-export async function fetchDeliveryPersons(): Promise<DeliveryPerson[]> {
-  try {
-    const personsCol = collection(db, 'deliveryPersons');
-    const q = query(personsCol, orderBy('name'));
-    const snapshot = await getDocs(q);
-    const personList = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    } as DeliveryPerson));
-    return personList;
-  } catch (error) {
-      console.error("Error fetching delivery persons:", error)
-      return []
-  }
-}
+
 
 
 // Analytics Actions
@@ -641,6 +629,22 @@ async function batchWrite(collectionName: string, data: any[]) {
   await batch.commit();
 }
 
+
+export async function importPromotionsFromFile(promotions: Promotion[]) {
+    try {
+        const transformedPromotions = promotions.map(p => ({
+            ...p,
+            name: (p as any).title || p.name // Ensure 'name' property exists for Firestore
+        }));
+                        await batchWrite('promotions', transformedPromotions);
+        revalidatePath('/', 'layout');
+        return { success: true, message: `${promotions.length} promociones importadas con éxito.` };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error al importar promociones.';
+        console.error("Error importing promotions:", error);
+        return { success: false, message: errorMessage };
+    }
+}
 
 export async function importProductsFromFile(products: Product[]) {
     try {
@@ -742,6 +746,71 @@ export async function updateRestaurantSettings(settingsData: RestaurantSettings)
     }
 }
 
+export async function fetchCategories(): Promise<ProductCategoryData[]> {
+  const categoriesCol = collection(db, 'categories');
+  const q = query(categoriesCol, orderBy('name'));
+  const categoriesSnapshot = await getDocs(q);
+  const categoryList = categoriesSnapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      name: data.name,
+      slug: data.slug,
+      icon: data.icon,
+    } as ProductCategoryData;
+  });
+  return categoryList;
+}
+
+export async function fetchDeliveryZones(): Promise<DeliveryZone[]> {
+  const zonesCol = collection(db, 'deliveryZones');
+  const q = query(zonesCol, orderBy('cost'));
+  const snapshot = await getDocs(q);
+  const zoneList = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  } as DeliveryZone));
+  return zoneList;
+}
+
+export async function fetchProducts(): Promise<Product[]> {
+  const productsCol = collection(db, 'products');
+  const q = query(productsCol, orderBy('name'));
+  const productsSnapshot = await getDocs(q);
+  const productList = productsSnapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      name: data.name,
+      description: data.description,
+      price: data.price,
+      image: data.image,
+      aiHint: data.aiHint,
+      category: data.category,
+      stock: data.stock,
+      options: data.options || [],
+    } as Product;
+  });
+  return productList;
+}
+
+export async function fetchPromotions(): Promise<Promotion[]> {
+  const promotionsCol = collection(db, 'promotions');
+  const promotionsSnapshot = await getDocs(promotionsCol);
+  const promotionList = promotionsSnapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      name: data.title,
+      description: data.description,
+      image: data.image,
+      aiHint: data.aiHint,
+      productId: data.productId,
+    } as Promotion;
+  });
+  return promotionList;
+}
+
 // Auth Actions
 export async function sendPasswordReset(email: string) {
     try {
@@ -759,6 +828,17 @@ export async function sendPasswordReset(email: string) {
                 return { success: false, error: 'Ocurrió un error al intentar enviar el correo.' };
         }
     }
+}
+
+export async function fetchDeliveryPersons(): Promise<DeliveryPerson[]> {
+  const personsCol = collection(db, 'deliveryPersons');
+  const q = query(personsCol, orderBy('name'));
+  const snapshot = await getDocs(q);
+  const personList = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  } as DeliveryPerson));
+  return personList;
 }
     
     

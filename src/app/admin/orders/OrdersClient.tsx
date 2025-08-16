@@ -327,8 +327,8 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
         const [allOrders, allPersons] = await Promise.all([fetchAllOrders(), fetchDeliveryPersons()]);
         
         // Detect new orders
-        const oldPendingIds = new Set(orders.filter(o => o.status === 'Pendiente').map(o => o.id));
-        const newPendingOrders = allOrders.filter(o => o.status === 'Pendiente' && !oldPendingIds.has(o.id));
+        const oldPendingIds = new Set(orders.filter((o: Order) => o.status === 'Pendiente').map((o: Order) => o.id));
+        const newPendingOrders = allOrders.filter((o: Order) => o.status === 'Pendiente' && !oldPendingIds.has(o.id));
 
         if (newPendingOrders.length > 0) {
             console.log("New order detected!");
@@ -357,7 +357,7 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
   }, []); // Run once on mount and then interval takes over. Depends on `orders` for comparison in loadData.
   
   const filteredOrders = useMemo(() => {
-    return orders.filter(o => {
+    return orders.filter((o: Order) => {
         return o.userName.toLowerCase().includes(searchTerm.toLowerCase()) || 
                 o.id.toLowerCase().includes(searchTerm.toLowerCase());
     });

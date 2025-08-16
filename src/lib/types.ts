@@ -65,7 +65,7 @@ export interface Order {
 
 export interface Promotion {
   id: string;
-  title: string;
+  name: string;
   description: string;
   image: string;
   aiHint: string;
@@ -74,6 +74,7 @@ export interface Promotion {
 
 export interface DeliveryZone {
     id: string;
+    name: string;
     neighborhoods: string[];
     cost: number;
 }

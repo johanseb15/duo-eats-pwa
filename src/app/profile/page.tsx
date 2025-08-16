@@ -333,7 +333,7 @@ export default function ProfilePage() {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminará la dirección "{selectedAddress?.name}".
+              Esta acción no se puede deshacer. Se eliminará la dirección &quot;{selectedAddress?.name}&quot;.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -47,13 +47,13 @@ export default function PromotionsCarousel({ promotions, products }: PromotionsC
              <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-r from-primary to-accent transition-all duration-300 hover:scale-[1.02]">
                 <CardContent className="relative flex flex-col md:flex-row items-center justify-between p-6 gap-4">
                     <div className="text-white z-10 flex-grow">
-                        <h2 className="text-2xl font-bold">{promo.title}</h2>
+                        <h2 className="text-2xl font-bold">{promo.name}</h2>
                         <p className="text-sm mt-1">{promo.description}</p>
                     </div>
                     <div className="relative w-24 h-24 flex-shrink-0">
                         <Image
                             src={promo.image}
-                            alt={promo.title}
+                            alt={promo.name}
                             width={96}
                             height={96}
                             className="rounded-full object-cover"

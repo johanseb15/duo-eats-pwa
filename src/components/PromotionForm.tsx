@@ -23,8 +23,8 @@ import type { Product, Promotion } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const formSchema = z.object({
-  title: z.string().min(2, {
-    message: 'El título debe tener al menos 2 caracteres.',
+  name: z.string().min(2, {
+    message: 'El nombre debe tener al menos 2 caracteres.',
   }),
   description: z.string().min(10, {
     message: 'La descripción debe tener al menos 10 caracteres.',
@@ -49,7 +49,7 @@ export function PromotionForm({ onSubmit, promotion, products, isSubmitting }: P
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '',
+      name: '',
       description: '',
       image: '',
       aiHint: '',
@@ -60,7 +60,7 @@ export function PromotionForm({ onSubmit, promotion, products, isSubmitting }: P
   useEffect(() => {
     if (promotion) {
       form.reset({
-        title: promotion.title,
+        name: promotion.name,
         description: promotion.description,
         image: promotion.image,
         aiHint: promotion.aiHint,
@@ -68,7 +68,7 @@ export function PromotionForm({ onSubmit, promotion, products, isSubmitting }: P
       })
     } else {
        form.reset({
-        title: '',
+        name: '',
         description: '',
         image: '',
         aiHint: '',
@@ -88,10 +88,10 @@ export function PromotionForm({ onSubmit, promotion, products, isSubmitting }: P
 
   const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
       const promotionData: PromotionInput = {
-        title: values.title,
+        name: values.name,
         description: values.description,
         image: values.image || `https://placehold.co/300x150.png`,
-        aiHint: values.aiHint || values.title.toLowerCase().split(' ').slice(0, 2).join(' '),
+        aiHint: values.aiHint || values.name.toLowerCase().split(' ').slice(0, 2).join(' '),
         productId: values.productId,
       };
       onSubmit(promotionData);
@@ -102,10 +102,10 @@ export function PromotionForm({ onSubmit, promotion, products, isSubmitting }: P
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="title"
+          name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Título de la Promoción</FormLabel>
+              <FormLabel>Nombre de la Promoción</FormLabel>
               <FormControl>
                 <Input placeholder="Ej: ¡Dúo Dinámico!" {...field} />
               </FormControl>

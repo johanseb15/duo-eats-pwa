@@ -1,294 +1,54 @@
 
 'use client';
 
-import { useEffect, useState, Suspense, lazy, useMemo, useTransition } from 'react';
+import { lazy } from 'react';
+import { AdminPage } from '@/components/AdminPage';
 import type { ProductCategoryData } from '@/lib/types';
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { Button } from '@/components/ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Skeleton } from '@/components/ui/skeleton';
-import { MoreHorizontal, PlusCircle, Trash2, Edit, Search } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { addCategory, deleteCategory, updateCategory, type CategoryInput } from '@/app/actions';
+import { fetchCategories, addCategory, deleteCategory, updateCategory } from '@/app/actions';
+import { TableCell } from '@/components/ui/table';
 import * as LucideIcons from 'lucide-react';
-import { Input } from '@/components/ui/input';
 
 const CategoryForm = lazy(() => import('@/components/CategoryForm').then(module => ({ default: module.CategoryForm })));
 
-
-async function getCategories(): Promise<ProductCategoryData[]> {
-  const categoriesCol = collection(db, 'categories');
-  const q = query(categoriesCol, orderBy('name'));
-  const categoriesSnapshot = await getDocs(q);
-  const categoryList = categoriesSnapshot.docs.map(doc => {
-    const data = doc.data();
-    return {
-      id: doc.id,
-      name: data.name,
-      slug: data.slug,
-      icon: data.icon,
-    } as ProductCategoryData;
-  });
-  return categoryList;
-}
-
 const getIcon = (name: string): React.ElementType => {
-    const Icon = (LucideIcons as any)[name];
-    return Icon || LucideIcons.Package;
+  const Icon = (LucideIcons as any)[name];
+  return Icon || LucideIcons.Package;
+};
+
+const columns: { key: keyof ProductCategoryData; header: string }[] = [
+  { key: 'icon', header: 'Ícono' },
+  { key: 'name', header: 'Nombre' },
+  { key: 'slug', header: 'Slug' },
+];
+
+const renderRow = (category: ProductCategoryData) => {
+  const Icon = getIcon(category.icon);
+  return (
+    <>
+      <TableCell><Icon className="h-5 w-5" /></TableCell>
+      <TableCell className="font-medium">{category.name}</TableCell>
+      <TableCell>
+        <code className="text-sm bg-muted p-2 rounded-lg">{category.slug}</code>
+      </TableCell>
+    </>
+  );
 };
 
 export default function AdminCategoriesPage() {
-  const [categories, setCategories] = useState<ProductCategoryData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<ProductCategoryData | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const { toast } = useToast();
-  const [isSubmitting, startTransition] = useTransition();
-
-  const loadCategories = async () => {
-    setLoading(true);
-    try {
-        const allCategories = await getCategories();
-        setCategories(allCategories);
-    } catch (error) {
-        console.error("Failed to load categories:", error);
-        toast({ title: "Error", description: "No se pudieron cargar las categorías.", variant: "destructive" });
-    } finally {
-        setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
-  const handleFormSubmit = (values: CategoryInput) => {
-    startTransition(async () => {
-      const result = selectedCategory
-        ? await updateCategory(selectedCategory.id, values)
-        : await addCategory(values);
-
-      if (result.success) {
-        toast({
-          title: selectedCategory ? "Categoría actualizada" : "Categoría creada",
-          description: `La categoría "${values.name}" ha sido guardada.`,
-        });
-        setIsFormOpen(false);
-        setSelectedCategory(null);
-        await loadCategories();
-      } else {
-        toast({
-          title: "Error al guardar",
-          description: result.error,
-          variant: "destructive",
-        });
-      }
-    });
-  };
-  
-  const handleEditClick = (category: ProductCategoryData) => {
-    setSelectedCategory(category);
-    setIsFormOpen(true);
-  };
-  
-  const handleDeleteClick = (category: ProductCategoryData) => {
-    setSelectedCategory(category);
-    setIsAlertOpen(true);
-  };
-  
-  const handleDeleteConfirm = async () => {
-    if (!selectedCategory) return;
-    const result = await deleteCategory(selectedCategory.id);
-    if (result.success) {
-      toast({
-        title: "Categoría eliminada",
-        description: "La categoría ha sido eliminada.",
-      });
-      await loadCategories();
-    } else {
-       toast({
-        title: "Error",
-        description: result.error || "No se pudo eliminar la categoría.",
-        variant: "destructive",
-      });
-    }
-    setIsAlertOpen(false);
-    setSelectedCategory(null);
-  }
-
-  const handleDialogClose = (open: boolean) => {
-    if (!open) {
-      setSelectedCategory(null);
-    }
-    setIsFormOpen(open);
-  }
-  
-  const filteredCategories = useMemo(() => {
-    return categories.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
-  }, [categories, searchTerm]);
-
-   const FormSkeleton = () => (
-    <div className="space-y-4">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full mt-4" />
-    </div>
-  )
-
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-center mb-6 gap-4">
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-10 w-64" />
-          <Skeleton className="h-10 w-40" />
-        </div>
-        <div className="rounded-2xl border">
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6 gap-4">
-        <h2 className="text-2xl font-bold shrink-0">Categorías ({filteredCategories.length})</h2>
-         <div className="relative w-full max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input 
-                placeholder="Buscar por nombre..." 
-                className="pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-            />
-        </div>
-         <Dialog open={isFormOpen} onOpenChange={handleDialogClose}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setIsFormOpen(true)}><PlusCircle className="mr-2 h-4 w-4" /> Añadir Categoría</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>{selectedCategory ? 'Editar Categoría' : 'Añadir Nueva Categoría'}</DialogTitle>
-              <DialogDescription>
-                {selectedCategory ? 'Modifica los detalles de la categoría.' : 'Crea una nueva categoría para tus productos.'}
-              </DialogDescription>
-            </DialogHeader>
-             <Suspense fallback={<FormSkeleton />}>
-                <CategoryForm 
-                  onSubmit={handleFormSubmit}
-                  category={selectedCategory}
-                  isSubmitting={isSubmitting}
-                />
-            </Suspense>
-          </DialogContent>
-        </Dialog>
-      </div>
-      <div className="rounded-2xl border bg-card/60 backdrop-blur-xl overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Ícono</TableHead>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Slug</TableHead>
-              <TableHead className="text-right w-[100px]">Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredCategories.map((category) => {
-                const Icon = getIcon(category.icon);
-                return (
-                  <TableRow key={category.id}>
-                    <TableCell><Icon className="h-5 w-5" /></TableCell>
-                    <TableCell className="font-medium">{category.name}</TableCell>
-                    <TableCell>
-                      <code className="text-sm bg-muted p-2 rounded-lg">{category.slug}</code>
-                    </TableCell>
-                    <TableCell className="text-right">
-                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEditClick(category)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDeleteClick(category)} className="text-destructive focus:text-destructive">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Eliminar
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                )
-            })}
-          </TableBody>
-        </Table>
-         {filteredCategories.length === 0 && (
-          <div className="text-center p-10">
-            <p className="text-muted-foreground">No se encontraron categorías con ese nombre.</p>
-          </div>
-        )}
-      </div>
-      
-       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. Esto eliminará permanentemente
-              la categoría "{selectedCategory?.name}". Los productos de esta categoría no serán eliminados.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive hover:bg-destructive/90">
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+    <AdminPage<ProductCategoryData>
+      pageTitle="Categorías"
+      addItemButtonText="Añadir Categoría"
+      fetchData={fetchCategories}
+      columns={columns}
+      renderRow={renderRow}
+      Form={CategoryForm}
+      onFormSubmit={(values, selectedItem) => {
+        return selectedItem
+          ? updateCategory(selectedItem.id, values)
+          : addCategory(values);
+      }}
+      onDeleteConfirm={(selectedItem) => deleteCategory(selectedItem.id)}
+    />
   );
 }

@@ -7,7 +7,7 @@ const withPWA = require('next-pwa')({
   disable: process.env.NODE_ENV === 'development',
   runtimeCaching: [
     {
-      urlPattern: ({ request }) => request.mode === 'navigate',
+      urlPattern: ({ request }: { request: Request }) => request.mode === 'navigate',
       handler: 'StaleWhileRevalidate',
       options: {
         cacheName: 'pages',
@@ -18,7 +18,7 @@ const withPWA = require('next-pwa')({
       },
     },
      {
-      urlPattern: ({ request }) => request.destination === 'image',
+      urlPattern: ({ request }: { request: Request }) => request.destination === 'image',
       handler: 'CacheFirst',
       options: {
         cacheName: 'images',
@@ -97,7 +97,7 @@ const nextConfig = {
       },
     ],
   },
-   webpack: (config, { isServer }) => {
+   webpack: (config: any, { isServer }: { isServer: boolean }) => {
     if (!isServer) {
       // Exclude server-only packages from client-side bundle
       config.externals.push(

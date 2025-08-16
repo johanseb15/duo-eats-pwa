@@ -571,21 +571,21 @@ const testCategories: ProductCategoryData[] = [
 const testPromotions: Promotion[] = [
   {
     id: '1',
-    title: '¡Combo Hamburguesa!',
+    name: '¡Combo Hamburguesa!',
     description: 'Hamburguesa Doble Queso + Coca-Cola 500ml a precio especial.',
     image: 'https://placehold.co/600x400.png',
     aiHint: 'burger combo',
   },
    {
     id: '2',
-    title: '¡Promo Pizza!',
+    name: '¡Promo Pizza!',
     "description": 'Llevando 2 Pizzas Napolitanas, la segunda tiene 50% OFF.',
     "image": 'https://placehold.co/600x400.png',
     "aiHint": 'pizza offer',
   },
   {
     id: '3',
-    title: '¡Prueba la Clásica!',
+    name: '¡Prueba la Clásica!',
     description: 'La favorita de todos, ¡pídela ahora!',
     image: 'https://placehold.co/400x400.png',
     aiHint: 'classic burger',
@@ -640,7 +640,7 @@ async function getPromotions(): Promise<Promotion[]> {
           const data = doc.data();
           return {
               id: doc.id,
-              title: data.title,
+              name: data.title,
               description: data.description,
               image: data.image,
               aiHint: data.aiHint,

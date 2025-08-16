@@ -22,6 +22,9 @@ import type { DeliveryZone } from '@/lib/types';
 import { Textarea } from './ui/textarea';
 
 const formSchema = z.object({
+  name: z.string().min(2, {
+    message: 'El nombre de la zona debe tener al menos 2 caracteres.',
+  }),
   neighborhoods: z.string().min(2, {
     message: 'Debes añadir al menos un barrio.',
   }),
@@ -42,6 +45,7 @@ export function DeliveryZoneForm({ onSubmit, zone, isSubmitting }: DeliveryZoneF
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: '',
       neighborhoods: '',
       cost: 0,
     },
@@ -50,11 +54,13 @@ export function DeliveryZoneForm({ onSubmit, zone, isSubmitting }: DeliveryZoneF
   useEffect(() => {
     if (zone) {
       form.reset({
+        name: zone.name,
         neighborhoods: zone.neighborhoods.join(', '),
         cost: zone.cost,
       });
     } else {
        form.reset({
+        name: '',
         neighborhoods: '',
         cost: 0,
        });
@@ -63,6 +69,7 @@ export function DeliveryZoneForm({ onSubmit, zone, isSubmitting }: DeliveryZoneF
 
   const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
       const zoneData: DeliveryZoneInput = {
+        name: values.name,
         neighborhoods: values.neighborhoods.split(',').map(n => n.trim()).filter(Boolean),
         cost: values.cost,
       };
@@ -77,6 +84,19 @@ export function DeliveryZoneForm({ onSubmit, zone, isSubmitting }: DeliveryZoneF
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre de la Zona</FormLabel>
+              <FormControl>
+                <Input placeholder="Ej: Zona Norte" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="neighborhoods"
