@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState, Suspense, lazy } from 'react';
+import { useEffect, useState, Suspense, lazy, useTransition } from 'react';
 import type { DeliveryZone } from '@/lib/types';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -41,7 +41,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { deleteDeliveryZone } from '@/app/actions';
+import { addDeliveryZone, deleteDeliveryZone, updateDeliveryZone, type DeliveryZoneInput } from '@/app/actions';
 import { Badge } from '@/components/ui/badge';
 
 const DeliveryZoneForm = lazy(() => import('@/components/DeliveryZoneForm').then(module => ({ default: module.DeliveryZoneForm })));
@@ -66,6 +66,7 @@ export default function AdminDeliveryZonesPage() {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [selectedZone, setSelectedZone] = useState<DeliveryZone | null>(null);
   const { toast } = useToast();
+  const [isSubmitting, startTransition] = useTransition();
 
   const loadZones = async () => {
     setLoading(true);
@@ -84,15 +85,29 @@ export default function AdminDeliveryZonesPage() {
     loadZones();
   }, []);
 
-  const handleFormSubmit = async () => {
-    setIsFormOpen(false);
-    toast({
-      title: selectedZone ? "Zona de entrega actualizada" : "Zona de entrega añadida",
-      description: `La zona se ha ${selectedZone ? 'actualizado' : 'guardado'} correctamente.`,
+  const handleFormSubmit = (values: DeliveryZoneInput) => {
+    startTransition(async () => {
+      const result = selectedZone
+        ? await updateDeliveryZone(selectedZone.id, values)
+        : await addDeliveryZone(values);
+
+      if (result.success) {
+        toast({
+          title: selectedZone ? "Zona actualizada" : "Zona añadida",
+          description: "La zona de entrega ha sido guardada.",
+        });
+        setIsFormOpen(false);
+        setSelectedZone(null);
+        await loadZones();
+      } else {
+        toast({
+          title: "Error al guardar",
+          description: result.error,
+          variant: "destructive",
+        });
+      }
     });
-    setSelectedZone(null);
-    await loadZones();
-  }
+  };
   
   const handleEditClick = (zone: DeliveryZone) => {
     setSelectedZone(zone);
@@ -172,8 +187,9 @@ export default function AdminDeliveryZonesPage() {
             </DialogHeader>
             <Suspense fallback={<FormSkeleton />}>
               <DeliveryZoneForm 
-                onFormSubmit={handleFormSubmit}
+                onSubmit={handleFormSubmit}
                 zone={selectedZone}
+                isSubmitting={isSubmitting}
               />
             </Suspense>
           </DialogContent>

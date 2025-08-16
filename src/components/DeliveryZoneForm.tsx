@@ -15,8 +15,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { addDeliveryZone, updateDeliveryZone, type DeliveryZoneInput } from '@/app/actions';
-import { useEffect, useTransition } from 'react';
+import { type DeliveryZoneInput } from '@/app/actions';
+import { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { DeliveryZone } from '@/lib/types';
 import { Textarea } from './ui/textarea';
@@ -31,15 +31,14 @@ const formSchema = z.object({
 });
 
 interface DeliveryZoneFormProps {
-  onFormSubmit: () => Promise<void>;
+  onSubmit: (values: DeliveryZoneInput) => void;
   zone?: DeliveryZone | null;
+  isSubmitting: boolean;
 }
 
 const currentCurrency = 'ARS';
 
-export function DeliveryZoneForm({ onFormSubmit, zone }: DeliveryZoneFormProps) {
-  const [isSubmitting, startTransition] = useTransition();
-
+export function DeliveryZoneForm({ onSubmit, zone, isSubmitting }: DeliveryZoneFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -62,8 +61,7 @@ export function DeliveryZoneForm({ onFormSubmit, zone }: DeliveryZoneFormProps) 
     }
   }, [zone, form]);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    startTransition(async () => {
+  const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
       const zoneData: DeliveryZoneInput = {
         neighborhoods: values.neighborhoods.split(',').map(n => n.trim()).filter(Boolean),
         cost: values.cost,
@@ -73,19 +71,12 @@ export function DeliveryZoneForm({ onFormSubmit, zone }: DeliveryZoneFormProps) 
           form.setError('neighborhoods', { message: 'Debes añadir al menos un barrio válido.' });
           return;
       }
-
-      if (zone) {
-         await updateDeliveryZone(zone.id, zoneData);
-      } else {
-         await addDeliveryZone(zoneData);
-      }
-      await onFormSubmit();
-    });
+      onSubmit(zoneData);
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="neighborhoods"

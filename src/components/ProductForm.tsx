@@ -16,8 +16,8 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { addProduct, updateProduct, type ProductInput } from '@/app/actions';
-import { useEffect, useState, useTransition } from 'react';
+import { type ProductInput } from '@/app/actions';
+import { useEffect, useState } from 'react';
 import { Loader2, PlusCircle, Trash2 } from 'lucide-react';
 import type { Currency, Prices, Product, ProductCategoryData } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -63,12 +63,12 @@ const formSchema = z.object({
 });
 
 interface ProductFormProps {
-  onProductSubmit: () => Promise<void>;
+  onSubmit: (values: ProductInput) => void;
   product?: Product | null;
+  isSubmitting: boolean;
 }
 
-export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
-  const [isSubmitting, startTransition] = useTransition();
+export function ProductForm({ onSubmit, product, isSubmitting }: ProductFormProps) {
   const [categories, setCategories] = useState<ProductCategoryData[]>([]);
 
   useEffect(() => {
@@ -139,56 +139,48 @@ export function ProductForm({ onProductSubmit, product }: ProductFormProps) {
     }
   }, [product, form]);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    startTransition(async () => {
-      const prices: Partial<Prices> = {
-        [currentCurrency]: values.price,
-      };
-      
-      if (currentCurrency === 'ARS') {
-        prices['USD'] = values.price / 1000;
-      } else {
-        prices['ARS'] = values.price * 1000;
-      }
+  const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
+    const prices: Partial<Prices> = {
+      [currentCurrency]: values.price,
+    };
+    
+    if (currentCurrency === 'ARS') {
+      prices['USD'] = values.price / 1000;
+    } else {
+      prices['ARS'] = values.price * 1000;
+    }
 
-      const finalOptions = values.options?.map(opt => ({
-        name: opt.name,
-        values: opt.values.map(val => {
-          const valuePrices: Partial<Prices> = {};
-          valuePrices[currentCurrency] = val.priceModifier;
-          if (currentCurrency === 'ARS') {
-             valuePrices['USD'] = val.priceModifier / 1000;
-          } else {
-              valuePrices['ARS'] = val.priceModifier * 1000;
-          }
-          return { name: val.name, priceModifier: valuePrices as Prices };
-        })
-      })) || [];
+    const finalOptions = values.options?.map(opt => ({
+      name: opt.name,
+      values: opt.values.map(val => {
+        const valuePrices: Partial<Prices> = {};
+        valuePrices[currentCurrency] = val.priceModifier;
+        if (currentCurrency === 'ARS') {
+            valuePrices['USD'] = val.priceModifier / 1000;
+        } else {
+            valuePrices['ARS'] = val.priceModifier * 1000;
+        }
+        return { name: val.name, priceModifier: valuePrices as Prices };
+      })
+    })) || [];
 
-
-      const productData: ProductInput = {
-        name: values.name,
-        description: values.description,
-        price: prices as Prices,
-        stock: values.stock,
-        category: values.category,
-        image: values.image || `https://placehold.co/400x400.png`,
-        aiHint: values.aiHint || values.name.toLowerCase().split(' ').slice(0, 2).join(' '),
-        options: finalOptions,
-      };
-
-      if (product) {
-         await updateProduct(product.id, productData);
-      } else {
-         await addProduct(productData);
-      }
-      await onProductSubmit();
-    });
+    const productData: ProductInput = {
+      name: values.name,
+      description: values.description,
+      price: prices as Prices,
+      stock: values.stock,
+      category: values.category,
+      image: values.image || `https://placehold.co/400x400.png`,
+      aiHint: values.aiHint || values.name.toLowerCase().split(' ').slice(0, 2).join(' '),
+      options: finalOptions,
+    };
+    
+    onSubmit(productData);
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="name"

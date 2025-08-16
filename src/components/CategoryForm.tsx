@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { addCategory, updateCategory, generateIconSuggestion, type CategoryInput } from '@/app/actions';
+import { generateIconSuggestion, type CategoryInput } from '@/app/actions';
 import { useEffect, useTransition } from 'react';
 import { Loader2, Wand2 } from 'lucide-react';
 import type { ProductCategoryData } from '@/lib/types';
@@ -34,12 +34,12 @@ const formSchema = z.object({
 });
 
 interface CategoryFormProps {
-  onSubmitSuccess: () => Promise<void>;
+  onSubmit: (values: CategoryInput) => void;
   category?: ProductCategoryData | null;
+  isSubmitting: boolean;
 }
 
-export function CategoryForm({ onSubmitSuccess, category }: CategoryFormProps) {
-  const [isSubmitting, startTransition] = useTransition();
+export function CategoryForm({ onSubmit, category, isSubmitting }: CategoryFormProps) {
   const [isSuggesting, startSuggestingTransition] = useTransition();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -76,23 +76,6 @@ export function CategoryForm({ onSubmitSuccess, category }: CategoryFormProps) {
       if (suggestion && (LucideIcons as any)[suggestion]) {
         form.setValue('icon', suggestion, { shouldValidate: true });
       }
-    });
-  }
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    startTransition(async () => {
-      const categoryData: CategoryInput = {
-        name: values.name,
-        slug: values.slug,
-        icon: values.icon,
-      };
-
-      if (category) {
-        await updateCategory(category.id, categoryData);
-      } else {
-        await addCategory(categoryData);
-      }
-      await onSubmitSuccess();
     });
   }
 

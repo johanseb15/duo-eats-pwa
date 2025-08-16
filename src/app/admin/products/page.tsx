@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState, Suspense, lazy, useMemo } from 'react';
+import { useEffect, useState, Suspense, lazy, useMemo, useTransition } from 'react';
 import Image from 'next/image';
 import type { Product, ProductCategoryData } from '@/lib/types';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
@@ -42,7 +42,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { deleteProduct } from '@/app/actions';
+import { addProduct, deleteProduct, updateProduct, type ProductInput } from '@/app/actions';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 
@@ -99,6 +99,7 @@ export default function AdminProductsPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
+  const [isSubmitting, startTransition] = useTransition();
 
   const loadData = async () => {
     setLoading(true);
@@ -118,15 +119,29 @@ export default function AdminProductsPage() {
     loadData();
   }, []);
 
-  const handleFormSubmit = async () => {
-    setIsFormOpen(false);
-    toast({
-      title: selectedProduct ? "Producto actualizado" : "Producto añadido",
-      description: `El producto se ha ${selectedProduct ? 'actualizado' : 'guardado'} correctamente.`,
+  const handleFormSubmit = (values: ProductInput) => {
+    startTransition(async () => {
+      const result = selectedProduct
+        ? await updateProduct(selectedProduct.id, values)
+        : await addProduct(values);
+
+      if (result.success) {
+        toast({
+          title: selectedProduct ? "Producto actualizado" : "Producto añadido",
+          description: `El producto "${values.name}" se ha guardado correctamente.`,
+        });
+        setIsFormOpen(false);
+        setSelectedProduct(null);
+        await loadData();
+      } else {
+        toast({
+          title: "Error al guardar",
+          description: result.error,
+          variant: "destructive",
+        });
+      }
     });
-    setSelectedProduct(null);
-    await loadData();
-  }
+  };
   
   const handleEditClick = (product: Product) => {
     setSelectedProduct(product);
@@ -230,8 +245,9 @@ export default function AdminProductsPage() {
             </DialogHeader>
             <Suspense fallback={<FormSkeleton />}>
                 <ProductForm 
-                  onProductSubmit={handleFormSubmit}
+                  onSubmit={handleFormSubmit}
                   product={selectedProduct}
+                  isSubmitting={isSubmitting}
                 />
             </Suspense>
           </DialogContent>

@@ -14,8 +14,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { addDeliveryPerson, updateDeliveryPerson, type DeliveryPersonInput } from '@/app/actions';
-import { useEffect, useTransition } from 'react';
+import { type DeliveryPersonInput } from '@/app/actions';
+import { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { DeliveryPerson } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -31,13 +31,12 @@ const formSchema = z.object({
 });
 
 interface DeliveryPersonFormProps {
-  onFormSubmit: () => Promise<void>;
+  onSubmit: (values: DeliveryPersonInput) => void;
   person?: DeliveryPerson | null;
+  isSubmitting: boolean;
 }
 
-export function DeliveryPersonForm({ onFormSubmit, person }: DeliveryPersonFormProps) {
-  const [isSubmitting, startTransition] = useTransition();
-
+export function DeliveryPersonForm({ onSubmit, person, isSubmitting }: DeliveryPersonFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -62,19 +61,6 @@ export function DeliveryPersonForm({ onFormSubmit, person }: DeliveryPersonFormP
        });
     }
   }, [person, form]);
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    startTransition(async () => {
-      const personData: DeliveryPersonInput = values;
-
-      if (person) {
-         await updateDeliveryPerson(person.id, personData);
-      } else {
-         await addDeliveryPerson(personData);
-      }
-      await onFormSubmit();
-    });
-  }
 
   return (
     <Form {...form}>

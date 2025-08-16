@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState, Suspense, lazy, useMemo } from 'react';
+import { useEffect, useState, Suspense, lazy, useMemo, useTransition } from 'react';
 import type { ProductCategoryData } from '@/lib/types';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -41,7 +41,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { deleteCategory } from '@/app/actions';
+import { addCategory, deleteCategory, updateCategory, type CategoryInput } from '@/app/actions';
 import * as LucideIcons from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
@@ -77,6 +77,7 @@ export default function AdminCategoriesPage() {
   const [selectedCategory, setSelectedCategory] = useState<ProductCategoryData | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
+  const [isSubmitting, startTransition] = useTransition();
 
   const loadCategories = async () => {
     setLoading(true);
@@ -95,15 +96,29 @@ export default function AdminCategoriesPage() {
     loadCategories();
   }, []);
 
-  const handleFormSubmit = async () => {
-    setIsFormOpen(false);
-    toast({
-      title: selectedCategory ? "Categoría actualizada" : "Categoría añadida",
-      description: `La categoría se ha ${selectedCategory ? 'actualizado' : 'guardado'} correctamente.`,
+  const handleFormSubmit = (values: CategoryInput) => {
+    startTransition(async () => {
+      const result = selectedCategory
+        ? await updateCategory(selectedCategory.id, values)
+        : await addCategory(values);
+
+      if (result.success) {
+        toast({
+          title: selectedCategory ? "Categoría actualizada" : "Categoría creada",
+          description: `La categoría "${values.name}" ha sido guardada.`,
+        });
+        setIsFormOpen(false);
+        setSelectedCategory(null);
+        await loadCategories();
+      } else {
+        toast({
+          title: "Error al guardar",
+          description: result.error,
+          variant: "destructive",
+        });
+      }
     });
-    setSelectedCategory(null);
-    await loadCategories();
-  }
+  };
   
   const handleEditClick = (category: ProductCategoryData) => {
     setSelectedCategory(category);
@@ -198,8 +213,9 @@ export default function AdminCategoriesPage() {
             </DialogHeader>
              <Suspense fallback={<FormSkeleton />}>
                 <CategoryForm 
-                  onSubmitSuccess={handleFormSubmit}
+                  onSubmit={handleFormSubmit}
                   category={selectedCategory}
+                  isSubmitting={isSubmitting}
                 />
             </Suspense>
           </DialogContent>

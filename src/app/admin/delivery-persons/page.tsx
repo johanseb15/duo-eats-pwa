@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState, Suspense, lazy } from 'react';
+import { useEffect, useState, Suspense, lazy, useTransition } from 'react';
 import type { DeliveryPerson } from '@/lib/types';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -41,7 +41,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { deleteDeliveryPerson } from '@/app/actions';
+import { addDeliveryPerson, deleteDeliveryPerson, updateDeliveryPerson, type DeliveryPersonInput } from '@/app/actions';
 import { Badge } from '@/components/ui/badge';
 
 const DeliveryPersonForm = lazy(() => import('@/components/DeliveryPersonForm').then(module => ({ default: module.DeliveryPersonForm })));
@@ -64,6 +64,7 @@ export default function AdminDeliveryPersonsPage() {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState<DeliveryPerson | null>(null);
   const { toast } = useToast();
+  const [isSubmitting, startTransition] = useTransition();
 
   const loadPersons = async () => {
     setLoading(true);
@@ -82,15 +83,29 @@ export default function AdminDeliveryPersonsPage() {
     loadPersons();
   }, []);
 
-  const handleFormSubmit = async () => {
-    setIsFormOpen(false);
-    toast({
-      title: selectedPerson ? "Repartidor actualizado" : "Repartidor añadido",
-      description: `El repartidor se ha ${selectedPerson ? 'actualizado' : 'guardado'} correctamente.`,
+  const handleFormSubmit = (values: DeliveryPersonInput) => {
+    startTransition(async () => {
+      const result = selectedPerson
+        ? await updateDeliveryPerson(selectedPerson.id, values)
+        : await addDeliveryPerson(values);
+
+      if (result.success) {
+        toast({
+          title: selectedPerson ? "Repartidor actualizado" : "Repartidor añadido",
+          description: `El repartidor "${values.name}" se ha guardado correctamente.`,
+        });
+        setIsFormOpen(false);
+        setSelectedPerson(null);
+        await loadPersons();
+      } else {
+        toast({
+          title: "Error al guardar",
+          description: result.error,
+          variant: "destructive",
+        });
+      }
     });
-    setSelectedPerson(null);
-    await loadPersons();
-  }
+  };
   
   const handleEditClick = (person: DeliveryPerson) => {
     setSelectedPerson(person);
@@ -171,8 +186,9 @@ export default function AdminDeliveryPersonsPage() {
             </DialogHeader>
             <Suspense fallback={<FormSkeleton />}>
               <DeliveryPersonForm 
-                onFormSubmit={handleFormSubmit}
+                onSubmit={handleFormSubmit}
                 person={selectedPerson}
+                isSubmitting={isSubmitting}
               />
             </Suspense>
           </DialogContent>

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState, Suspense, lazy, useMemo } from 'react';
+import { useEffect, useState, Suspense, lazy, useMemo, useTransition } from 'react';
 import Image from 'next/image';
 import type { Promotion, Product } from '@/lib/types';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
@@ -42,7 +42,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { deletePromotion } from '@/app/actions';
+import { addPromotion, deletePromotion, updatePromotion, type PromotionInput } from '@/app/actions';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 
@@ -82,6 +82,7 @@ export default function AdminPromotionsPage() {
   const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
+  const [isSubmitting, startTransition] = useTransition();
 
   const loadData = async () => {
     setLoading(true);
@@ -101,15 +102,29 @@ export default function AdminPromotionsPage() {
     loadData();
   }, []);
 
-  const handleFormSubmit = async () => {
-    setIsFormOpen(false);
-    toast({
-      title: selectedPromotion ? "Promoción actualizada" : "Promoción añadida",
-      description: `La promoción se ha ${selectedPromotion ? 'actualizado' : 'guardado'} correctamente.`,
+  const handleFormSubmit = (values: PromotionInput) => {
+    startTransition(async () => {
+      const result = selectedPromotion
+        ? await updatePromotion(selectedPromotion.id, values)
+        : await addPromotion(values);
+
+      if (result.success) {
+        toast({
+          title: selectedPromotion ? "Promoción actualizada" : "Promoción añadida",
+          description: `La promoción "${values.title}" se ha guardado correctamente.`,
+        });
+        setIsFormOpen(false);
+        setSelectedPromotion(null);
+        await loadData();
+      } else {
+        toast({
+          title: "Error al guardar",
+          description: result.error,
+          variant: "destructive",
+        });
+      }
     });
-    setSelectedPromotion(null);
-    await loadData();
-  }
+  };
   
   const handleEditClick = (promotion: Promotion) => {
     setSelectedPromotion(promotion);
@@ -208,9 +223,10 @@ export default function AdminPromotionsPage() {
             </DialogHeader>
             <Suspense fallback={<FormSkeleton />}>
                 <PromotionForm 
-                  onPromotionSubmit={handleFormSubmit}
+                  onSubmit={handleFormSubmit}
                   promotion={selectedPromotion}
                   products={products}
+                  isSubmitting={isSubmitting}
                 />
             </Suspense>
           </DialogContent>

@@ -16,8 +16,8 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { addPromotion, updatePromotion, type PromotionInput } from '@/app/actions';
-import { useEffect, useTransition } from 'react';
+import { type PromotionInput } from '@/app/actions';
+import { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { Product, Promotion } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -39,14 +39,13 @@ const formSchema = z.object({
 });
 
 interface PromotionFormProps {
-  onPromotionSubmit: () => Promise<void>;
+  onSubmit: (values: PromotionInput) => void;
   promotion?: Promotion | null;
   products: Product[];
+  isSubmitting: boolean;
 }
 
-export function PromotionForm({ onPromotionSubmit, promotion, products }: PromotionFormProps) {
-  const [isSubmitting, startTransition] = useTransition();
-
+export function PromotionForm({ onSubmit, promotion, products, isSubmitting }: PromotionFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -87,8 +86,7 @@ export function PromotionForm({ onPromotionSubmit, promotion, products }: Promot
     }
   }
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    startTransition(async () => {
+  const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
       const promotionData: PromotionInput = {
         title: values.title,
         description: values.description,
@@ -96,19 +94,12 @@ export function PromotionForm({ onPromotionSubmit, promotion, products }: Promot
         aiHint: values.aiHint || values.title.toLowerCase().split(' ').slice(0, 2).join(' '),
         productId: values.productId,
       };
-
-      if (promotion) {
-         await updatePromotion(promotion.id, promotionData);
-      } else {
-         await addPromotion(promotionData);
-      }
-      await onPromotionSubmit();
-    });
+      onSubmit(promotionData);
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="title"
@@ -144,7 +135,7 @@ export function PromotionForm({ onPromotionSubmit, promotion, products }: Promot
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Producto Asociado (Opcional)</FormLabel>
-                <Select onValueChange={handleProductSelect} value={field.value}>
+                <Select onValueChange={(value) => handleProductSelect(value)} value={field.value}>
                     <FormControl>
                     <SelectTrigger>
                         <SelectValue placeholder="Seleccionar un producto" />
