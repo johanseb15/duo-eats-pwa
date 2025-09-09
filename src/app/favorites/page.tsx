@@ -5,12 +5,13 @@ import { useFavorites } from '@/store/favorites';
 import { ProductCard } from '@/components/ProductCard';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
-import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Heart } from 'lucide-react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function FavoritesPage() {
   const { favorites } = useFavorites();
+  const router = useRouter();
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-28">
@@ -25,16 +26,15 @@ export default function FavoritesPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-20">
-            <Heart className="mx-auto h-24 w-24 text-muted-foreground" />
-            <h2 className="mt-6 text-2xl font-semibold">No tienes favoritos</h2>
-            <p className="mt-2 text-muted-foreground">
-              Toca el corazón en un producto para guardarlo aquí.
-            </p>
-            <Button asChild className="mt-6 rounded-full">
-              <Link href="/">Explorar menú</Link>
-            </Button>
-          </div>
+          <EmptyState
+            icon={Heart}
+            title="No tienes favoritos"
+            description="Toca el corazón en un producto para guardarlo aquí."
+            action={{
+              label: "Explorar menú",
+              onClick: () => router.push('/'),
+            }}
+          />
         )}
       </main>
       <BottomNav />

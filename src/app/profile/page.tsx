@@ -28,7 +28,7 @@ import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
 import { auth } from '@/lib/firebase';
-import { Skeleton } from '@/components/ui/skeleton';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -58,6 +58,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const AddressForm = lazy(() => import('@/components/AddressForm').then(module => ({ default: module.AddressForm })));
 
@@ -135,27 +136,12 @@ export default function ProfilePage() {
     setSelectedAddress(null);
   };
 
-  const handleFormSuccess = async () => {
-    setIsAddressFormOpen(false);
-    toast({ title: selectedAddress ? 'Dirección actualizada' : 'Dirección añadida' });
-    await loadAddresses();
-    setSelectedAddress(null);
-  };
-
-
   if (loading || !user) {
     return (
       <div className="flex flex-col min-h-screen bg-background pb-28">
         <Header />
         <main className="flex-grow container mx-auto px-4 py-6">
-          <div className="flex flex-col items-center text-center">
-            <Skeleton className="w-24 h-24 rounded-full mb-4" />
-            <Skeleton className="h-8 w-48" />
-          </div>
-          <div className="mt-8 space-y-3">
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-24 w-full" />
-          </div>
+          <LoadingSpinner size="lg" text="Cargando tu perfil..." />
         </main>
         <BottomNav />
       </div>
@@ -265,7 +251,7 @@ export default function ProfilePage() {
                           <DialogHeader>
                               <DialogTitle>{selectedAddress ? 'Editar Dirección' : 'Añadir Nueva Dirección'}</DialogTitle>
                           </DialogHeader>
-                          <Suspense fallback={<FormSkeleton />}>
+                          <Suspense fallback={<LoadingSpinner text="Cargando formulario..." />}>
                             <AddressForm
                                 userId={user.uid}
                                 address={selectedAddress}
@@ -279,7 +265,7 @@ export default function ProfilePage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {loadingAddresses ? (
-                     <div className='text-center py-10'><Loader2 className='mx-auto h-12 w-12 animate-spin text-primary'/></div>
+                     <LoadingSpinner text="Cargando direcciones..." />
                   ) : addresses.length > 0 ? (
                     addresses.map(address => (
                       <div key={address.id} className="flex items-center p-4 bg-card/60 backdrop-blur-xl rounded-xl shadow-sm">

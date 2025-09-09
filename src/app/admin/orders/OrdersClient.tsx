@@ -6,6 +6,7 @@ import { useEffect, useState, useMemo, useTransition, useRef } from 'react';
 import type { Order, DeliveryPerson } from '@/lib/types';
 import { fetchAllOrders, updateOrder, fetchDeliveryPersons } from '@/app/actions';
 import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -137,7 +138,7 @@ const OrderCard = ({ order, onStatusChange, onAssignDeliveryPerson, deliveryPers
                         </p>
                     )}
                     </div>
-                    <Badge className={`${getStatusVariant(order.status)} text-white`}>{order.status}</Badge>
+                    <StatusBadge status={order.status} variant="order" />
                 </CardHeader>
                 <CardContent>
                     <ul className="space-y-3">

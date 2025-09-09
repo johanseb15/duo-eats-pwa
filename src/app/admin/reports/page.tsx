@@ -5,7 +5,7 @@ import { useEffect, useState, useMemo } from 'react';
 import type { Order, DeliveryPerson, PaymentMethod } from '@/lib/types';
 import { fetchAllOrders, fetchDeliveryPersons } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
-import { Skeleton } from '@/components/ui/skeleton';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { DollarSign, ShoppingCart, TrendingUp, Calendar as CalendarIcon, User, CreditCard, X, ListChecks } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -113,14 +113,8 @@ export default function ReportsPage() {
 
     if (loading) {
         return (
-            <div className="space-y-6">
-                <Skeleton className="h-20 w-full" />
-                <div className="grid gap-4 md:grid-cols-3">
-                    <Skeleton className="h-24" />
-                    <Skeleton className="h-24" />
-                    <Skeleton className="h-24" />
-                </div>
-                <Skeleton className="h-64 w-full" />
+            <div className="flex items-center justify-center min-h-[400px]">
+                <LoadingSpinner size="lg" text="Generando reportes..." />
             </div>
         );
     }

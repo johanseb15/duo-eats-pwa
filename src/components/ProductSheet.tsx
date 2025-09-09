@@ -32,6 +32,7 @@ export function ProductSheet({ product }: ProductSheetProps) {
     const { toast } = useToast();
     const isFav = isFavorite(product.id);
     const [notes, setNotes] = useState('');
+    const [imageLoading, setImageLoading] = useState(true);
 
     const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: string }>(() => {
         const defaults: { [key: string]: string } = {};
@@ -92,23 +93,27 @@ export function ProductSheet({ product }: ProductSheetProps) {
         <div className="flex flex-col h-[90vh] sm:h-auto">
             <ScrollArea className="flex-grow">
                 <div className="relative h-72 w-full">
+                    {imageLoading && (
+                        <div className="absolute inset-0 bg-muted animate-pulse" />
+                    )}
                     <Image
                         src={product.image}
                         alt={product.name}
                         fill
-                        className="object-cover"
+                        className={`object-cover transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
                         data-ai-hint={product.aiHint}
                         loading="lazy"
+                        onLoad={() => setImageLoading(false)}
                     />
                     {product.stock <= 0 && (
                         <Badge variant="destructive" className="absolute top-4 left-4 text-lg">Sin Stock</Badge>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
                 </div>
                 <DialogHeader className="p-6 -mt-16 relative bg-background rounded-t-3xl text-left">
                     <div className="flex justify-between items-start">
                         <DialogTitle className="text-3xl font-bold text-foreground max-w-[calc(100%-4rem)]">{product.name}</DialogTitle>
-                         <Button variant="ghost" size="icon" className="rounded-full text-primary flex-shrink-0" onClick={handleFavoriteClick}>
+                         <Button variant="ghost" size="icon" className="rounded-full text-primary flex-shrink-0 hover:bg-primary/10 transition-colors" onClick={handleFavoriteClick}>
                             <Heart className={cn("h-7 w-7", isFav && "fill-current")} />
                         </Button>
                     </div>
@@ -150,13 +155,18 @@ export function ProductSheet({ product }: ProductSheetProps) {
                     </div>
                 </div>
             </ScrollArea>
-             <DialogFooter className="p-6 bg-background/80 backdrop-blur-xl border-t sticky bottom-0">
+             <DialogFooter className="p-6 bg-background/95 backdrop-blur-xl border-t sticky bottom-0 shadow-lg">
                 <div className="flex justify-between items-center w-full gap-4">
-                     <p className="text-2xl font-extrabold text-foreground">
+                     <p className="text-3xl font-extrabold text-primary">
                         {currencySymbol}{finalPrice.toFixed(2)}
                     </p>
                     <DialogClose asChild>
-                      <Button onClick={handleAddToCart} size="lg" className="rounded-full flex-grow" disabled={product.stock <= 0}>
+                      <Button 
+                        onClick={handleAddToCart} 
+                        size="lg" 
+                        className="rounded-full flex-grow bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]" 
+                        disabled={product.stock <= 0}
+                      >
                           {product.stock <= 0 ? 'Sin Stock' : 'Agregar al carrito'}
                       </Button>
                     </DialogClose>

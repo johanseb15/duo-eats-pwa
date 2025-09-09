@@ -3,6 +3,7 @@ import { Open_Sans, Poppins } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const fontSans = Open_Sans({
   subsets: ['latin'],
@@ -41,7 +42,9 @@ export default function RootLayout({
         )}
         suppressHydrationWarning={true}
       >
-        {children}
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
         <Toaster />
       </body>
     </html>

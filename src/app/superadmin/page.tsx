@@ -18,7 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 type User = {
     uid: string;
@@ -54,23 +54,8 @@ export default function SuperAdminPage() {
     
     if (authLoading || loading) {
         return (
-             <div className="space-y-8">
-                 <div className="flex items-center gap-4">
-                     <UserCog className="h-8 w-8 text-purple-500" />
-                     <div>
-                        <h1 className="text-3xl font-bold">Panel de Superadministrador</h1>
-                         <p className="text-muted-foreground">
-                            Gestión avanzada de usuarios y datos de la aplicación.
-                        </p>
-                     </div>
-                </div>
-                <div className="rounded-2xl border">
-                    <div className="p-6">
-                        <Skeleton className="h-6 w-1/2" />
-                        <Skeleton className="h-4 w-3/4 mt-2" />
-                    </div>
-                    <Skeleton className="h-48 w-full" />
-                </div>
+            <div className="flex items-center justify-center min-h-[400px]">
+                <LoadingSpinner size="lg" text="Cargando panel de superadministrador..." />
             </div>
         )
     }

@@ -11,7 +11,7 @@ import { getStatusVariant } from "./orders/OrdersClient";
 import { DollarSign, Package, ShoppingCart, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { DashboardAnalytics } from "@/lib/types";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 const currencySymbol = '$';
 
@@ -51,17 +51,8 @@ export default function AdminDashboardPage() {
     
     if (loading) {
         return (
-             <div className="space-y-6">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    <Skeleton className="h-28 rounded-2xl" />
-                    <Skeleton className="h-28 rounded-2xl" />
-                    <Skeleton className="h-28 rounded-2xl" />
-                </div>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                    <Skeleton className="col-span-4 h-72 rounded-2xl" />
-                    <Skeleton className="col-span-4 lg:col-span-3 h-72 rounded-2xl" />
-                </div>
-                <Skeleton className="h-64 w-full rounded-2xl" />
+            <div className="flex items-center justify-center min-h-[400px]">
+                <LoadingSpinner size="lg" text="Cargando analíticas..." />
             </div>
         )
     }

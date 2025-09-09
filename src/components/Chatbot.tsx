@@ -24,6 +24,21 @@ export function Chatbot() {
   const [isThinking, startTransition] = useTransition();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const isScrollingDown = currentScrollY > lastScrollY;
+      
+      setIsVisible(!isScrollingDown || currentScrollY < 100);
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -59,7 +74,10 @@ export function Chatbot() {
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button
-          className="fixed bottom-24 right-4 md:bottom-8 md:right-8 h-16 w-16 rounded-full shadow-2xl z-50"
+          className={cn(
+            "fixed bottom-24 right-4 md:bottom-8 md:right-8 h-16 w-16 rounded-full shadow-2xl z-50 transition-all duration-300 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 hover:scale-110",
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"
+          )}
           size="icon"
         >
           <Bot className="h-8 w-8" />

@@ -14,7 +14,8 @@ import type { Order } from '@/lib/types';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
 import { fetchOrdersByUserId } from '../actions';
-import { Skeleton } from '@/components/ui/skeleton';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useToast } from '@/hooks/use-toast';
 import { useCart } from '@/store/cart';
 
@@ -86,15 +87,7 @@ export default function OrdersPage() {
             <div className="flex flex-col min-h-screen bg-background pb-28">
                 <Header />
                 <main className="flex-grow container mx-auto px-4 py-6">
-                    <div className="relative flex items-center mb-6">
-                    <Skeleton className="h-10 w-10 rounded-full" />
-                    <Skeleton className="h-7 w-32 mx-auto" />
-                    </div>
-                    <div className="space-y-4">
-                    {[...Array(3)].map((_, i) => (
-                        <Skeleton key={i} className="h-48 w-full rounded-2xl" />
-                    ))}
-                    </div>
+                    <LoadingSpinner size="lg" text="Cargando tu historial..." />
                 </main>
                 <BottomNav />
             </div>
@@ -118,16 +111,15 @@ export default function OrdersPage() {
             </div>
 
             {orders.length === 0 ? (
-                <div className="text-center py-20">
-                <FileText className="mx-auto h-24 w-24 text-muted-foreground" />
-                <h2 className="mt-6 text-2xl font-semibold">No tienes pedidos</h2>
-                <p className="mt-2 text-muted-foreground">
-                    Empieza a ordenar para ver tu historial aquí.
-                </p>
-                <Button asChild className="mt-6 rounded-full">
-                    <Link href="/">Comenzar a ordenar</Link>
-                </Button>
-                </div>
+                <EmptyState
+                  icon={FileText}
+                  title="No tienes pedidos"
+                  description="Empieza a ordenar para ver tu historial aquí."
+                  action={{
+                    label: "Comenzar a ordenar",
+                    onClick: () => router.push('/'),
+                  }}
+                />
             ) : (
                 <div className="space-y-4">
                 {orders.map((order) => (

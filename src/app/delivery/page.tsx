@@ -4,7 +4,7 @@
 import { useEffect, useState, useTransition, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
-import { Skeleton } from '@/components/ui/skeleton';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -144,25 +144,23 @@ export default function DeliveryPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-10 w-64 mb-4" />
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-48 w-full" />
-        <Skeleton className="h-48 w-full" />
-      </div>
+      <LoadingSpinner size="lg" text="Cargando portal del repartidor..." />
     );
   }
 
   if (!deliveryPerson) {
       return (
-           <Card className="border-destructive">
-             <CardHeader>
-                <CardTitle>Acceso de Repartidor Requerido</CardTitle>
-                <CardDescription>
-                    Tu cuenta de usuario no está registrada como repartidor. Por favor, contacta al administrador del sistema.
-                </CardDescription>
-             </CardHeader>
-           </Card>
+          <Card className="border-destructive bg-destructive/5">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+                <Package className="h-6 w-6 text-destructive" />
+              </div>
+              <CardTitle className="text-destructive">Acceso de Repartidor Requerido</CardTitle>
+              <CardDescription>
+                Tu cuenta de usuario no está registrada como repartidor. Por favor, contacta al administrador del sistema para obtener acceso.
+              </CardDescription>
+            </CardHeader>
+          </Card>
       )
   }
 

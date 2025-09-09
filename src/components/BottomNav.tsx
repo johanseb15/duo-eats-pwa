@@ -15,9 +15,22 @@ export function BottomNav() {
   const { items } = useCart();
   const { user } = useAuth();
   const [hasMounted, setHasMounted] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
     setHasMounted(true);
+    
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const isScrollingDown = currentScrollY > lastScrollY;
+      
+      setIsVisible(!isScrollingDown || currentScrollY < 100);
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const itemCount = hasMounted ? items.reduce((sum, item) => sum + item.quantity, 0) : 0;
@@ -31,7 +44,10 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-20 bg-background/80 backdrop-blur-xl border-t-2 border-white/20 md:hidden z-50 rounded-t-3xl">
+    <nav className={cn(
+      "fixed bottom-0 left-0 right-0 h-20 bg-background/90 backdrop-blur-xl border-t-2 border-white/20 md:hidden z-50 rounded-t-3xl transition-transform duration-300 shadow-2xl",
+      isVisible ? "translate-y-0" : "translate-y-full"
+    )}>
       <div className="flex h-full justify-around items-center max-w-lg mx-auto">
         {navItems.map(({ href, icon: Icon, label, badge }) => {
           const isActive = (href === '/' && pathname === href) || (href !== '/' && pathname.startsWith(href));

@@ -19,7 +19,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { createOrder, fetchAddressesByUserId, fetchRestaurantSettings } from '@/app/actions';
-import { Skeleton } from '@/components/ui/skeleton';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { EmptyState } from '@/components/ui/empty-state';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
@@ -298,8 +299,7 @@ export default function CartPage() {
         <Header />
         <main className="flex-grow container mx-auto px-4 py-6">
           <h1 className="text-3xl font-bold mb-6">Mi Carrito</h1>
-          <Skeleton className="h-48 w-full" />
-           <Skeleton className="h-48 w-full mt-4" />
+          <LoadingSpinner size="lg" text="Cargando tu carrito..." />
         </main>
         <BottomNav />
       </div>
@@ -321,16 +321,15 @@ export default function CartPage() {
           </div>
 
           {items.length === 0 ? (
-            <div className="text-center py-20">
-              <ShoppingCart className="mx-auto h-24 w-24 text-muted-foreground" />
-              <h2 className="mt-6 text-2xl font-semibold">Tu carrito está vacío</h2>
-              <p className="mt-2 text-muted-foreground">
-                Parece que aún no has añadido nada.
-              </p>
-              <Button asChild className="mt-6 rounded-full">
-                <Link href="/">Comenzar a ordenar</Link>
-              </Button>
-            </div>
+            <EmptyState
+              icon={ShoppingCart}
+              title="Tu carrito está vacío"
+              description="Parece que aún no has añadido nada. ¡Explora nuestro delicioso menú!"
+              action={{
+                label: "Comenzar a ordenar",
+                onClick: () => router.push('/'),
+              }}
+            />
           ) : (
             <div className="space-y-4 pb-32 md:pb-0">
                 {items.map((item) => {
@@ -536,7 +535,12 @@ export default function CartPage() {
                 </Card>
 
                 <div className="md:mt-6 md:p-0 p-4 md:static md:bottom-auto md:left-auto md:right-auto fixed bottom-24 left-0 right-0">
-                  <Button onClick={handleCheckout} size="lg" className="w-full rounded-full text-lg py-7 bg-green-500 hover:bg-green-600 text-white" disabled={isProcessing || !canCheckout}>
+                  <Button 
+                    onClick={handleCheckout} 
+                    size="lg" 
+                    className="w-full rounded-full text-lg py-7 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02]" 
+                    disabled={isProcessing || !canCheckout}
+                  >
                       {isProcessing ? <Loader2 className="animate-spin" /> : 'Finalizar Pedido'}
                     </Button>
                 </div>

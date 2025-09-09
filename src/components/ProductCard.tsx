@@ -43,6 +43,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const { toast } = useToast();
   const { items, addToCart, updateQuantity } = useCart();
   const [hasMounted, setHasMounted] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
   
   useEffect(() => {
     setHasMounted(true);
@@ -127,18 +128,22 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Dialog>
        <DialogTrigger asChild>
-        <div className="w-full overflow-hidden transition-all duration-300 rounded-2xl group bg-card hover:shadow-xl hover:-translate-y-1 cursor-pointer border">
+        <div className="w-full overflow-hidden transition-all duration-300 rounded-2xl group bg-card hover:shadow-xl hover:-translate-y-2 cursor-pointer border hover:border-primary/20">
           <Card className="border-0 bg-transparent shadow-none">
             <CardContent className="p-0 flex items-center gap-4">
               <div className="relative w-28 h-28 flex-shrink-0">
+                {imageLoading && (
+                  <div className="absolute inset-0 bg-muted animate-pulse rounded-lg" />
+                )}
                 <Image
                   src={product.image}
                   alt={product.name}
                   width={112}
                   height={112}
-                  className="object-cover h-full w-full"
+                  className={`object-cover h-full w-full rounded-lg transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
                   data-ai-hint={product.aiHint}
                   loading="lazy"
+                  onLoad={() => setImageLoading(false)}
                 />
                  {product.stock <= 0 && (
                   <Badge variant="destructive" className="absolute top-2 left-2">Sin Stock</Badge>
@@ -151,11 +156,11 @@ export function ProductCard({ product }: ProductCardProps) {
                 <CardDescription className="text-muted-foreground mt-1 h-10 overflow-hidden text-sm">
                   {product.description}
                 </CardDescription>
-                <div className='flex justify-between items-center mt-2'>
-                    <p className="text-lg font-bold text-foreground">{currencySymbol}{product.price[currentCurrency].toFixed(2)}</p>
+                <div className='flex justify-between items-center mt-3'>
+                    <p className="text-xl font-bold text-primary">{currencySymbol}{product.price[currentCurrency].toFixed(2)}</p>
                     <div className="flex items-center gap-1">
                         {hasMounted && (
-                            <Button variant="ghost" size="icon" className="rounded-full text-primary" onClick={handleFavoriteClick} aria-label={`Marcar ${product.name} como favorito`}>
+                            <Button variant="ghost" size="icon" className="rounded-full text-primary hover:bg-primary/10 transition-colors" onClick={handleFavoriteClick} aria-label={`Marcar ${product.name} como favorito`}>
                                 <Heart className={cn("h-5 w-5", isFav && "fill-current")} />
                             </Button>
                         )}

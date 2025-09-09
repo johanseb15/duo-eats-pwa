@@ -6,7 +6,8 @@ import Image from 'next/image';
 import type { Product, ProductCategoryData, Promotion } from '@/lib/types';
 import * as LucideIcons from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { Skeleton } from '@/components/ui/skeleton';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Button } from './ui/button';
 import { FileText, PlusCircle, Search } from 'lucide-react';
 import React, { Suspense, useState, useMemo } from 'react';
@@ -17,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { cn } from '@/lib/utils';
 import { Chatbot } from './Chatbot';
 import { Input } from './ui/input';
+import { Skeleton } from './ui/skeleton';
 
 const PromotionsCarousel = React.lazy(() => import('@/components/PromotionsCarousel'));
 const Recommendations = React.lazy(() => import('@/components/Recommendations'));
@@ -58,16 +60,21 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
       <Header />
       <main className="flex-grow container mx-auto px-4 py-6">
         <div className="text-left mb-8">
-           {authLoading ? (
-            <Skeleton className="h-9 w-48" />
+          {authLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-9 w-48" />
+              <Skeleton className="h-5 w-32" />
+            </div>
           ) : (
+            <div className="space-y-1">
             <h1 className="text-3xl font-bold text-foreground">
               Hola, {welcomeName} 👋
             </h1>
+              <p className="text-muted-foreground">
+                ¿Qué se te antoja hoy?
+              </p>
+            </div>
           )}
-          <p className="text-muted-foreground mt-1">
-            ¿Qué se te antoja hoy?
-          </p>
         </div>
 
         <section className="mb-12">
@@ -153,18 +160,15 @@ export default function HomeClient({ products, promotions, categories }: HomeCli
               ))}
             </div>
           ) : (
-             <div className="text-center py-20 bg-card rounded-2xl border">
-              <FileText className="mx-auto h-24 w-24 text-muted-foreground" />
-              <h2 className="mt-6 text-2xl font-semibold">Nuestro menú está vacío</h2>
-              <p className="mt-2 text-muted-foreground">
-                Parece que aún no has añadido ningún producto.
-              </p>
-              {user && (
-                <Button asChild className="mt-6">
-                  <Link href="/admin/products"><PlusCircle className='mr-2'/>Añadir Productos</Link>
-                </Button>
-              )}
-            </div>
+            <EmptyState
+              icon={FileText}
+              title="Nuestro menú está vacío"
+              description="Parece que aún no has añadido ningún producto."
+              action={user ? {
+                label: "Añadir Productos",
+                onClick: () => window.location.href = '/admin/products',
+              } : undefined}
+            />
           )}
         </section>
       </main>

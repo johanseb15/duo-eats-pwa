@@ -9,7 +9,8 @@ import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { EmptyState } from '@/components/ui/empty-state';
 import type { Order } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import { fetchOrderById } from '../../actions';
@@ -109,8 +110,7 @@ export default function OrderTrackingPage() {
        <div className="flex flex-col min-h-screen bg-background pb-28">
         <Header />
         <main className="flex-grow container mx-auto px-4 py-6 flex flex-col items-center justify-center">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            <p className="mt-4 text-muted-foreground">Buscando tu pedido...</p>
+            <LoadingSpinner size="lg" text="Buscando tu pedido..." />
         </main>
         <BottomNav />
       </div>
@@ -122,16 +122,15 @@ export default function OrderTrackingPage() {
        <div className="flex flex-col min-h-screen bg-background pb-28">
         <Header />
         <main className="flex-grow container mx-auto px-4 py-6">
-             <div className="text-center py-20">
-                <FileText className="mx-auto h-24 w-24 text-muted-foreground" />
-                <h2 className="mt-6 text-2xl font-semibold">Pedido no encontrado</h2>
-                <p className="mt-2 text-muted-foreground">
-                    No pudimos encontrar el pedido que buscas. Verifica el enlace o vuelve al inicio.
-                </p>
-                <Button asChild className="mt-6 rounded-full">
-                    <Link href="/">Volver al inicio</Link>
-                </Button>
-            </div>
+            <EmptyState
+              icon={FileText}
+              title="Pedido no encontrado"
+              description="No pudimos encontrar el pedido que buscas. Verifica el enlace o vuelve al inicio."
+              action={{
+                label: "Volver al inicio",
+                onClick: () => router.push('/'),
+              }}
+            />
         </main>
         <BottomNav />
       </div>
